@@ -164,6 +164,20 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .tp-val.word-val{font-size:26px;letter-spacing:5px;color:rgba(255,255,255,.8);animation:none;text-shadow:none;}
 .tp-stats{display:flex;align-items:center;gap:8px;}
 .tp-hint-sub{font-size:10px;color:var(--mut);font-weight:600;}
+#lvl-obj{align-items:center;justify-content:center;gap:7px;align-self:center;margin:2px 0 6px;
+  background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.28);border-radius:11px;padding:5px 12px;
+  font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#7fdcff;white-space:nowrap;}
+#lvl-obj.done{background:rgba(16,185,129,.14);border-color:rgba(16,185,129,.4);color:#34d399;}
+/* TITLES (selectable) */
+#titles-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.title-chip{background:linear-gradient(150deg,rgba(30,41,59,.5),rgba(13,19,30,.9));border:1px solid var(--bdr2);border-radius:14px;padding:10px 12px;cursor:pointer;transition:transform .12s ease,border-color .2s ease;}
+.title-chip:active{transform:scale(.97);}
+.title-chip.equipped{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 6px 18px -8px var(--acc);background:linear-gradient(150deg,rgba(0,212,255,.16),rgba(13,19,30,.92));}
+.title-chip.locked{opacity:.5;cursor:default;}
+.tc-name{font-family:'Syne',sans-serif;font-size:12.5px;font-weight:800;color:var(--txt);}
+.title-chip.equipped .tc-name{color:var(--acc);}
+.tc-hint{font-size:9.5px;color:var(--mut);margin-top:2px;font-weight:600;}
+.title-chip.equipped .tc-hint{color:#7fdcff;}
 .timer-track{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;position:relative;}
 #timer-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--grn),var(--acc));border-radius:6px;transition:width 1s linear;}
 .timer-lbl{font-size:10px;font-weight:700;color:var(--mut);white-space:nowrap;}
@@ -538,6 +552,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .boss-active .bottom-nav{display:none!important;}
 .boss-active .g-hud{display:none!important;}
 .boss-active .tp-top{display:none!important;}
+.boss-active #lvl-obj{display:none!important;}
 .boss-active #g-score{display:none!important;}
 .boss-active .target-panel{background:transparent!important;border:none!important;box-shadow:none!important;backdrop-filter:none!important;padding:4px 0 0!important;}
 .boss-active .tp-bottom{justify-content:center;}
@@ -1027,7 +1042,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         </div>
         <div class="mode-card time" onclick="startGame('time')">
           <div class="card-icon">⏱️</div>
-          <div class="card-name">Time Attack</div><div class="card-meta">90s · Speed Run</div>
+          <div class="card-name">Time Attack</div><div class="card-meta">Survival Rush ⚡</div>
           <div class="card-foot"><span class="card-diff hard">Hard</span>
             <span class="card-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>
         </div>
@@ -1176,6 +1191,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
           <div style="font-size:11px;color:var(--mut);" id="set-stats">Level 1 • Best: 0 pts</div>
         </div>
       </div>
+      <div class="sec-lbl">🏷️ Title — choose your badge of honor</div>
+      <div id="titles-list"></div>
       <div class="sec-lbl">🏅 Achievements</div>
       <div class="set-row" onclick="showScreen('badges',document.getElementById('nav-settings'))">
         <div class="set-ico">🏅</div>
@@ -1264,6 +1281,9 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         </div>
         <span class="tp-hint-sub" id="tp-hint-sub" style="display:none;"></span>
       </div>
+
+      <!-- level objective chip -->
+      <div id="lvl-obj" style="display:none;"></div>
 
       <!-- letter-slots hidden, display is in tp-val -->
       <div class="letter-slots" id="letter-slots" style="display:none!important"></div>
@@ -1364,6 +1384,22 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
     </div>
   </div>
 
+  <!-- HOW TO PLAY (first run) -->
+  <div class="modal-overlay" id="tutorialModal">
+    <div class="modal-box" style="text-align:left;max-width:330px;">
+      <div style="text-align:center;font-size:40px;margin-bottom:6px;">🧠⚡</div>
+      <div class="modal-title" style="text-align:center;">How to Play</div>
+      <div style="font-size:13px;color:var(--txt);line-height:1.85;margin:10px 2px 20px;">
+        🎯 Match the big <b>target number</b> up top.<br>
+        🔢 Tap a <b>number</b>, an <b>operator</b>, then a number — e.g. <b style="color:var(--acc)">6 + 1</b> for 7.<br>
+        🧩 Longer answers (<b>2+1+1</b>) score <b>more</b>!<br>
+        ⚡ Chain answers for <b>combos</b> → GOD MODE.<br>
+        ⏱️ Beat the clock — it speeds up near the end.
+      </div>
+      <button class="modal-btn btn-primary" onclick="closeTutorial()">⚡ Let's Go!</button>
+    </div>
+  </div>
+
   <!-- AVATAR PICKER MODAL -->
   <div class="modal-overlay" id="avatarModal">
     <div class="modal-box" style="text-align:center;max-width:330px;">
@@ -1436,6 +1472,62 @@ let gActive=false,gMode='',gSubMode='';
 let pGold=500,pLives=3,pLevel=1,pScore=0,pXP=0,pHints=5;
 let difficultyMod=1.0; // adaptive: <1 easier, >1 harder
 let pendingBoss=false;
+let bossKind='big';            // 'mini' (every 5 lvls) | 'big' (every 10)
+// per-level tracking for stars + objectives
+let levelTimedOut=false, levelMaxComboMult=1, levelUsedMult=false;
+let levelObjective=null, levelObjDone=false;
+const OBJECTIVES=[
+  {id:'mult',     txt:'Use × in an answer'},
+  {id:'combo3',   txt:'Reach a ×3 combo'},
+  {id:'fast',     txt:'Finish with 25s+ left'},
+  {id:'noTimeout',txt:'No time-outs this level'}
+];
+// called at the start of every new level (normal or boss)
+function beginLevel(isBossLevel){
+  levelTimedOut=false; levelMaxComboMult=1; levelUsedMult=false; levelObjDone=false;
+  if(isBossLevel || gMode==='time'){ levelObjective=null; updateObjChip(); return; }
+  levelObjective=OBJECTIVES[Math.floor(Math.random()*OBJECTIVES.length)];
+  updateObjChip();
+  showObjBanner(levelObjective.txt);
+}
+function updateObjChip(){
+  const c=document.getElementById('lvl-obj'); if(!c) return;
+  if(!levelObjective || gMode==='time' || isBoss){ c.style.display='none'; return; }
+  c.style.display='flex';
+  c.className='lvl-obj'+(levelObjDone?' done':'');
+  c.innerHTML='<span>'+(levelObjDone?'✅':'🎯')+'</span><span>'+levelObjective.txt+'</span>';
+}
+function checkObjective(){   // live-mark the trackable goals during play
+  if(!levelObjective || levelObjDone) return;
+  const o=levelObjective.id;
+  if(o==='mult' && gSubMode==='math' && tray.includes('×')) levelObjDone=true;
+  else if(o==='combo3' && comboMult>=3) levelObjDone=true;
+  if(levelObjDone){ updateObjChip(); showGoldPop('🎯 Goal done!'); }
+}
+function evalObjective(){    // final check at level complete
+  if(!levelObjective) return false;
+  const o=levelObjective.id;
+  if(o==='mult') return levelUsedMult;
+  if(o==='combo3') return levelMaxComboMult>=3;
+  if(o==='fast') return timer>=25;
+  if(o==='noTimeout') return !levelTimedOut;
+  return false;
+}
+function showObjBanner(txt){
+  const phone=document.getElementById('phone'); if(!phone) return;
+  const b=document.createElement('div');
+  b.style.cssText='position:absolute;left:50%;top:24%;transform:translate(-50%,-50%);z-index:8000;pointer-events:none;text-align:center;font-family:Syne,sans-serif;font-weight:800;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.85);';
+  b.innerHTML='<div style="font-size:12px;letter-spacing:3px;color:#00e5ff;">🎯 LEVEL GOAL</div><div style="font-size:20px;margin-top:3px;">'+txt+'</div>';
+  if(b.animate) b.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.7)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:1},{opacity:0,transform:'translate(-50%,-65%)'}],{duration:2000,easing:'ease-out'});
+  phone.appendChild(b); setTimeout(()=>b.remove(),2050);
+}
+// 1–3 star rating for the level just finished
+function computeStars(){
+  let s=1;                              // completing the level
+  if(!levelTimedOut) s++;              // never timed out
+  if(levelMaxComboMult>=3) s++;        // hit a ×3+ combo
+  return Math.min(3,s);
+}
 let primarySolution=[];
 let godUsedThisLevel=false;
 let bossHP=100, bossMaxHP=100, bossHitsTaken=0, bossHitsNeeded=8;
@@ -1451,6 +1543,57 @@ let recentWins=0, recentLosses=0;
 let pGems=10; // premium currency
 let sessionStart=0, bestScore=0, totalGamesPlayed=0;
 let solvedCount=0,pTotalSolved=0,pAchievements=[];
+// ── TITLES (selectable prestige labels, persisted once earned) ──
+const TITLES=[
+  {id:'rookie',     name:'Rookie',          hint:'Start playing'},
+  {id:'cruncher',   name:'Number Cruncher', hint:'Solve 50 total'},
+  {id:'combo_king', name:'Combo King',      hint:'Reach a ×3 combo'},
+  {id:'boss_slayer',name:'Boss Slayer',     hint:'Defeat a boss'},
+  {id:'wizard',     name:'Math Wizard',     hint:'Reach Level 10'},
+  {id:'speed',      name:'Speed Demon',     hint:'Time Attack Wave 3'},
+  {id:'perfect',    name:'Perfectionist',   hint:'Earn 3★ on a level'},
+  {id:'unstoppable',name:'Unstoppable',     hint:'Reach a ×5 combo'},
+  {id:'godmode',    name:'God of Numa',     hint:'Trigger GOD MODE'},
+  {id:'legend',     name:'Numa Legend',     hint:'Reach Level 20'}
+];
+let unlockedTitles=['rookie'], equippedTitleId='rookie';
+function titleName(id){ const t=TITLES.find(x=>x.id===id); return t?t.name:'Rookie'; }
+function loadTitles(){
+  try{ unlockedTitles=JSON.parse(localStorage_get('numa_titles')||'["rookie"]'); }catch(e){ unlockedTitles=['rookie']; }
+  if(!unlockedTitles.includes('rookie')) unlockedTitles.push('rookie');
+  equippedTitleId=localStorage_get('numa_title')||'rookie';
+  if(!unlockedTitles.includes(equippedTitleId)) equippedTitleId='rookie';
+}
+function unlockTitle(id){
+  if(unlockedTitles.includes(id)) return;
+  unlockedTitles.push(id);
+  localStorage_set('numa_titles',JSON.stringify(unlockedTitles));
+  const toast=document.getElementById('toast');
+  if(toast){ const ic=document.getElementById('toast-icon'); if(ic)ic.className='fa-solid fa-medal';
+    const h=toast.querySelector('h4'); if(h)h.textContent='🏷️ New Title Unlocked';
+    document.getElementById('toast-text').textContent=titleName(id);
+    toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3200); }
+  initAudio(); if(typeof sfxGod==='function')sfxGod(); if(typeof haptic==='function')haptic([20,30,40]);
+}
+function equipTitle(id){
+  if(!unlockedTitles.includes(id)) return;
+  equippedTitleId=id; localStorage_set('numa_title',id);
+  updateHUD(); if(typeof renderTitles==='function') renderTitles();
+  initAudio(); if(typeof sfxClick==='function')sfxClick();
+}
+function renderTitles(){
+  const c=document.getElementById('titles-list'); if(!c) return;
+  c.innerHTML='';
+  TITLES.forEach(t=>{
+    const owned=unlockedTitles.includes(t.id), eq=(t.id===equippedTitleId);
+    const chip=document.createElement('div');
+    chip.className='title-chip'+(owned?'':' locked')+(eq?' equipped':'');
+    chip.innerHTML='<div class="tc-name">'+(owned?'':'🔒 ')+t.name+'</div>'
+      +'<div class="tc-hint">'+(owned?(eq?'✓ Equipped':'Tap to equip'):t.hint)+'</div>';
+    if(owned) chip.onclick=()=>equipTitle(t.id);
+    c.appendChild(chip);
+  });
+}
 let timer=60,targetVal=null,targetWord='';
 let guaranteedSeq=[],loopRaf,timerInt;
 let fallers=[],tray=[],selectedLetters=[];
@@ -1565,12 +1708,19 @@ function showScreen(id,navEl){
   updateHUD();
 }
 
+/* ── TIME ATTACK tuning ── */
+const TA_START=30, TA_MAX=45;   // RUSH: short clock, low cap → constant pressure
+let taWave=1;
 /* ── GAME START ── */
+let _pendingMode=null;
 function startGame(mode){
+  // first-time players: show How-to-Play, then start the chosen mode
+  if(!localStorage_get('numa_tut')){ _pendingMode=mode; showModal('tutorialModal'); return; }
   gMode=mode;
   gSubMode=(mode==='combo'||mode==='time')?'math':mode;
   gActive=true;
-  timer=(mode==='time')?90:60; // Time Attack: 90 seconds
+  timer=(mode==='time')?TA_START:60;
+  taWave=1;
   pScore=0; solvedCount=0;
   pLives=3; // fresh lives each run (arcade style)
   if(typeof hideBoss==='function') hideBoss();
@@ -1581,9 +1731,11 @@ function startGame(mode){
   document.getElementById('home-screen').style.display='none';
   document.getElementById('badges-screen').style.display='none';
   document.getElementById('game-screen').style.display='flex';
+  // hide the Hint button in Time Attack (no hints in survival rush)
+  const hb=document.getElementById('hint-btn'); if(hb) hb.style.display=(mode==='time')?'none':'';
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('nav-home').classList.add('active');
-  initBoard(); updateHUD(); setTarget();
+  initBoard(); updateHUD(); beginLevel(false); setTarget();
   clearInterval(timerInt); timerInt=setInterval(tick,1000);
   if(loopRaf)cancelAnimationFrame(loopRaf);
   if(gSubMode==='word') buildWordGrid();
@@ -1844,7 +1996,7 @@ function setTarget(){
 function tick(){
   if(!gActive)return;
   timer--;
-  const maxT=(gMode==='time')?90:60;
+  const maxT=(gMode==='time')?TA_MAX:60;
   document.getElementById('timer-text').textContent=timer+'s';
   document.getElementById('timer-fill').style.width=(Math.max(0,timer/maxT)*100)+'%';
   updateTimerTension();
@@ -1861,7 +2013,7 @@ function timeUpHeartBreak(){
   clearInterval(timerInt);
   if(loopRaf)cancelAnimationFrame(loopRaf);
   initAudio(); sfxWrong(); haptic([60,40,80]);
-  pLives--;
+  pLives--; levelTimedOut=true;
   recentLosses++; recentWins=0;
   if(recentLosses>=2){ difficultyMod=Math.max(difficultyMod-0.12,0.7); recentLosses=0; }
 
@@ -1892,7 +2044,7 @@ function timeUpHeartBreak(){
     } else {
       // continue: fresh timer, same level
       tray=[]; selectedLetters=[];
-      timer=(gMode==='time')?90:60;
+      timer=(gMode==='time')?TA_START:60;
       document.getElementById('timer-fill').style.width='100%';
       document.getElementById('timer-text').textContent=timer+'s';
       setDanger(false);
@@ -1915,7 +2067,7 @@ function setDanger(on){
 // 3-stage time pressure: edge glow yellow → orange → red + tremble + ticking
 let _tensionStage=-1;
 function updateTimerTension(){
-  const maxT=(gMode==='time')?90:60;
+  const maxT=(gMode==='time')?TA_MAX:60;
   const frac=Math.max(0,timer)/maxT;
   let stage=0;
   if(frac<=0.17) stage=3;        // ~last 10s (60s round) — RED
@@ -1981,7 +2133,7 @@ function gameLoop(){
   if(isBoss) baseSpeed*=1.12;                       // bosses a touch faster than their level
   baseSpeed*=difficultyMod; // adaptive
   // ⏱️ TIME PRESSURE: in the second half of the round tiles speed up (1.0 → ~1.6 by 0s)
-  const maxT=(gMode==='time')?90:60;
+  const maxT=(gMode==='time')?TA_MAX:60;
   if(timer < maxT*0.5){ baseSpeed*= 1 + (1 - Math.max(0,timer)/(maxT*0.5))*0.6; }
   for(let i=fallers.length-1;i>=0;i--){
     if(fallers[i]._frozen){ continue; } // hint-frozen tiles stay put
@@ -1994,7 +2146,7 @@ function gameLoop(){
 
 function spawnTile(forceSolution){
   // bonus drop chance (higher in boss rounds)
-  const bonusChance=isBoss?0.12:0.06;
+  const bonusChance=isBoss?0.12:(gMode==='time'?0.11:0.06);
   if(!forceSolution && Math.random()<bonusChance){
     spawnBonus();
     return;
@@ -2032,12 +2184,10 @@ function spawnTile(forceSolution){
 }
 
 function spawnBonus(){
-  const types=[
-    {emoji:'💎',type:'gem',reward:1},
-    {emoji:'💎',type:'gem',reward:1},
-    {emoji:'⭐',type:'star',reward:0},
-    {emoji:'🪙',type:'coin',reward:25}
-  ];
+  // Time Attack: mostly ⏱️ time drops (precious seconds) + a few rewards
+  const types = (gMode==='time')
+    ? [{emoji:'⏱️',type:'time',reward:3},{emoji:'⏱️',type:'time',reward:3},{emoji:'⏱️',type:'time',reward:4},{emoji:'💎',type:'gem',reward:1},{emoji:'🪙',type:'coin',reward:25}]
+    : [{emoji:'💎',type:'gem',reward:1},{emoji:'💎',type:'gem',reward:1},{emoji:'⭐',type:'star',reward:0},{emoji:'🪙',type:'coin',reward:25}];
   const t=types[Math.floor(Math.random()*types.length)];
   const el=document.createElement('div');
   el.className='gtile bonus-tile';
@@ -2060,7 +2210,8 @@ function collectBonus(obj){
   obj.el.remove();
   initAudio(); sfxGold(); haptic(15);
   const t=obj.bonus;
-  if(t.type==='gem'){ pGems+=t.reward; showGoldPop('💎 +'+t.reward); }
+  if(t.type==='time'){ timer=Math.min(timer+t.reward, TA_MAX); showGoldPop('⏱️ +'+t.reward+'s'); haptic(20); }
+  else if(t.type==='gem'){ pGems+=t.reward; showGoldPop('💎 +'+t.reward); }
   else if(t.type==='coin'){ pGold+=t.reward; showGoldPop('🪙 +'+t.reward); }
   else if(t.type==='star'){ pXP+=50; pScore+=30; showGoldPop('⭐ +50 XP'); }
   triggerSparks(20,true);
@@ -2236,6 +2387,11 @@ function handleSuccess(){
   if(isBoss && Math.random()<0.22){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); }
   pScore+=pts; pGold+=goldEarned; pXP+=pts; solvedCount++; pTotalSolved++;
   streakCount++;
+  // per-level tracking for stars + objectives (tray still holds the solved expression here)
+  if(comboMult>levelMaxComboMult) levelMaxComboMult=comboMult;
+  if(gSubMode==='math' && tray.includes('×')) levelUsedMult=true;
+  checkObjective();
+  if(pTotalSolved>=50) unlockTitle('cruncher');
 
   // ── BOSS DAMAGE: result launches at boss! ──
   if(isBoss){
@@ -2254,6 +2410,8 @@ function handleSuccess(){
   // ── COMBO LADDER: 3 GOOD → 5 GREAT → 8 INSANE → 12 UNSTOPPABLE → 20 GOD MODE ──
   const tier=comboTier(streakCount);
   comboMult=tier.mult;
+  if(comboMult>=3) unlockTitle('combo_king');
+  if(comboMult>=5) unlockTitle('unstoppable');
   const leveledUp = tier.level>lastComboTier;
   updateCombo();
   if(tier.level>=1 && leveledUp){
@@ -2293,14 +2451,30 @@ function handleSuccess(){
   updateHUD();
   if(gMode==='combo')gSubMode=gSubMode==='math'?'word':'math';
   checkAchievements();
-  // TIME ATTACK: +3s bonus, no levels, instant next target
+  // TIME ATTACK (RUSH): time reward scales with skill; waves give escalating purpose
   if(gMode==='time'){
-    timer=Math.min(timer+3,99);
+    // base +2s, more for combos and multi-operation (brain) answers — cap keeps it tense
+    const gain=2 + Math.min(comboMult,4)*0.5 + exprBonus*0.5;
+    timer=Math.min(timer+gain, TA_MAX);
     const pop=document.createElement('div');
     pop.className='pts-pop'; pop.style.cssText='position:absolute;left:55%;top:40%;z-index:9999;color:#10ff80;';
-    pop.textContent='+3s';
+    pop.textContent='+'+(Math.round(gain*10)/10)+'s';
     document.getElementById('phone').appendChild(pop);
     setTimeout(()=>pop.remove(),900);
+    // WAVE up every 5 solves (skip while a mini-boss is alive)
+    if(!isBoss && solvedCount>0 && solvedCount%5===0){
+      taWave++;
+      if(taWave>=3) unlockTitle('speed');
+      if(taWave%3===0){
+        startTimeBoss();                          // every 3rd wave = MINI-BOSS
+      } else {
+        timer=Math.min(timer+5, TA_MAX);          // breather bonus
+        showWaveBanner(taWave);
+        initAudio(); if(typeof sfxGod==='function')sfxGod(); if(typeof haptic==='function')haptic([20,30,40]);
+        if(typeof fireConfetti==='function') fireConfetti(40);
+      }
+    }
+    updateHUD();
     setTimeout(()=>setTarget(), 500);
     return;
   }
@@ -2317,7 +2491,9 @@ function handleSuccess(){
     }
     questAdvance('levels',pLevel,true);
     timer=60; updateHUD();
-    pendingBoss=(pLevel%10===0 && !wasBoss);
+    // boss cadence: mini-boss every 5 levels, big boss every 10
+    pendingBoss=(pLevel%5===0 && !wasBoss);
+    bossKind=(pLevel%10===0)?'big':'mini';
     // FINAL BONUS: comboed through a normal level → lightning chain reward (~once per level)
     if(!wasBoss && tier.level>=1){
       triggerGodMode();   // chain; endChainChallenge() then handles pendingBoss / next level
@@ -2335,9 +2511,14 @@ function handleSuccess(){
 
 function showBossModal(){
   pendingBoss=false;
-  bossTarget=8+Math.floor(pLevel/10)*2;
+  const mini=(bossKind==='mini');
+  bossTarget = mini ? 5 : (8+Math.floor(pLevel/10)*2);
   const bsub=document.getElementById('boss-sub');
-  if(bsub) bsub.innerHTML='⚔️ Level '+pLevel+' BOSS! Survive <strong style="color:#fff">'+bossTarget+' challenges</strong>. Faster tiles, bigger rewards!';
+  const skull=document.querySelector('#bossModal .boss-skull');
+  if(skull) skull.textContent = mini?'💀':'👹';
+  if(bsub) bsub.innerHTML = mini
+    ? '💀 Level '+pLevel+' MINI-BOSS! Land <strong style="color:#fff">'+bossTarget+' hits</strong> — quick fight, fast rewards!'
+    : '⚔️ Level '+pLevel+' BOSS! Survive <strong style="color:#fff">'+bossTarget+' challenges</strong>. Faster tiles, bigger rewards!';
   showModal('bossModal');
   initAudio(); sfxGod();
 }
@@ -2348,12 +2529,38 @@ function finishLevelUp(wasBoss){
   if(wasBoss) questAdvance('boss',1);
   hideBoss();
   document.getElementById('phone').classList.remove('boss-active');
-  document.getElementById('modal-lvl-title').textContent=wasBoss?'👑 BOSS DEFEATED!':'⚡ LEVEL '+pLevel+'! ⚡';
-  document.getElementById('modal-lvl-sub').textContent=wasBoss?('🏆 Huge rewards! 🪙 +'+(pLevel*30)):('🎯 Fresh 60s • 🪙 +'+(pLevel*10)+' gold');
-  pGold+=wasBoss?(pLevel*30):(pLevel*10);
-  if(wasBoss){ pGems+=2; unlockAchievement('boss_slayer'); }
+  const mini=(bossKind==='mini');
+  // ── STARS (boss = full marks; normal = earned) ──
+  const starsEarned=wasBoss?3:computeStars();
+  renderLevelStars(starsEarned);
+  // ── TITLE unlocks ──
+  if(wasBoss) unlockTitle('boss_slayer');
+  if(pLevel>=10) unlockTitle('wizard');
+  if(pLevel>=20) unlockTitle('legend');
+  if(!wasBoss && starsEarned===3) unlockTitle('perfect');
+  // ── OBJECTIVE bonus (normal levels only) ──
+  let objLine='';
+  if(!wasBoss && levelObjective){
+    if(evalObjective()){ pGold+=40; pGems+=1; objLine=' • 🎯 Goal! +40🪙 +1💎'; }
+    else objLine=' • 🎯 Goal missed';
+  }
+  let title,sub,gold;
+  if(wasBoss){
+    title=mini?'💀 MINI-BOSS DOWN!':'👑 BOSS DEFEATED!';
+    gold=mini?(pLevel*15):(pLevel*30);
+    sub='🏆 +🪙 '+gold+(mini?' +1💎':' +2💎');
+    pGold+=gold; pGems+=mini?1:2; unlockAchievement('boss_slayer');
+  } else {
+    gold=pLevel*10; title='⚡ LEVEL '+pLevel+'! ⚡'; sub='🪙 +'+gold+objLine; pGold+=gold;
+  }
+  document.getElementById('modal-lvl-title').textContent=title;
+  document.getElementById('modal-lvl-sub').textContent=sub;
   showModal('levelModal');
   fireConfetti(wasBoss?120:70); sfxLevelUp();
+}
+function renderLevelStars(n){
+  const wrap=document.querySelector('#levelModal .lvlup-stars'); if(!wrap) return;
+  wrap.querySelectorAll('i').forEach((st,i)=>{ st.style.color = i<n ? 'var(--gold)' : 'rgba(255,255,255,.15)'; });
 }
 
 function startBoss(){
@@ -2363,6 +2570,7 @@ function startBoss(){
   document.getElementById('timer-fill').style.width='100%';
   document.getElementById('timer-text').textContent='60s';
   setDanger(false);
+  beginLevel(true);
   document.getElementById('phone').classList.add('boss-active');
   // SET UP THE LIVING BOSS
   setupBoss();
@@ -2525,6 +2733,40 @@ function dealBossDamage(resultValue){
   showBossDamage(resultValue||dmgPerHit);
   updateBossHP();
   initAudio(); sfxCorrect(); haptic([20,15]);
+  // TIME ATTACK mini-boss: HP depleted → end the boss with a reward
+  if(gMode==='time' && bossHP<=0){ setTimeout(endTimeBoss,300); }
+}
+
+/* ── TIME ATTACK MINI-BOSS (every 3rd wave) ── */
+function startTimeBoss(){
+  isBoss=true;
+  bossTarget=4+Math.floor(taWave/3);             // scales: wave3→5 hits, wave6→6 …
+  if(typeof setupBoss==='function') setupBoss();  // sets HP / arena / visuals (uses bossTarget)
+  document.getElementById('phone').classList.add('boss-active');
+  if(typeof startBossZaps==='function') startBossZaps();
+  initAudio(); if(typeof sfxGod==='function')sfxGod(); if(typeof haptic==='function')haptic([30,40,60]);
+  if(typeof fireConfetti==='function') fireConfetti(30);
+  // banner
+  const phone=document.getElementById('phone');
+  const b=document.createElement('div');
+  b.style.cssText='position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);z-index:8000;pointer-events:none;text-align:center;font-family:Syne,sans-serif;font-weight:800;color:#ff5252;text-shadow:0 0 30px rgba(239,68,68,.8),0 2px 8px rgba(0,0,0,.85);';
+  b.innerHTML='<div style="font-size:48px;line-height:1;">💀</div><div style="font-size:30px;letter-spacing:2px;margin-top:4px;">MINI-BOSS!</div>';
+  if(b.animate) b.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.4)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.12)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:0,transform:'translate(-50%,-66%) scale(1)'}],{duration:1500,easing:'cubic-bezier(.34,1.56,.64,1)'});
+  phone.appendChild(b); setTimeout(()=>b.remove(),1550);
+}
+function endTimeBoss(){
+  if(!isBoss) return;
+  isBoss=false;
+  if(typeof stopBossZaps==='function') stopBossZaps();
+  if(typeof hideBoss==='function') hideBoss();
+  document.getElementById('phone').classList.remove('boss-active');
+  // reward: big time + score
+  timer=Math.min(timer+10, TA_MAX);
+  pScore+=200; pGold+=50; pGems+=1;
+  initAudio(); if(typeof sfxLevelUp==='function')sfxLevelUp(); if(typeof haptic==='function')haptic([20,30,40,30,60]);
+  if(typeof fireConfetti==='function') fireConfetti(90);
+  showGoldPop('👑 BOSS DOWN! +10s');
+  updateHUD();
 }
 
 function showBossDamage(val){
@@ -2580,6 +2822,11 @@ function launchAttackAtBoss(dmgVal){
   }, 450);
 }
 
+function closeTutorial(){
+  localStorage_set('numa_tut','1');
+  const m=document.getElementById('tutorialModal'); if(m) m.style.display='none';
+  if(_pendingMode){ const md=_pendingMode; _pendingMode=null; startGame(md); }
+}
 function continueGame(){
   document.getElementById('levelModal').style.display='none';
   // fresh 60s timer + reset bar visual
@@ -2588,6 +2835,7 @@ function continueGame(){
   document.getElementById('timer-fill').style.background='linear-gradient(90deg,var(--grn),var(--acc))';
   document.getElementById('timer-text').textContent='60s';
   setDanger(false);
+  beginLevel(false);
   setTarget(); gActive=true;
   clearInterval(timerInt); timerInt=setInterval(tick,1000);
   if(loopRaf)cancelAnimationFrame(loopRaf);
@@ -2644,6 +2892,7 @@ function showComboBurst(t){
 function enterGodModeState(){
   if(godModeActive)return;
   godModeActive=true;
+  unlockTitle('godmode');
   const phone=document.getElementById('phone');
   phone.classList.add('god-mode-active');
   showGodBanner();
@@ -2762,6 +3011,15 @@ function godCountdown(){
   },1000);
 }
 
+function showWaveBanner(n){
+  const phone=document.getElementById('phone'); if(!phone) return;
+  const b=document.createElement('div');
+  b.style.cssText='position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);z-index:8000;pointer-events:none;text-align:center;font-family:Syne,sans-serif;font-weight:800;color:#00e5ff;text-shadow:0 0 30px rgba(0,229,255,.7),0 2px 8px rgba(0,0,0,.85);';
+  b.innerHTML='<div style="font-size:13px;letter-spacing:4px;opacity:.85;">⏱️ WAVE</div><div style="font-size:56px;line-height:1;">'+n+'</div>';
+  if(b.animate) b.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.4) rotate(-8deg)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.15) rotate(0)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:0,transform:'translate(-50%,-72%) scale(1)'}],{duration:1400,easing:'cubic-bezier(.34,1.56,.64,1)'});
+  phone.appendChild(b);
+  setTimeout(()=>b.remove(),1450);
+}
 function showGodBanner(){
   const phone=document.getElementById('phone');
   let banner=document.getElementById('god-banner');
@@ -2994,6 +3252,7 @@ function updateHintUI(){
 
 function useHint(){
   if(!gActive)return;
+  if(gMode==='time')return; // no hints in Time Attack — it's a reflex/survival mode
   if(pHints<=0){
     // pause game and show refill options
     gActive=false;
@@ -3252,8 +3511,9 @@ function updateHUD(){
   const pill=document.getElementById('g-mode-pill');
   const prog=document.getElementById('g-progress');
   if(gMode==='time'){
-    if(pill) pill.textContent='⏱️ TIME ATTACK';
-    if(prog) prog.textContent='🔥 '+pScore+' pts';
+    if(pill) pill.textContent='⏱️ WAVE '+taWave;
+    const tb=(typeof modeBest==='function')?modeBest('time'):0;
+    if(prog) prog.textContent='🔥 '+pScore+(tb>0?(' · BEST '+tb):'');
   } else {
     const modeEmoji=gSubMode==='word'?'🔤':'🔢';
     if(pill) pill.textContent=modeEmoji+' '+(gSubMode==='math'?'MATH':'WORD');
@@ -3263,7 +3523,7 @@ function updateHUD(){
   document.getElementById('m-gold').textContent=pGold;
   const mgems=document.getElementById('m-gems');if(mgems)mgems.textContent=pGems;
   document.getElementById('menu-lv').textContent='Lv '+pLevel;
-  document.getElementById('menu-rank').textContent=rank.charAt(0)+rank.slice(1).toLowerCase();
+  document.getElementById('menu-rank').textContent=titleName(equippedTitleId);
   const xpPct=Math.min((pXP%(pLevel*100))/(pLevel*100)*100,100);
   document.getElementById('xp-bar').style.width=xpPct+'%';
   document.getElementById('xp-lbl').textContent=`${pXP%(pLevel*100)} / ${pLevel*100} XP`;
@@ -3326,7 +3586,7 @@ function continueWithAd(){
   setTimeout(()=>resumeFromGameOver(), 2500);
 }
 function resumeFromGameOver(){
-  pLives=3; timer=(gMode==='time')?90:60; updateHUD();
+  pLives=3; timer=(gMode==='time')?TA_START:60; updateHUD();
   document.getElementById('energyModal').style.display='none';
   gActive=true;
   clearInterval(timerInt); timerInt=setInterval(tick,1000);
@@ -3694,6 +3954,8 @@ function showGameOver(){
   if(typeof endGodMode==='function') endGodMode();
   if(typeof clearTension==='function') clearTension();
   stopBossZaps();
+  isBoss=false; if(typeof hideBoss==='function') hideBoss();
+  document.getElementById('phone').classList.remove('boss-active');
   if(pScore>bestScore){
     bestScore=pScore;
     localStorage_set('numa_best',String(bestScore));
@@ -3758,12 +4020,15 @@ function renderSettings(){
   set('set-games',totalGamesPlayed);
   set('set-best',bestScore);
   set('set-solved',pTotalSolved);
+  renderTitles();
   const stog=document.getElementById('set-sound-toggle');if(stog)stog.classList.toggle('on',soundOn);
   const htog=document.getElementById('set-haptic-toggle');if(htog)htog.classList.toggle('on',hapticOn);
 }
 function resetProgress(){
   if(confirm('Reset all progress? This cannot be undone.')){
     pGold=500;pGems=10;pLevel=1;pScore=0;pXP=0;pHints=5;bestScore=0;totalGamesPlayed=0;pTotalSolved=0;pAchievements=[];
+    unlockedTitles=['rookie'];equippedTitleId='rookie';
+    try{localStorage.removeItem('numa_titles');localStorage.removeItem('numa_title');}catch(e){}
     localStorage_set('numa_best','0');
     updateHUD();renderSettings();showBuyToast('🔄 Progress reset!');
   }
@@ -4163,6 +4428,8 @@ function endChainChallenge(won){
   const o=document.getElementById('chain-overlay');
   o.classList.remove('active');
   updateHUD();
+  // the level was cleared via combo-chain → still grant its objective bonus
+  if(levelObjective && evalObjective()){ pGold+=40; pGems+=1; showGoldPop('🎯 Goal! +40🪙 +1💎'); }
   // after chain: if a boss/level-up was pending (god mode hit on level-complete), handle it
   if(pendingBoss){
     showBossModal();
@@ -4175,6 +4442,7 @@ function endChainChallenge(won){
     document.getElementById('timer-fill').style.width='100%';
     document.getElementById('timer-text').textContent='60s';
     setDanger(false);
+    beginLevel(false);
     setTarget();
     clearInterval(timerInt); timerInt=setInterval(tick,1000);
     if(loopRaf)cancelAnimationFrame(loopRaf);
@@ -4573,6 +4841,7 @@ function guestWallRegister(){
 setTimeout(()=>{ if(!splashDismissed) dismissSplash(); }, 8000);
 
 /* ── INIT ── */
+loadTitles();
 updateHUD();
 updateHintUI();
 applyProfile();
