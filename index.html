@@ -183,8 +183,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .tile-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px;}
 
 /* FALLING TILE */
-.gtile{position:absolute;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#fff;cursor:pointer;
+.gtile{position:absolute;width:17%;aspect-ratio:1;min-width:54px;max-width:80px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:clamp(24px,6.8vw,34px);font-weight:800;color:#fff;cursor:pointer;
   box-shadow:0 5px 0 rgba(0,0,0,.5),0 0 16px rgba(0,0,0,.4);z-index:10;transition:transform .08s;}
 .gtile:active{transform:scale(.86) translateY(4px) !important;}
 .gtile.selected{box-shadow:0 0 0 3px #fff,0 5px 0 rgba(0,0,0,.5),0 0 20px rgba(255,255,255,.3) !important;transform:scale(1.08);}
@@ -1937,10 +1937,12 @@ function gameLoop(){
   // fall speed: livelier base, scales with level
   // Gentle ramp: comfortable early, reaching the "fast" feel only around level 20-25.
   let baseSpeed;
-  if(lv<=25) baseSpeed=0.6+lv*0.05;        // L1≈0.65, L10≈1.1, L20≈1.6, L25≈1.85
-  else baseSpeed=1.85+(lv-25)*0.10;        // keeps climbing slowly after 25
+  if(lv<=25) baseSpeed=0.95+lv*0.075;      // livelier: L1≈1.0, L10≈1.7, L20≈2.45, L25≈2.8
+  else baseSpeed=2.8+(lv-25)*0.12;         // keeps climbing slowly after 25
   if(isBoss) baseSpeed*=1.12;                       // bosses a touch faster than their level
   baseSpeed*=difficultyMod; // adaptive
+  // ⚡ while you're composing an answer, tiles almost FREEZE (god-mode-style) so you can think
+  if(tray.length>0) baseSpeed*=0.20;
   for(let i=fallers.length-1;i>=0;i--){
     if(fallers[i]._frozen){ continue; } // hint-frozen tiles stay put
     fallers[i].y+=baseSpeed*(0.9+Math.random()*.2);
@@ -2178,8 +2180,14 @@ function handleSuccess(){
   // ── REWARDS ──
   const basePts=gSubMode==='math'?15:25;
   const bossBonus=isBoss?2:1;
-  const pts=basePts*comboMult*bossBonus;
-  let goldEarned=(3+comboMult*2)*bossBonus;
+  // ⚡ COMPLEXITY BONUS: the more operations used to hit the target, the more points
+  // (e.g. 4 = "2+1+1" or "1×2×2" beats just tapping a "4")
+  const opCount=(gSubMode==='math')?tray.filter(v=>['+','-','×','÷'].includes(v)).length:0;
+  const exprBonus=Math.max(0,opCount-1);              // extra ops beyond the first
+  const exprMult=1+0.6*exprBonus;                     // +60% per extra operation
+  const pts=Math.round(basePts*comboMult*bossBonus*exprMult);
+  let goldEarned=Math.round((3+comboMult*2)*bossBonus*exprMult);
+  if(exprBonus>0) setTimeout(()=>showGoldPop('⚡ '+(opCount)+'-OP CHAIN! +'+Math.round((exprMult-1)*100)+'%'),200);
   // GOD MODE: huge bonus + chance for gem
   if(comboMult>=3){ goldEarned+=15; if(Math.random()<0.12){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); } }
   // active god mode = triple everything
@@ -4580,19 +4588,19 @@ if(_pl)_pl.onclick=()=>showScreen('market',document.getElementById('nav-market')
   }
 
   // Floating orbs
-  for(let i=0;i<6;i++){
+  for(let i=0;i<7;i++){
     particles.push({
-      x:Math.random()*390,y:Math.random()*844,
+      x:Math.random()*W,y:Math.random()*H,
       vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,
-      r:60+Math.random()*80,
+      r:70+Math.random()*90,
       ci:i%3,phase:Math.random()*Math.PI*2
     });
   }
 
   // Grid dots
   const dots=[];
-  for(let x=20;x<390;x+=30){
-    for(let y=20;y<844;y+=30){
+  for(let x=20;x<W;x+=30){
+    for(let y=20;y<H;y+=30){
       dots.push({x,y,pulse:Math.random()*Math.PI*2});
     }
   }
@@ -4600,9 +4608,9 @@ if(_pl)_pl.onclick=()=>showScreen('market',document.getElementById('nav-market')
   // Floating math symbols
   const mathSyms=['+','-','×','÷','=','1','2','3','4','5','6','7','8','9'];
   const floaters=[];
-  for(let i=0;i<18;i++){
+  for(let i=0;i<22;i++){
     floaters.push({
-      x:Math.random()*370+10,
+      x:Math.random()*(W-20)+10,
       y:Math.random()*800+20,
       vy:-(0.15+Math.random()*0.25),
       sym:mathSyms[Math.floor(Math.random()*mathSyms.length)],
@@ -4615,8 +4623,10 @@ if(_pl)_pl.onclick=()=>showScreen('market',document.getElementById('nav-market')
   function draw(){
     ctx.clearRect(0,0,W,H);
 
-    // Base dark bg
-    ctx.fillStyle='#080c14';
+    // Base bg — radial depth instead of flat black
+    const bgGrad=ctx.createRadialGradient(W*0.5,H*0.32,0,W*0.5,H*0.5,Math.max(W,H)*0.9);
+    bgGrad.addColorStop(0,'#0d1730'); bgGrad.addColorStop(0.55,'#0a1020'); bgGrad.addColorStop(1,'#05080f');
+    ctx.fillStyle=bgGrad;
     ctx.fillRect(0,0,W,H);
 
     // BIG glowing orbs — very visible
@@ -4630,8 +4640,8 @@ if(_pl)_pl.onclick=()=>showScreen('market',document.getElementById('nav-market')
       const rad=p.r*pulse;
       const rg=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,rad);
       const col=getPalColor(p.ci);
-      rg.addColorStop(0,col+'0.22)');
-      rg.addColorStop(0.4,col+'0.10)');
+      rg.addColorStop(0,col+'0.36)');
+      rg.addColorStop(0.4,col+'0.17)');
       rg.addColorStop(1,col+'0)');
       ctx.fillStyle=rg;
       ctx.fillRect(0,0,W,H);
@@ -4640,11 +4650,11 @@ if(_pl)_pl.onclick=()=>showScreen('market',document.getElementById('nav-market')
     // Dot grid — pulsing, visible
     dots.forEach(d=>{
       d.pulse+=0.025;
-      const a=0.18+0.12*Math.sin(d.pulse);
+      const a=0.24+0.16*Math.sin(d.pulse);
       const col=getPalColor(Math.floor((d.x+d.y)/120)%3);
       ctx.fillStyle=col+a+')';
       ctx.beginPath();
-      ctx.arc(d.x,d.y,1.5,0,Math.PI*2);
+      ctx.arc(d.x,d.y,2,0,Math.PI*2);
       ctx.fill();
     });
 
@@ -4681,8 +4691,8 @@ if(_pl)_pl.onclick=()=>showScreen('market',document.getElementById('nav-market')
     const hexSize=42;
     const hexH2=hexSize*Math.sqrt(3);
     const hOff=(frame*0.3)%hexH2;
-    ctx.strokeStyle='rgba(0,212,255,0.07)';
-    ctx.lineWidth=0.8;
+    ctx.strokeStyle='rgba(0,212,255,0.13)';
+    ctx.lineWidth=0.9;
     for(let row=-1;row<H/hexH2+2;row++){
       for(let col2=-1;col2<W/(hexSize*1.5)+2;col2++){
         const cx2=col2*hexSize*1.5;
