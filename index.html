@@ -243,6 +243,16 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .danger-bar.pulse{animation:dangerPulse .6s ease-in-out infinite;}
 @keyframes dangerPulse{0%,100%{opacity:0;}50%{opacity:1;}}
 
+/* ⏱️ TIMER TENSION — full-perimeter edge glow: yellow → orange → red */
+#edge-fx{position:absolute;inset:0;z-index:195;pointer-events:none;border-radius:inherit;opacity:0;transition:opacity .4s ease;}
+#edge-fx.lvl1{opacity:1;box-shadow:inset 0 0 60px 7px rgba(245,158,11,.45);animation:edgeGlow 1.3s ease-in-out infinite;}
+#edge-fx.lvl2{opacity:1;box-shadow:inset 0 0 80px 11px rgba(249,115,22,.6);animation:edgeGlow .85s ease-in-out infinite;}
+#edge-fx.lvl3{opacity:1;box-shadow:inset 0 0 100px 15px rgba(239,68,68,.75);animation:edgeGlow .5s ease-in-out infinite;}
+@keyframes edgeGlow{0%,100%{opacity:.5;}50%{opacity:1;}}
+/* screen tremble in the final seconds */
+.screens.tense-shake{animation:tenseShake .2s linear infinite;}
+@keyframes tenseShake{0%,100%{transform:translate(0,0);}25%{transform:translate(-1.5px,1px);}50%{transform:translate(1.5px,-1px);}75%{transform:translate(-1px,-1.5px);}}
+
 /* SHAKE */
 @keyframes shake{0%,100%{transform:translateX(0);}15%{transform:translateX(-10px);}30%{transform:translateX(10px);}45%{transform:translateX(-8px);}60%{transform:translateX(8px);}75%{transform:translateX(-5px);}90%{transform:translateX(5px);}}
 .shaking{animation:shake .4s ease-out;}
@@ -965,6 +975,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
   <!-- DANGER BARS -->
   <div class="danger-bar left" id="dbl"></div>
   <div class="danger-bar right" id="dbr"></div>
+  <!-- timer tension edge glow -->
+  <div id="edge-fx"></div>
 
   <!-- TOAST -->
   <div class="toast" id="toast">
@@ -1537,7 +1549,7 @@ function showScreen(id,navEl){
   if(typeof stopHintEnergy==='function') stopHintEnergy();
   gActive=false; clearInterval(timerInt);
   if(loopRaf)cancelAnimationFrame(loopRaf);
-  setDanger(false);
+  setDanger(false); if(typeof clearTension==='function') clearTension();
   const screens={home:'home-screen',badges:'badges-screen',market:'market-screen',game:'game-screen',leaderboard:'leaderboard-screen',daily:'daily-screen',settings:'settings-screen'};
   for(const k in screens){
     const el=document.getElementById(screens[k]);
@@ -1724,10 +1736,11 @@ function setTarget(){
     // Difficulty-scaled math problem
     const lvl=effLevel();   // Time Attack ramps difficulty with solves; normal modes use pLevel
     let maxNum, allowMult, allowDiv, allowTriple;
-    if(lvl<=2){ maxNum=8; allowMult=false; allowDiv=false; allowTriple=false; }      // gentle intro: +/- only
-    else if(lvl<=6){ maxNum=10; allowMult=true; allowDiv=false; allowTriple=false; }  // multiplication kicks in early
-    else if(lvl<=9){ maxNum=12; allowMult=true; allowDiv=true; allowTriple=false; }   // division added
-    else if(lvl<=18){ maxNum=15; allowMult=true; allowDiv=true; allowTriple=true; }   // 3-number problems
+    if(lvl<=2){ maxNum=6; allowMult=false; allowDiv=false; allowTriple=false; }       // very easy: tiny +/- only
+    else if(lvl<=4){ maxNum=9; allowMult=false; allowDiv=false; allowTriple=false; }  // bigger +/-, still no ×
+    else if(lvl<=7){ maxNum=10; allowMult=true; allowDiv=false; allowTriple=false; }  // × kicks in
+    else if(lvl<=10){ maxNum=12; allowMult=true; allowDiv=true; allowTriple=false; }  // ÷ added
+    else if(lvl<=16){ maxNum=15; allowMult=true; allowDiv=true; allowTriple=true; }   // 3-number problems
     else { maxNum=20; allowMult=true; allowDiv=true; allowTriple=true; }
 
     // Generate a 2- or 3-number problem. Retry until the target isn't an immediate
@@ -1834,13 +1847,7 @@ function tick(){
   const maxT=(gMode==='time')?90:60;
   document.getElementById('timer-text').textContent=timer+'s';
   document.getElementById('timer-fill').style.width=(Math.max(0,timer/maxT)*100)+'%';
-  if(timer<=15){
-    document.getElementById('timer-fill').style.background='linear-gradient(90deg,#ef4444,#f97316)';
-    setDanger(true);
-  } else {
-    document.getElementById('timer-fill').style.background='linear-gradient(90deg,var(--grn),var(--acc))';
-    setDanger(false);
-  }
+  updateTimerTension();
   if(timer<=0){
     setDanger(false);
     if(gMode==='time'){ gActive=false; clearInterval(timerInt); if(loopRaf)cancelAnimationFrame(loopRaf); showGameOver(); }
@@ -1905,6 +1912,38 @@ function setDanger(on){
   document.getElementById('dbr').style.opacity=on?'1':'0';
 }
 
+// 3-stage time pressure: edge glow yellow → orange → red + tremble + ticking
+let _tensionStage=-1;
+function updateTimerTension(){
+  const maxT=(gMode==='time')?90:60;
+  const frac=Math.max(0,timer)/maxT;
+  let stage=0;
+  if(frac<=0.17) stage=3;        // ~last 10s (60s round) — RED
+  else if(frac<=0.33) stage=2;   // ~20s — ORANGE
+  else if(frac<=0.5) stage=1;    // ~30s — YELLOW
+  const e=document.getElementById('edge-fx');
+  const scr=document.querySelector('.screens');
+  const fill=document.getElementById('timer-fill');
+  if(e){ e.classList.remove('lvl1','lvl2','lvl3'); if(stage>0) e.classList.add('lvl'+stage); }
+  if(scr) scr.classList.toggle('tense-shake', stage>=3);
+  setDanger(stage>=3);
+  if(fill) fill.style.background = stage>=3?'linear-gradient(90deg,#ef4444,#f97316)'
+    : stage===2?'linear-gradient(90deg,#f97316,#f59e0b)'
+    : stage===1?'linear-gradient(90deg,#f59e0b,#fbbf24)'
+    : 'linear-gradient(90deg,var(--grn),var(--acc))';
+  if(stage!==_tensionStage){
+    if(stage>0 && typeof haptic==='function') haptic(stage>=3?[25,30,25]:18);
+    _tensionStage=stage;
+  }
+  if(stage>=3){ initAudio(); if(typeof beep==='function') beep(880,0.04,'square',0.05); } // ticking in the red zone
+}
+function clearTension(){
+  _tensionStage=-1;
+  const e=document.getElementById('edge-fx'); if(e) e.classList.remove('lvl1','lvl2','lvl3');
+  const scr=document.querySelector('.screens'); if(scr) scr.classList.remove('tense-shake');
+  setDanger(false);
+}
+
 /* ── MATH FALLING GAME LOOP ── */
 let lastSpawn=0;
 // effective difficulty level — Time Attack has no real levels, so it ramps with solves
@@ -1941,8 +1980,9 @@ function gameLoop(){
   else baseSpeed=2.8+(lv-25)*0.12;         // keeps climbing slowly after 25
   if(isBoss) baseSpeed*=1.12;                       // bosses a touch faster than their level
   baseSpeed*=difficultyMod; // adaptive
-  // ⚡ while you're composing an answer, tiles almost FREEZE (god-mode-style) so you can think
-  if(tray.length>0) baseSpeed*=0.20;
+  // ⏱️ TIME PRESSURE: in the second half of the round tiles speed up (1.0 → ~1.6 by 0s)
+  const maxT=(gMode==='time')?90:60;
+  if(timer < maxT*0.5){ baseSpeed*= 1 + (1 - Math.max(0,timer)/(maxT*0.5))*0.6; }
   for(let i=fallers.length-1;i>=0;i--){
     if(fallers[i]._frozen){ continue; } // hint-frozen tiles stay put
     fallers[i].y+=baseSpeed*(0.9+Math.random()*.2);
@@ -3652,6 +3692,7 @@ function closeAvatarModal(){ document.getElementById('avatarModal').style.displa
 function showGameOver(){
   initAudio();
   if(typeof endGodMode==='function') endGodMode();
+  if(typeof clearTension==='function') clearTension();
   stopBossZaps();
   if(pScore>bestScore){
     bestScore=pScore;
