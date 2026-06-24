@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>NUMA BLAST</title>
 <!-- full-screen mobile / add-to-home-screen -->
@@ -523,6 +526,14 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
   20%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(4deg);}
   40%{transform:translate(-50%,-50%) scale(1) rotate(-2deg);}
   80%{opacity:1;}100%{opacity:0;transform:translate(-50%,-130%) scale(.95);}}
+/* big mocking SMILE that pops with the taunt */
+.wrong-mock{position:absolute;transform:translate(-50%,-50%);z-index:14;pointer-events:none;font-size:48px;
+  filter:drop-shadow(0 3px 7px rgba(0,0,0,.6));animation:wrongMockA 1.1s cubic-bezier(.2,1.6,.4,1) forwards;}
+@keyframes wrongMockA{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-18deg);}
+  18%{opacity:1;transform:translate(-50%,-50%) scale(1.28) rotate(12deg);}
+  34%{transform:translate(-50%,-50%) scale(1) rotate(-6deg);}
+  50%{transform:translate(-50%,-50%) scale(1.1) rotate(5deg);}
+  82%{opacity:1;}100%{opacity:0;transform:translate(-50%,-86%) scale(.9);}}
 /* ── BOSS DUEL: answer orbs hugging the boss (math boss) ── */
 .duel-orb{position:absolute;width:74px;height:74px;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:12;
   display:flex;align-items:center;justify-content:center;font-family:'Bungee',sans-serif;font-size:27px;color:#fff;will-change:transform;
@@ -599,9 +610,9 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 @keyframes bossTele{from{transform:scale(1);}to{transform:scale(1.06);}}
 /* ── BOSS ATTACK ANNOUNCEMENT (big, readable) ── */
 #boss-cry{position:absolute;left:50%;top:19%;transform:translate(-50%,-50%);z-index:9994;pointer-events:none;text-align:center;white-space:nowrap;display:none;}
-#boss-cry.show{display:block;animation:bcryA 1.15s cubic-bezier(.2,1.6,.4,1) forwards;}
+#boss-cry.show{display:block;animation:bcryA 1.9s cubic-bezier(.2,1.6,.4,1) forwards;}
 #boss-cry .bc-tag{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;letter-spacing:4px;color:#ff8a6a;text-shadow:0 1px 6px rgba(0,0,0,.9);margin-bottom:2px;}
-#boss-cry .bc-name{font-family:'Bungee',sans-serif;font-size:30px;letter-spacing:1px;line-height:1;
+#boss-cry .bc-name{font-family:'Bungee',sans-serif;font-size:34px;letter-spacing:1px;line-height:1;
   -webkit-text-fill-color:transparent;-webkit-background-clip:text;background-clip:text;
   filter:drop-shadow(0 0 22px var(--bcc,#ff5a2a)) drop-shadow(0 3px 0 rgba(50,5,0,.9));}
 @keyframes bcryA{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-5deg);}
@@ -609,7 +620,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
   76%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-64%) scale(1.05);}}
 /* incoming-attack red edge pulse while a skill resolves */
 #boss-cry.show::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
-  box-shadow:inset 0 0 60px rgba(255,40,20,.35);animation:bcryEdge 1.15s ease-out forwards;}
+  box-shadow:inset 0 0 60px rgba(255,40,20,.35);animation:bcryEdge 1.9s ease-out forwards;}
 @keyframes bcryEdge{0%{opacity:0;}14%{opacity:1;}100%{opacity:0;}}
 /* ── BOSS STUN (sersemletme): brief input lock + dizzy overlay ── */
 #stun-ov{position:absolute;inset:0;z-index:9300;pointer-events:none;display:none;border-radius:inherit;
@@ -1058,9 +1069,9 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .bdo-flash{position:absolute;inset:0;background:#fff;opacity:0;animation:bdoFlash .5s ease forwards;}
 @keyframes bdoFlash{0%{opacity:.9;}100%{opacity:0;}}
 /* ═══ P1 BOSS RIGS (img-part bosses from boss gallery) ═══ */
-#brig-mover{position:relative;width:170px;height:170px;will-change:transform;transition:opacity .22s;}
+#brig-mover{position:relative;width:210px;height:236px;will-change:transform;transition:opacity .22s;}
 #brig-mover.tele{opacity:0;}
-#brig-scale{position:absolute;left:50%;top:0;width:340px;height:400px;transform:translateX(-50%) scale(.42);transform-origin:top center;}
+#brig-scale{position:absolute;left:50%;top:0;width:340px;height:400px;transform:translateX(-50%) scale(.58);transform-origin:top center;}
 #brig{position:absolute;left:0;top:0;width:340px;height:400px;animation:bgBob 3.6s ease-in-out infinite;}
 .rig-w #brig{animation-duration:4.2s;}
 @keyframes bgBob{50%{transform:translateY(-12px);}0%,100%{transform:translateY(0);}}
@@ -1071,6 +1082,11 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 #brig #armRP{z-index:6;transform-origin:30% 8%;animation:bgSwR 3.6s ease-in-out infinite;}
 @keyframes bgSwL{50%{transform:rotate(5deg);}0%,100%{transform:rotate(-3deg);}}
 @keyframes bgSwR{50%{transform:rotate(-5deg);}0%,100%{transform:rotate(3deg);}}
+/* THE AMALGAM — two fused heads (no single torso): breathe out of sync so it looks alive */
+#brig #amHL{z-index:6;transform-origin:90% 30%;animation:bgBrth 3.2s ease-in-out infinite;}
+#brig #amHR{z-index:5;transform-origin:10% 30%;animation:bgBrth 3.2s ease-in-out -1.6s infinite;}
+.rig-w #brig,.rig-v #brig{animation-duration:4.2s;}
+.rig-a #brig{animation-duration:2.8s;}
 .bgear{position:absolute;z-index:4;will-change:transform;filter:drop-shadow(0 0 8px rgba(255,170,40,.4));}
 .bgear.front{z-index:8;}
 .eyeflame{position:absolute;width:7px;height:7px;border-radius:50%;z-index:9;pointer-events:none;
@@ -1723,6 +1739,13 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
           <div class="card-foot"><span class="card-best">BEST <b data-best="time">0</b></span>
             <span class="card-diff hard">Hard</span></div>
         </div>
+        <div class="mode-card pulse" data-mode="pulse" onclick="selectMode('pulse',this)">
+          <div class="card-badge">NEW</div>
+          <div class="card-icon">🎡</div>
+          <div class="card-name">Pulse</div><div class="card-meta">Color Memory ⚡</div>
+          <div class="card-foot"><span class="card-best">BEST <b data-best="pulse">0</b></span>
+            <span class="card-diff med">Medium</span></div>
+        </div>
       </div>
 
       <!-- big PLAY -->
@@ -2229,6 +2252,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 </div><!-- /phone -->
 
 <script src="assets.js"></script>
+<script src="bosses2.js"></script>
 <script>
 /* ── STATE ── */
 let gActive=false,gMode='',gSubMode='';
@@ -2320,6 +2344,12 @@ function beginLevel(isBossLevel){
 }
 function updateObjChip(){
   const c=document.getElementById('lvl-obj'); if(!c) return;
+  if(gMode==='word' && !isBoss){   // word mode: show how many words remain until the next level
+    const need=Math.min(4+Math.floor(pLevel/4),8);
+    c.style.display='flex'; c.className='lvl-obj';
+    c.innerHTML='<span>📖</span><span>WORD '+Math.min(solvedCount+1,need)+' / '+need+' → LEVEL UP</span>';
+    return;
+  }
   if(!levelObjective || gMode==='time' || isBoss){ c.style.display='none'; return; }
   c.style.display='flex';
   c.className='lvl-obj'+(levelObjDone?' done':'');
@@ -2474,25 +2504,26 @@ const wordPacks={
 const newWordsEasy=[{w:"STAR",h:"✨ Shines in the night sky"},{w:"FISH",h:"🐟 Swims in water with gills"},{w:"CAT",h:"🐱 Meowing pet that loves mice"},{w:"DOG",h:"🐶 Barks and wags its tail"},{w:"BIRD",h:"🐦 Has feathers and flies high"},{w:"TREE",h:"🌳 Has leaves, branches, and roots"},{w:"MOON",h:"🌔 Glows brightly during the night"},{w:"SUN",h:"☀️ Gives light and warm rays"},{w:"BOOK",h:"📖 Pages filled with written stories"},{w:"PEN",h:"🖊️ Used to write on paper"},{w:"CAR",h:"🚗 Drives on roads with wheels"},{w:"BUS",h:"🚌 Large vehicle for many passengers"},{w:"BOAT",h:"⛵ Floats and sails on water"},{w:"ROAD",h:"🛣️ Paved path for driving vehicles"},{w:"ROCK",h:"🪨 Hard solid natural earth material"},{w:"FIRE",h:"🔥 Hot burning flames and heat"},{w:"ICE",h:"🧊 Frozen solid cold water block"},{w:"SNOW",h:"❄️ Cold white flakes from clouds"},{w:"RAIN",h:"🌧️ Water drops falling from clouds"},{w:"WIND",h:"🌬️ Moving air you can feel"},{w:"BEAR",h:"🐻 Large furry forest dwelling animal"},{w:"LION",h:"🦁 King of the wild savannah"},{w:"WOLF",h:"🐺 Howls loudly at the moon"},{w:"FOX",h:"🦊 Clever orange woodland wild animal"},{w:"DEER",h:"🦌 Forest animal with large antlers"},{w:"FROG",h:"🐸 Green jumping amphibian in ponds"},{w:"COW",h:"🐄 Farm animal that gives milk"},{w:"PIG",h:"🐷 Pink farm animal loving mud"},{w:"DUCK",h:"🦆 Quacking bird on a lake"},{w:"SWAN",h:"🦢 Elegant white water dwelling bird"},{w:"OWL",h:"🦉 Hooting night bird with big eyes"},{w:"BAT",h:"🦇 Flying mammal living in caves"},{w:"ANT",h:"🐜 Tiny hard working colony insect"},{w:"BEE",h:"🐝 Buzzing insect that makes honey"},{w:"BUG",h:"🪲 Small crawling insect with legs"},{w:"WORM",h:"🪱 Wiggles deep in the soil"},{w:"CRAB",h:"🦀 Ocean creature with pinching claws"},{w:"HAND",h:"🖐️ Has five fingers for grabbing"},{w:"FOOT",h:"🦶 Used for walking and standing"},{w:"EYE",h:"👁️ Organ used for seeing things"},{w:"EAR",h:"👂 Body part used for hearing"},{w:"NOSE",h:"👃 Used to smell different scents"},{w:"HAIR",h:"💇 Grows on top of head"},{w:"BONE",h:"🦴 Hard white part of skeleton"},{w:"MEAT",h:"🥩 Protein food from an animal"},{w:"MILK",h:"🥛 White dairy drink rich in calcium"},{w:"EGG",h:"🥚 Oval food laid by hens"},{w:"SOUP",h:"🥣 Warm liquid meal in bowl"},{w:"RICE",h:"🍚 Small white grains grown in paddies"},{w:"CAKE",h:"🎂 Sweet baked dessert for birthdays"},{w:"PIE",h:"🥧 Baked pastry with fruit filling"},{w:"TEA",h:"🍵 Hot brewed drink from leaves"},{w:"CUP",h:"☕ Small vessel for drinking liquids"},{w:"FORK",h:"🍴 Utensil with prongs for eating"},{w:"PAN",h:"🍳 Flat metal tool for frying"},{w:"BED",h:"🛏️ Soft furniture for sleeping on"},{w:"DOOR",h:"🚪 Opens and closes a room"},{w:"KEY",h:"🔑 Metal object to unlock things"},{w:"WALL",h:"🧱 Solid structure enclosing a room"},{w:"ROOF",h:"🏠 Top cover of a building"},{w:"ROOM",h:"🛋️ Enclosed space inside a house"},{w:"BELL",h:"🔔 Rings to make a sound"},{w:"TOY",h:"🧸 Plaything used by happy children"},{w:"BALL",h:"⚽ Round object used in sports"},{w:"GAME",h:"🎮 Fun activity with winning rules"},{w:"CARD",h:"🃏 Paper piece for magic or playing"},{w:"RING",h:"💍 Circular jewelry worn on finger"},{w:"COIN",h:"🪙 Round metal piece of money"},{w:"CASH",h:"💵 Paper bills used as currency"},{w:"MAP",h:"🗺️ Shows locations of different places"},{w:"BAG",h:"👜 Used to carry items around"},{w:"BOX",h:"📦 Cardboard container for storing things"},{w:"TENT",h:"⛺ Fabric shelter for outdoor camping"},{w:"NET",h:"🥅 Meshed tool to catch fish"},{w:"SHIP",h:"🛳️ Large vessel sailing the ocean"},{w:"PARK",h:"🏞️ Public green space with trees"},{w:"POOL",h:"🏊 Area filled with water for swimming"},{w:"SHOP",h:"🏪 Place to buy goods"},{w:"CITY",h:"🏙️ Large town with tall buildings"},{w:"TOWN",h:"🏘️ Settlement smaller than a metropolis"}];
 const newWordsMed=[{w:"PLANET",h:"🪐 Orbits around a star"},{w:"RABBIT",h:"🐰 Hopping animal with long ears"},{w:"MONKEY",h:"🐒 Swings from trees in jungles"},{w:"HORSE",h:"🐎 Galloping animal you can ride"},{w:"DONKEY",h:"🫏 Stubborn animal carrying heavy loads"},{w:"ZEBRA",h:"🦓 Wild animal with striped coat"},{w:"CAMEL",h:"🐫 Desert animal with humped back"},{w:"PIGEON",h:"🐦 Common gray city dwelling bird"},{w:"PARROT",h:"🦜 Colorful bird that copies speech"},{w:"EAGLE",h:"🦅 Majestic bird with great vision"},{w:"TURTLE",h:"🐢 Slow reptile with hard shell"},{w:"LIZARD",h:"🦎 Scaly reptile running on walls"},{w:"BEETLE",h:"🪲 Insect with a hard shell"},{w:"SPIDER",h:"🕷️ Spins sticky webs to hunt"},{w:"SHRIMP",h:"🍤 Small pink curved seafood crustacean"},{w:"SQUID",h:"🦑 Ocean creature with many tentacles"},{w:"SHARK",h:"🦈 Fierce predator of the ocean"},{w:"WHALE",h:"🐋 Massive mammal swimming in sea"},{w:"SALMON",h:"🐟 Pink fish that swims upstream"},{w:"FINGER",h:"🤌 Pointing part of the hand"},{w:"THUMB",h:"👍 Short thick digit on hand"},{w:"MUSCLE",h:"💪 Body tissue used for strength"},{w:"BRAIN",h:"🧠 Organ controlling thoughts and actions"},{w:"HEART",h:"❤️ Pumps red blood through body"},{w:"LIVER",h:"🩸 Large organ filtering body toxins"},{w:"BLOOD",h:"💉 Red liquid flowing in veins"},{w:"SALAD",h:"🥗 Healthy bowl of mixed greens"},{w:"BREAD",h:"🍞 Baked dough sliced for sandwiches"},{w:"CHEESE",h:"🧀 Yellow dairy product with holes"},{w:"BUTTER",h:"🧈 Yellow spread made from cream"},{w:"YOGURT",h:"🥣 Creamy dairy food eaten cold"},{w:"CEREAL",h:"🥣 Breakfast food eaten with milk"},{w:"NOODLE",h:"🍜 Long thin stringy Asian food"},{w:"PASTA",h:"🍝 Italian dish served with sauce"},{w:"PIZZA",h:"🍕 Cheesy round Italian baked dish"},{w:"BURGER",h:"🍔 Meat patty inside a bun"},{w:"HOTDOG",h:"🌭 Sausage served in long bun"},{w:"BACON",h:"🥓 Crispy fried strips of pork"},{w:"STEAK",h:"🥩 Thick slice of grilled beef"},{w:"TURKEY",h:"🦃 Large bird eaten on Thanksgiving"},{w:"CARROT",h:"🥕 Orange root vegetable for rabbits"},{w:"POTATO",h:"🥔 Brown root vegetable for fries"},{w:"TOMATO",h:"🍅 Red juicy fruit used in salads"},{w:"ONION",h:"🧅 Pungent vegetable making you cry"},{w:"GARLIC",h:"🧄 Strong smelling bulb for cooking"},{w:"PEPPER",h:"🌶️ Spicy vegetable used for seasoning"},{w:"APPLE",h:"🍎 Red or green crunchy fruit"},{w:"BANANA",h:"🍌 Yellow curved fruit peeled to eat"},{w:"ORANGE",h:"🍊 Round citrus fruit with zest"},{w:"GRAPES",h:"🍇 Small purple fruits on vines"},{w:"CHERRY",h:"🍒 Small red fruit with pits"},{w:"LEMON",h:"🍋 Sour yellow citrus fruit slice"},{w:"COFFEE",h:"☕ Dark caffeinated morning wake drink"},{w:"JUICE",h:"🧃 Sweet liquid squeezed from fruits"},{w:"WATER",h:"💧 Clear liquid vital for life"},{w:"GLASS",h:"🥛 Clear container for drinking cold liquids"},{w:"PLATE",h:"🍽️ Flat dish for serving food"},{w:"SPOON",h:"🥄 Utensil with curved bowl end"},{w:"KNIFE",h:"🔪 Sharp tool used for cutting"},{w:"CHAIR",h:"🪑 Furniture designed for sitting on"},{w:"TABLE",h:"🪚 Flat furniture for eating at"},{w:"COUCH",h:"🛋️ Soft furniture seating multiple people"},{w:"WINDOW",h:"🪟 Glass opening looking outside house"},{w:"MIRROR",h:"🪞 Reflective glass showing your face"},{w:"CLOSET",h:"🚪 Storage space for hanging clothes"},{w:"DRAWER",h:"🗄️ Sliding compartment in a desk"},{w:"PILLOW",h:"🛏️ Soft cushion for resting head"},{w:"TOWEL",h:"🧖 Cloth used for drying off"},{w:"SOAP",h:"🧼 Slippery bar used for washing"},{w:"BRUSH",h:"🪥 Tool for cleaning your teeth"},{w:"TOILET",h:"🚽 Bathroom fixture for human waste"},{w:"SHOWER",h:"🚿 Sprays water for bathing standing"},{w:"FLIGHT",h:"✈️ Journey traveling in an airplane"},{w:"TRAIN",h:"🚆 Long vehicle traveling on rails"},{w:"PLANE",h:"🛫 Flying vehicle soaring through skies"},{w:"TRUCK",h:"🚛 Heavy vehicle transporting large cargo"},{w:"ENGINE",h:"⚙️ Machine providing power to vehicles"},{w:"MOTOR",h:"🏎️ Device creating mechanical motion power"},{w:"WHEEL",h:"🛞 Round object turning a car"},{w:"BRAKE",h:"🛑 Mechanism used to stop vehicles"},{w:"BRIDGE",h:"🌉 Structure built over a river"}];
 const newWordsHard=[{w:"DRAGON",h:"🐉 Mythical fire-breathing beast"},{w:"UNICORN",h:"🦄 Magical horse with single horn"},{w:"MONSTER",h:"👹 Scary creature hiding under beds"},{w:"VAMPIRE",h:"🧛 Night creature drinking human blood"},{w:"ZOMBIE",h:"🧟 Undead corpse walking very slowly"},{w:"DINOSAUR",h:"🦖 Giant extinct prehistoric reptile beast"},{w:"ELEPHANT",h:"🐘 Huge mammal with long trunk"},{w:"KANGAROO",h:"🦘 Australian animal carrying pouch baby"},{w:"PENGUIN",h:"🐧 Flightless bird living in ice"},{w:"DOLPHIN",h:"🐬 Smart and playful ocean mammal"},{w:"OCTOPUS",h:"🐙 Sea creature with eight arms"},{w:"LOBSTER",h:"🦞 Red crustacean with large claws"},{w:"PELICAN",h:"🦤 Bird with huge throat pouch"},{w:"OSTRICH",h:"🪶 Fastest running heavy flightless bird"},{w:"FLAMINGO",h:"🦩 Tall pink bird standing elegantly"},{w:"PEACOCK",h:"🦚 Bird with beautiful colorful tail"},{w:"LEOPARD",h:"🐆 Wild spotted big climbing cat"},{w:"PANTHER",h:"🐈‍⬛ Black stealthy wild jungle cat"},{w:"CHEETAH",h:"🐆 Fastest running spotted land animal"},{w:"GORILLA",h:"🦍 Very large strong jungle ape"},{w:"HAMSTER",h:"🐹 Small furry pet running wheels"},{w:"SQUIRREL",h:"🐿️ Bushy tailed animal eating nuts"},{w:"RACCOON",h:"🦝 Masked animal digging in trash"},{w:"BUFFALO",h:"🐃 Large horned wild roaming bovine"},{w:"MUSTANG",h:"🐎 Wild free roaming western horse"},{w:"GOLDFISH",h:"🐠 Small orange pet swimming around"},{w:"BACTERIA",h:"🧫 Microscopic organisms causing many illnesses"},{w:"SKELETON",h:"☠️ Complete inner framework of bones"},{w:"SHOULDER",h:"💪 Joint connecting arm to torso"},{w:"STOMACH",h:"🤢 Organ digesting all eaten meals"},{w:"PANCREAS",h:"🩸 Organ producing insulin for digestion"},{w:"SANDWICH",h:"🥪 Meat and cheese between bread"},{w:"MACARONI",h:"🧀 Curved pasta often with cheese"},{w:"SPAGHETTI",h:"🍝 Long thin Italian pasta strings"},{w:"DUMPLING",h:"🥟 Dough wrapped around meat filling"},{w:"PANCAKE",h:"🥞 Flat breakfast cake with syrup"},{w:"BROWNIE",h:"🍫 Dense chocolate baked square dessert"},{w:"PUDDING",h:"🍮 Sweet creamy soft dessert bowl"},{w:"CUPCAKE",h:"🧁 Small cake baked in wrapper"},{w:"BISCUIT",h:"🍪 Small baked flaky bread round"},{w:"CRACKER",h:"🍘 Crisp salty thin baked snack"},{w:"PRETZEL",h:"🥨 Twisted salty baked dough knot"},{w:"POPCORN",h:"🍿 Exploded corn snack for movies"},{w:"CABBAGE",h:"🥬 Leafy green round soup vegetable"},{w:"LETTUCE",h:"🥗 Leafy base for healthy salads"},{w:"SPINACH",h:"🍃 Healthy dark green leafy vegetable"},{w:"BROCCOLI",h:"🥦 Green vegetable looking like trees"},{w:"ZUCCHINI",h:"🥒 Long green summer squash vegetable"},{w:"CUCUMBER",h:"🥒 Long green crisp salad vegetable"},{w:"EGGPLANT",h:"🍆 Large purple smooth skinned vegetable"},{w:"PUMPKIN",h:"🎃 Orange squash carved for Halloween"},{w:"AVOCADO",h:"🥑 Green fruit with large pit"},{w:"COCONUT",h:"🥥 Hard shell tropical brown fruit"},{w:"APRICOT",h:"🍑 Small orange fuzzy summer fruit"},{w:"BLENDER",h:"🍹 Machine mixing fruits into smoothies"},{w:"TOASTER",h:"🍞 Appliance browning slices of bread"},{w:"MICROWAVE",h:"♨️ Heats up leftover meals quickly"},{w:"FREEZER",h:"🧊 Appliance keeping food icy cold"},{w:"MONITOR",h:"🖥️ Screen displaying computer digital output"},{w:"KEYBOARD",h:"⌨️ Board with buttons for typing"},{w:"PRINTER",h:"🖨️ Machine transferring documents to paper"},{w:"SCANNER",h:"📄 Device copying images to computers"},{w:"SPEAKER",h:"🔊 Device playing loud music audio"},{w:"COMPASS",h:"🧭 Tool showing magnetic north direction"},{w:"TELESCOPE",h:"🔭 Instrument for viewing distant stars"},{w:"BINOCULAR",h:"👓 Two lenses for seeing far"},{w:"UMBRELLA",h:"☔ Portable canopy blocking heavy rain"},{w:"RAINCOAT",h:"🧥 Waterproof jacket for wet weather"},{w:"SWEATER",h:"🧶 Warm knitted long sleeved clothing"},{w:"TROUSERS",h:"👖 Clothing covering legs to ankles"},{w:"SNEAKERS",h:"👟 Comfortable shoes used for running"},{w:"SLIPPERS",h:"🩴 Comfortable indoor shoes for lounging"},{w:"BACKPACK",h:"🎒 Bag worn to carry books"},{w:"LUGGAGE",h:"🧳 Bags holding clothes for travel"},{w:"SUITCASE",h:"💼 Rectangular rolling bag for trips"},{w:"AIRPLANE",h:"🛩️ Large flying vehicle with wings"},{w:"BICYCLE",h:"🚲 Two wheeled pedaled riding vehicle"},{w:"SCOOTER",h:"🛴 Small standing vehicle with wheels"},{w:"TRACTOR",h:"🚜 Heavy vehicle pulling farm equipment"},{w:"CARRIAGE",h:"🎠 Horse drawn old fashioned vehicle"}];
-// Pool everything; pick by difficulty tier based on level
+const newWordsExpert=[{w:"GIRAFFE",h:"🦒 Tall animal with a long neck"},{w:"MEERKAT",h:"🦦 Desert animal standing on guard"},{w:"HEDGEHOG",h:"🦔 Small animal covered in spines"},{w:"CHIPMUNK",h:"🐿️ Tiny striped nut-hoarding rodent"},{w:"REINDEER",h:"🦌 Antlered animal pulling Santa's sleigh"},{w:"ANTELOPE",h:"🦌 Fast horned grazing plains animal"},{w:"PLATYPUS",h:"🦫 Egg-laying duck-billed mammal"},{w:"PORPOISE",h:"🐬 Small smart ocean mammal"},{w:"STARFISH",h:"⭐ Five-armed creature on the seabed"},{w:"MACKEREL",h:"🐟 Striped fish caught in the sea"},{w:"BULLFROG",h:"🐸 Large loudly croaking pond frog"},{w:"SCORPION",h:"🦂 Desert bug with a stinging tail"},{w:"TERMITE",h:"🐜 Tiny insect that eats wood"},{w:"FIREFLY",h:"✨ Insect that glows at night"},{w:"LADYBUG",h:"🐞 Red beetle with black spots"},{w:"TADPOLE",h:"🐸 Baby frog still in water"},{w:"PANCAKES",h:"🥞 Stacked breakfast discs with syrup"},{w:"OMELETTE",h:"🍳 Folded cooked egg dish"},{w:"LASAGNA",h:"🍝 Layered baked pasta dish"},{w:"RAVIOLI",h:"🥟 Stuffed little pasta pillows"},{w:"BURRITO",h:"🌯 Wrapped tortilla full of filling"},{w:"BAGUETTE",h:"🥖 Long thin crusty French bread"},{w:"DOUGHNUT",h:"🍩 Sweet fried ring with glaze"},{w:"SMOOTHIE",h:"🥤 Blended cold fruit drink"},{w:"ESPRESSO",h:"☕ Strong tiny shot of coffee"},{w:"PORRIDGE",h:"🥣 Warm cooked oats for breakfast"},{w:"KETCHUP",h:"🍅 Red tomato sauce for fries"},{w:"MUSTARD",h:"🌭 Yellow tangy hotdog sauce"},{w:"PICKLES",h:"🥒 Sour preserved cucumber slices"},{w:"PEANUTS",h:"🥜 Salty snack nuts in shells"},{w:"ALMONDS",h:"🌰 Crunchy oval brown nuts"},{w:"CASHEWS",h:"🥜 Curved creamy snacking nuts"},{w:"MANDARIN",h:"🍊 Small easy-to-peel citrus fruit"},{w:"VOLCANO",h:"🌋 Mountain that erupts hot lava"},{w:"GLACIER",h:"🧊 Huge slow-moving river of ice"},{w:"RAINBOW",h:"🌈 Colorful arc after the rain"},{w:"TORNADO",h:"🌪️ Spinning destructive funnel of wind"},{w:"THUNDER",h:"⛈️ Loud boom after a lightning strike"},{w:"VILLAGE",h:"🏘️ Small group of country houses"},{w:"FACTORY",h:"🏭 Building where goods are made"},{w:"LIBRARY",h:"📚 Quiet place full of books"},{w:"STADIUM",h:"🏟️ Huge arena for sports crowds"},{w:"PYRAMID",h:"🔺 Ancient triangular Egyptian tomb"},{w:"HARBOUR",h:"⚓ Safe place where ships dock"},{w:"COMPUTER",h:"💻 Machine for work and games"},{w:"BATTERY",h:"🔋 Stores power for a device"},{w:"CHARGER",h:"🔌 Cable that refills a battery"},{w:"LANTERN",h:"🏮 Portable light you carry"},{w:"SCISSORS",h:"✂️ Two blades for cutting paper"},{w:"STAPLER",h:"📎 Tool that pins papers together"},{w:"ENVELOPE",h:"✉️ Paper holder for a letter"},{w:"NOTEBOOK",h:"📓 Bound pages for writing notes"},{w:"CALENDAR",h:"📅 Shows the days and months"},{w:"DIAMOND",h:"💎 Hardest sparkling precious gem"},{w:"CRYSTAL",h:"🔮 Clear gem used for gazing"},{w:"TRUMPET",h:"🎺 Brass instrument you blow into"},{w:"BALLOON",h:"🎈 Inflated rubber that floats up"}];
+const newWordsMaster=[{w:"CROCODILE",h:"🐊 Big river reptile with snapping jaws"},{w:"ALLIGATOR",h:"🐊 Swamp reptile with a wide snout"},{w:"BUTTERFLY",h:"🦋 Insect with colorful wings"},{w:"DRAGONFLY",h:"🪰 Fast darting insect near ponds"},{w:"CHAMELEON",h:"🦎 Lizard that changes its color"},{w:"CENTIPEDE",h:"🐛 Long bug with many legs"},{w:"JELLYFISH",h:"🎐 Soft stinging sea drifter"},{w:"PINEAPPLE",h:"🍍 Spiky tropical golden fruit"},{w:"NECTARINE",h:"🍑 Smooth-skinned juicy peach cousin"},{w:"CROISSANT",h:"🥐 Flaky curved French pastry"},{w:"MILKSHAKE",h:"🥤 Thick blended ice-cream drink"},{w:"ASTEROID",h:"☄️ Rock tumbling through space"},{w:"SATELLITE",h:"🛰️ Object orbiting around Earth"},{w:"HURRICANE",h:"🌀 Giant spinning ocean storm"},{w:"AVALANCHE",h:"🏔️ Snow crashing down a mountain"},{w:"WATERFALL",h:"💦 Water dropping off a cliff"},{w:"MOUNTAIN",h:"⛰️ Very tall rocky peak"},{w:"CONTINENT",h:"🗺️ One of Earth's huge landmasses"},{w:"ELEVATOR",h:"🛗 Box that lifts you up floors"},{w:"ESCALATOR",h:"🛗 Moving staircase in malls"},{w:"DETECTIVE",h:"🕵️ Person who solves mysteries"},{w:"ASTRONAUT",h:"👨‍🚀 Person who travels to space"},{w:"ORCHESTRA",h:"🎻 Large group of musicians"},{w:"SAXOPHONE",h:"🎷 Curved golden jazz instrument"},{w:"ACCORDION",h:"🪗 Squeezebox with buttons and keys"},{w:"HARMONICA",h:"🎵 Small mouth-blown reed instrument"},{w:"DUMBBELL",h:"🏋️ Weight lifted for strong arms"},{w:"MARATHON",h:"🏃 Very long running race"},{w:"CHAMPION",h:"🏆 Winner of the competition"},{w:"FIREWORK",h:"🎆 Explodes in the colorful night sky"},{w:"SNOWFLAKE",h:"❄️ Unique frozen ice crystal"},{w:"CHRISTMAS",h:"🎄 December holiday with a tree"},{w:"BIRTHDAY",h:"🎂 Yearly day you blow out candles"},{w:"CARNIVAL",h:"🎪 Fair with rides and games"},{w:"FESTIVAL",h:"🎉 Big joyful public celebration"},{w:"SCARECROW",h:"🌾 Straw figure scaring crop birds"},{w:"WINDMILL",h:"🌬️ Tower with spinning sail blades"},{w:"SUBMARINE",h:"🚢 Boat that travels underwater"},{w:"AMBULANCE",h:"🚑 Vehicle rushing people to hospital"},{w:"FIRETRUCK",h:"🚒 Red vehicle that fights fires"},{w:"HAMBURGER",h:"🍔 Beef patty in a sesame bun"},{w:"CHOCOLATE",h:"🍫 Sweet brown cocoa treat"},{w:"CINNAMON",h:"🥮 Warm brown baking spice"},{w:"BLUEBERRY",h:"🫐 Tiny round blue sweet fruit"},{w:"VANILLA",h:"🍦 Classic pale ice-cream flavor"},{w:"ARTICHOKE",h:"🌿 Green layered edible flower bud"},{w:"ASPARAGUS",h:"🥬 Long thin green spear vegetable"},{w:"MUSHROOM",h:"🍄 Fungus with a round cap"},{w:"PORCUPINE",h:"🦔 Spiny rodent with sharp quills"},{w:"TREASURE",h:"💰 Hidden chest full of gold"}];
+// Pool everything; pick by difficulty tier based on level — 5 bands ramping to L50
 function getWordDict(){
-  // levels map to difficulty tiers
-  if(pLevel<=6) return newWordsEasy;
-  if(pLevel<=14) return newWordsMed;
-  if(pLevel<=20) return newWordsHard;
-  // high levels: mix medium + hard for variety
-  return newWordsMed.concat(newWordsHard);
+  if(pLevel<=10) return newWordsEasy;     // 🟢 short / very easy
+  if(pLevel<=20) return newWordsMed;      // 🟡 medium
+  if(pLevel<=30) return newWordsHard;     // 🔴 hard
+  if(pLevel<=50) return newWordsExpert.concat(newWordsMaster,newWordsHard);  // 🟣 expert+ — 187-word pool keeps all of L31-50 repeat-free
+  return newWordsMed.concat(newWordsHard,newWordsExpert,newWordsMaster);  // L51+ : everything
 }
-// avoid repeating the same word twice in a row
-let lastWord='', lastTarget=null, recentWords=[];
+// SHUFFLE-BAG: draw words without replacement per tier → NO repeats until the whole tier is used, then reshuffle
+let lastWord='', lastTarget=null, _wordBags={};
 function pickWord(){
   const pool=getWordDict();
-  const keep=Math.min(15, Math.max(4, pool.length-3)); // remember recent words without deadlocking small pools
-  let w, tries=0;
-  do{ w=pool[Math.floor(Math.random()*pool.length)]; tries++; }
-  while(recentWords.includes(w.w) && tries<40);
-  recentWords.push(w.w);
-  while(recentWords.length>keep) recentWords.shift();
+  const key=(pLevel<=10?'e':pLevel<=20?'m':pLevel<=30?'h':pLevel<=50?'x':'mix')+pool.length;
+  let bag=_wordBags[key];
+  if(!bag || !bag.length){ bag=pool.map((_,i)=>i); for(let i=bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=bag[i];bag[i]=bag[j];bag[j]=t;} _wordBags[key]=bag; }
+  // never repeat the immediately-previous word across a fresh bag boundary
+  if(bag.length>1 && pool[bag[bag.length-1]].w===lastWord){ const t=bag[bag.length-1]; bag[bag.length-1]=bag[0]; bag[0]=t; }
+  const w=pool[bag.pop()];
   lastWord=w.w;
   return w;
 }
@@ -2536,6 +2567,8 @@ function showScreen(id,navEl){
   if(loopRaf)cancelAnimationFrame(loopRaf);
   if(typeof stopWaveWatchdog==='function') stopWaveWatchdog();
   if(id!=='market' && typeof stopDealTimer==='function') stopDealTimer();
+  if(typeof clearPulseTimers==='function') clearPulseTimers();
+  document.getElementById('phone').classList.remove('pulse-nav');
   setDanger(false); if(typeof clearTension==='function') clearTension();
   timescale=1; slowmoTimer=0;
   if(typeof resetBank==='function'){ resetBank(); endFinalWave(); clearParry(); clearBossFx(); }
@@ -2560,13 +2593,13 @@ function showScreen(id,navEl){
 
 /* ══════════ PREMIUM HOME MENU + WORLD MAP logic ══════════ */
 let selectedMode='math';
-const MODE_LABELS={math:'MATH BLAST',word:'WORD HUNT',combo:'COMBO MIX',time:'TIME ATTACK'};
+const MODE_LABELS={math:'MATH BLAST',word:'WORD HUNT',combo:'COMBO MIX',time:'TIME ATTACK',pulse:'PULSE'};
 const WORLDS=[
   {name:'VOID REALM',    boss:'VOID CALCULATOR'},
   {name:'WRAITH REALM',  boss:'WORD WRAITH'},
   {name:'CHRONO REALM',  boss:'CHRONO DEVOURER'},
-  {name:'CIPHER REALM',  boss:'CIPHER'},
-  {name:'QUANTUM REALM', boss:'QUANTUM CORE'},
+  {name:'AMALGAM REALM', boss:'THE AMALGAM'},
+  {name:'NULL REALM',    boss:'NULL KING'},
 ];
 function worldOf(level){ return Math.min(Math.floor((level-1)/10), WORLDS.length-1); }
 /* per-world painted backdrop — EXTERNAL files (world1=lava,2=forest,3=desert,4=ice,5=space) keep index.html small */
@@ -2721,7 +2754,7 @@ function startGame(mode){
   pScore=0; solvedCount=0;
   pLives=3; // fresh lives each run (arcade style)
   if(typeof hideBoss==='function') hideBoss();
-  document.getElementById('phone').classList.remove('boss-active'); // ensure boss focus chrome is restored
+  document.getElementById('phone').classList.remove('boss-active','pulse-nav'); // ensure boss focus chrome is restored
   fallers=[]; tray=[]; selectedLetters=[]; streakCount=0; comboMult=1; isBoss=false; lastSpawn=0; lastComboTier=0; godUsedThisLevel=false;
   // wave-core state reset
   timescale=1; slowmoUsed=false; slowmoTimer=0; waveActive=false; waveTime=0;
@@ -2887,10 +2920,16 @@ function selectLetter(idx,el){
    heavily, leaning into its direction. Skills fire from the existing boss-attack
    interval (startBossZaps → bossAttackTick dispatcher).                        */
 const BOSS_RIGS={
-  c:{name:'CHRONO DEVOURER',taunt:'Your seconds are mine.',cls:'rig-c',eye:'#ffaa2a',
+  c:{name:'CHRONO DEVOURER',taunt:'Your seconds are mine.',cls:'rig-c',eye:'#ffaa2a',bossW:340,
      parts:[{id:'armLP',k:'cAL',w:93,x:6,y:78},{id:'armRP',k:'cAR',w:93,x:240,y:78},{id:'torsoP',k:'cT',w:208,x:66,y:0}]},
-  w:{name:'WORD WRAITH',taunt:'Letters obey ME.',cls:'rig-w',eye:'#5af08a',
-     parts:[{id:'armLP',k:'wAL',w:99,x:22,y:111},{id:'armRP',k:'wAR',w:99,x:209,y:111},{id:'torsoP',k:'wT',w:330,x:5,y:0}]}
+  w:{name:'WORD WRAITH',taunt:'Letters obey ME.',cls:'rig-w',eye:'#5af08a',bossW:340,
+     parts:[{id:'armLP',k:'wAL',w:99,x:22,y:111},{id:'armRP',k:'wAR',w:99,x:209,y:111},{id:'torsoP',k:'wT',w:330,x:5,y:0}]},
+  v:{name:'VOID CALCULATOR',taunt:'You are nothing.',cls:'rig-v',eye:'#c4b5fd',bossW:290,
+     parts:[{id:'armLP',k:'vAL',w:101,x:-2,y:128},{id:'armRP',k:'vAR',w:101,x:191,y:128},{id:'torsoP',k:'vT',w:222,x:34,y:0}]},
+  a:{name:'THE AMALGAM',taunt:'We are many.',cls:'rig-a',eye:'#ff5a3c',bossW:340,
+     parts:[{id:'armLP',k:'aAL',w:112,x:0,y:49},{id:'armRP',k:'aAR',w:127,x:223,y:140},{id:'amHL',k:'aHL',w:90,x:82,y:1},{id:'amHR',k:'aHR',w:153,x:167,y:0}]},
+  n:{name:'NULL KING',taunt:'Bow to zero.',cls:'rig-n',eye:'#ffd86a',bossW:344,
+     parts:[{id:'armLP',k:'nAL',w:129,x:11,y:122},{id:'armRP',k:'nAR',w:130,x:204,y:122},{id:'torsoP',k:'nMid',w:344,x:0,y:122},{id:'headP',k:'nHd',w:258,x:43,y:0}]}
 };
 let rigKind=null,rigT=0,rigTelePhase=0,rigTeleTimer=5,rigTeleporting=false,rigRaf=null,rigLast=0,rigGears=[],rigFlameIv=null;
 let wraithShield=[],wraithShieldIdx=0,bossAtkStep=0;
@@ -2899,11 +2938,12 @@ function buildBossRig(kind){
   rigKind=kind; rigT=0; rigTelePhase=0; rigTeleTimer=5; rigTeleporting=false;
   const bc=document.getElementById('boss-char'); if(!bc) return;
   const svg=bc.querySelector('.boss-svg'); if(svg) svg.style.display='none';   // rig replaces the SVG robot
-  bc.classList.remove('rig-w','rig-c'); bc.classList.add(BOSS_RIGS[kind].cls);
+  bc.classList.remove('rig-v','rig-w','rig-c','rig-a','rig-n'); bc.classList.add(BOSS_RIGS[kind].cls);
+  const rig=BOSS_RIGS[kind], bw=rig.bossW||340;
   const mover=document.createElement('div'); mover.id='brig-mover';
-  const scale=document.createElement('div'); scale.id='brig-scale';
-  const brig=document.createElement('div'); brig.id='brig';
-  BOSS_RIGS[kind].parts.forEach(p=>{
+  const scale=document.createElement('div'); scale.id='brig-scale'; scale.style.width=bw+'px';
+  const brig=document.createElement('div'); brig.id='brig'; brig.style.width=bw+'px';
+  rig.parts.forEach(p=>{
     const img=document.createElement('img');
     img.className='part'; img.id=p.id; img.src=BOSS_A[p.k];
     img.style.cssText='width:'+p.w+'px;left:'+p.x+'px;top:'+p.y+'px;';
@@ -2911,7 +2951,16 @@ function buildBossRig(kind){
   });
   scale.appendChild(brig); mover.appendChild(scale);
   bc.insertBefore(mover,bc.firstChild);
-  document.getElementById('boss-name-tag').textContent=BOSS_RIGS[kind].name;
+  // per-rig part tweaks (arm pivots + z-order) ported from the boss gallery
+  const armL=brig.querySelector('#armLP'), armR=brig.querySelector('#armRP');
+  if(kind==='v'&&armL&&armR){ armL.style.transformOrigin='78% 12%'; armR.style.transformOrigin='22% 12%'; }
+  if(kind==='w'&&armL&&armR){ armL.style.zIndex='4'; armR.style.zIndex='4'; armL.style.transformOrigin='70% 6%'; armR.style.transformOrigin='30% 6%'; }
+  if(kind==='a'&&armL&&armR){ armL.style.transformOrigin='73% 5%'; armR.style.transformOrigin='8% 5%'; }
+  if(kind==='n'&&armL&&armR){ armL.style.transformOrigin='85% 12%'; armR.style.transformOrigin='15% 12%'; armL.style.zIndex='4'; armR.style.zIndex='4';
+    const tp=brig.querySelector('#torsoP'); if(tp)tp.style.zIndex='5'; const hp=brig.querySelector('#headP'); if(hp)hp.style.zIndex='6'; }
+  // recolour the rig to the realm boss so they don't all look identical (phase tints still stack on the part imgs)
+  if(typeof _bossPersona!=='undefined'&&_bossPersona&&_bossPersona.rigTint&&_bossPersona.rigTint!=='none') mover.style.filter=_bossPersona.rigTint;
+  document.getElementById('boss-name-tag').textContent=(typeof _bossPersona!=='undefined'&&_bossPersona&&_bossPersona.name)||BOSS_RIGS[kind].name;
   if(kind==='c'){
     // orbiting gears + eye flames
     [BOSS_A.g0,BOSS_A.g1,BOSS_A.g2,BOSS_A.g3].forEach((src,i)=>{
@@ -2939,7 +2988,7 @@ function destroyBossRig(){
   wraithShield.forEach(s=>{ if(s.el)s.el.remove(); }); wraithShield=[]; wraithShieldIdx=0;
   const m=document.getElementById('brig-mover'); if(m) m.remove();
   const bc=document.getElementById('boss-char');
-  if(bc){ bc.classList.remove('rig-w','rig-c'); const svg=bc.querySelector('.boss-svg'); if(svg) svg.style.display=''; }
+  if(bc){ bc.classList.remove('rig-v','rig-w','rig-c','rig-a','rig-n'); const svg=bc.querySelector('.boss-svg'); if(svg) svg.style.display=''; }
 }
 function bossRigLoop(now){
   if(!rigKind){ rigRaf=null; return; }
@@ -2967,6 +3016,15 @@ function bossRigLoop(now){
         rigTeleTimer=4.5+Math.random()*3.5;
       },240);
     }
+  } else if(rigKind==='v'){
+    // void: slow ominous hover + drift (a calculator that floats in the dark)
+    mx=Math.sin(rigT*.42)*42; my=Math.sin(rigT*.85)*9; lean=Math.sin(rigT*.42)*3;
+  } else if(rigKind==='a'){
+    // amalgam: erratic, twitchy, lurching (stitched-together monster)
+    mx=Math.sin(rigT*.7)*44+Math.sin(rigT*2.4)*7; my=Math.abs(Math.sin(rigT*1.3))*-15; lean=Math.cos(rigT*.7)*7+Math.sin(rigT*3.1)*2;
+  } else if(rigKind==='n'){
+    // null king: regal, imposing, slow majestic hover
+    mx=Math.sin(rigT*.34)*30; my=Math.sin(rigT*.68)*-12; lean=Math.cos(rigT*.34)*3;
   } else {
     // chrono: heavier, livelier patrol — bigger sweep + vertical bob + lean (so it never looks static)
     mx=Math.sin(rigT*.5)*58; my=Math.abs(Math.sin(rigT*1.0))*-16; lean=Math.cos(rigT*.5)*6;
@@ -3030,7 +3088,7 @@ function chronoGearStorm(){
 // CHRONO: time steal — gold sand flows from the board into the boss (-5s in Time Attack)
 function chronoTimeSteal(){
   const phone=document.getElementById('phone'); if(!phone) return;
-  announceBossAttack('TIME STEAL', '#ffd24a', gMode==='time'?'⏳ −5 SECONDS':'⏳ −40 POINTS');
+  announceBossAttack(gMode==='time'?'TIME STEAL':'SCRAMBLE', '#ffd24a', gMode==='time'?'⏳ −5 SECONDS':'🔀 ANSWERS SHUFFLED');
   const pr=phone.getBoundingClientRect();
   const mover=document.getElementById('brig-mover');
   const mr=mover?mover.getBoundingClientRect():pr;
@@ -3052,7 +3110,7 @@ function chronoTimeSteal(){
   setTimeout(()=>{
     initAudio(); beep(220,.16,'sawtooth',.14);
     if(gMode==='time'){ timer=Math.max(1,timer-5); showGoldPop('⏳ -5s STOLEN!'); }
-    else { pScore=Math.max(0,pScore-40); showGoldPop('⏳ -40 pts STOLEN!'); updateHUD(); }
+    else { pScore=Math.max(0,pScore-30); showGoldPop('🔀 SCRAMBLED!'); updateHUD(); if(duelActive && typeof spawnDuel==='function') spawnDuel(); }
     flashBoard('rgba(255,170,40,0.25)');
   },1100);
 }
@@ -3170,7 +3228,7 @@ function announceBossAttack(name, color, tag){
   const tg=cry.querySelector('.bc-tag'); if(tg) tg.textContent=tag||'BOSS ATTACK';
   cry.classList.remove('show'); void cry.offsetWidth; cry.classList.add('show');
   if(typeof haptic==='function') haptic([10,30,10]);
-  setTimeout(()=>cry.classList.remove('show'),1200);
+  setTimeout(()=>cry.classList.remove('show'),1900);
 }
 /* ── BOSS STUN (sersemletme) — brief input lock + dizzy overlay ── */
 function bossStun(){
@@ -3194,6 +3252,7 @@ function clearBossFx(){
   const cry=document.getElementById('boss-cry'); if(cry) cry.classList.remove('show');
   const warn=document.getElementById('boss-warn'); if(warn) warn.classList.remove('on');   // ⚠ wind-up pip was sticking into the next game (top of the equation)
   const bch=document.getElementById('boss-char'); if(bch) bch.classList.remove('boss-windup');
+  const fog=document.querySelector('#g-board .boss-fog'); if(fog) fog.classList.remove('on');   // clear DARKNESS cloud if boss ended mid-attack
   document.querySelectorAll('#boss-arena .boss-taunt').forEach(t=>t.remove());
 }
 /* ── BOSS LIGHTNING CHARGE — each correct solve charges the orb; tap it to blast the boss ── */
@@ -3242,12 +3301,13 @@ function fireBossCharge(ev){
 }
 /* ═══════════ BOSS DUEL MODE — answer orbs hug the boss, tap = direct strike, real HP defeat ═══════════ */
 let duelActive=false, duelOrbs=[];
-function clearDuel(){ const b=document.getElementById('g-board'); if(b) b.querySelectorAll('.duel-orb').forEach(o=>o.remove()); duelOrbs=[]; }
+function clearDuel(){ if(typeof stopDuelShuffle==='function') stopDuelShuffle(); const b=document.getElementById('g-board'); if(b) b.querySelectorAll('.duel-orb').forEach(o=>o.remove()); duelOrbs=[]; }
 function spawnDuel(){
   if(!gActive||!isBoss||gSubMode!=='math') return;
   clearDuel();
-  genWaveEq(); renderWaveEq();
   const board=document.getElementById('g-board');
+  if(board) board.querySelectorAll('.wtile,.btile').forEach(t=>t.remove());   // safety: wipe any stray falling/build tiles so they never bleed behind the orbs
+  genWaveEq(); renderWaveEq();
   const N=waveEq.answers.length;
   const cols=Math.min(N,3);                 // up to 3 columns of orbs around/under the boss
   const rows=Math.ceil(N/cols);
@@ -3263,6 +3323,7 @@ function spawnDuel(){
     el.onpointerdown=ev=>{ ev.preventDefault(); ev.stopPropagation(); tapDuel(val===waveEq.ans,el); };
     board.appendChild(el); duelOrbs.push({el,val,correct:val===waveEq.ans});
   });
+  injectBossShowCSS(); startDuelShuffle();   // orbs orbit/shuffle so you can't pre-aim
 }
 function duelStrike(el){
   const phone=document.getElementById('phone'), cv=document.getElementById('boss-fx');
@@ -3305,7 +3366,11 @@ function tapDuel(correct, el){
     el.classList.add('wrong');
     streakCount=0; comboMult=1; lastComboTier=0; updateCombo(); updateWaveCombo(false);
     impact('fail');
-    if(typeof bossLaugh==='function') bossLaugh();
+    if(typeof bossMock==='function') bossMock(); else if(typeof bossLaugh==='function') bossLaugh();   // boss laughs IN YOUR FACE
+    // ANTI-BRUTE-FORCE: a wrong guess HEALS the boss (undoes a hit) + throws a brand-new challenge,
+    // so tapping the orbs in sequence backfires — you must read the answer right the FIRST time.
+    if(bossHitsTaken>0){ bossHP=Math.min(bossMaxHP, bossHP+Math.ceil(bossMaxHP/bossHitsNeeded)); bossHitsTaken=Math.max(0,bossHitsTaken-1); if(typeof updateBossHP==='function') updateBossHP(); if(typeof showGoldPop==='function') showGoldPop('💢 WRONG — BOSS HEALED'); }
+    if(gActive && isBoss && duelActive){ setTimeout(()=>{ if(gActive&&isBoss&&duelActive){ clearDuel(); spawnDuel(); } }, 480); }
   }
 }
 // CHRONO DEVOUR — the boss visibly sucks a number orb into itself (thematic "yutma")
@@ -3339,28 +3404,340 @@ function onBossDuelDefeated(){
   if(typeof questAdvance==='function') questAdvance('levels',pLevel,true);
   finishLevelUp(true);
 }
+/* ── DRAMATIC OBSTRUCTION SKILLS — the boss actively wrecks your view, not abstract point penalties ── */
+function injectBossFogCSS(){
+  if(document.getElementById('bossfog-css')) return;
+  const s=document.createElement('style'); s.id='bossfog-css';
+  s.textContent=`
+  .boss-fog{position:absolute;inset:0;z-index:40;pointer-events:none;opacity:0;border-radius:inherit;
+    background:radial-gradient(circle at 50% 42%,rgba(30,8,52,.45),rgba(6,2,14,.97) 72%);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+  .boss-fog.on{animation:bossFogA 1.7s ease-in-out forwards;}
+  @keyframes bossFogA{0%{opacity:0;transform:scale(1.18);}13%{opacity:1;transform:scale(1);}78%{opacity:1;}100%{opacity:0;}}
+  .duel-orb.orb-hidden{color:#ff6ad5 !important;text-shadow:0 0 12px #ff6ad5;filter:brightness(.82) contrast(1.25);}`;
+  document.head.appendChild(s);
+}
+function bossFog(){   // 🌫️ DARKNESS — slams a blinding dark cloud over the whole board for ~1.7s
+  injectBossFogCSS();
+  announceBossAttack('DARKNESS', '#9b5cff', "🌫️ CAN'T SEE!");
+  if(typeof shakePhone==='function') shakePhone();
+  const board=document.getElementById('g-board'); if(!board) return;
+  let f=board.querySelector('.boss-fog');
+  if(!f){ f=document.createElement('div'); f.className='boss-fog'; board.appendChild(f); }
+  f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
+  initAudio(); beep(70,.5,'sawtooth',.16); setTimeout(()=>beep(48,.42,'sawtooth',.12),200);
+  if(typeof haptic==='function') haptic([30,40,30,40]);
+  setTimeout(()=>{ if(f) f.classList.remove('on'); }, 1700);
+}
+function bossHideNumbers(){   // ❓ CIPHER LOCK — flips every answer orb to "?" → memorize the answer or wait it out
+  if(!duelActive || !duelOrbs.length){ bossFog(); return; }
+  injectBossFogCSS();
+  announceBossAttack('CIPHER LOCK', '#ff6ad5', '❓ NUMBERS HIDDEN');
+  if(typeof shakePhone==='function') shakePhone();
+  // glitch scan sweeps down the board, flipping numbers to "?" as it passes
+  const _bd=document.getElementById('g-board');
+  if(_bd){ const sw=document.createElement('div'); sw.className='cipher-sweep'; _bd.appendChild(sw); setTimeout(()=>sw.remove(),720); }
+  duelOrbs.forEach(o=>{ if(o.el){ o.el.dataset.real=o.el.textContent; o.el.textContent='?'; o.el.classList.add('orb-hidden','orb-glitch'); setTimeout(()=>o.el&&o.el.classList.remove('orb-glitch'),520); } });
+  initAudio(); beep(200,.18,'square',.12); setTimeout(()=>beep(150,.2,'square',.1),150);
+  if(typeof haptic==='function') haptic([20,30,20]);
+  setTimeout(()=>{ duelOrbs.forEach(o=>{ if(o.el && o.el.dataset.real!==undefined){ o.el.textContent=o.el.dataset.real; o.el.classList.remove('orb-hidden'); delete o.el.dataset.real; } }); }, 1700);
+}
+/* ═══════════ BOSS SHOW SYSTEM — alive, growing, attacking, explosive ═══════════ */
+let duelShuffleInt=null;
+function injectBossShowCSS(){
+  if(document.getElementById('bossshow-css')) return;
+  const s=document.createElement('style'); s.id='bossshow-css';
+  s.textContent=`
+  #brig-scale{transition:transform .55s cubic-bezier(.2,1.5,.4,1);}
+  .boss-char.boss-p1 #brig-scale{transform:translateX(-50%) scale(.63)!important;}
+  .boss-char.boss-p2 #brig-scale{transform:translateX(-50%) scale(.68)!important;}
+  .boss-char.boss-p3 #brig-scale{transform:translateX(-50%) scale(.74)!important;}
+  .boss-char.boss-crit #brig-scale{transform:translateX(-50%) scale(.80)!important;}
+  .duel-orb{transition:left .5s cubic-bezier(.4,0,.2,1),top .5s cubic-bezier(.4,0,.2,1),transform .12s,filter .15s;}
+  .duel-orb.orb-zapped{animation:orbZap .5s ease;}
+  @keyframes orbZap{0%,100%{filter:brightness(1);}30%{filter:brightness(2.6) saturate(0);}55%{filter:brightness(.4);}}
+  .duel-orb.orb-fake{box-shadow:0 0 0 2px rgba(255,59,106,.85) inset, 0 0 14px rgba(255,59,106,.4);}
+  .boss-shock{position:absolute;left:50%;top:18%;width:28px;height:28px;border-radius:50%;transform:translate(-50%,-50%);z-index:30;pointer-events:none;border:4px solid #fff;}
+  .boss-shock.go{animation:bossShockA .6s ease-out forwards;}
+  @keyframes bossShockA{0%{width:28px;height:28px;opacity:.9;border-color:#fff;}100%{width:440px;height:440px;opacity:0;border-color:#ff5a2a;}}
+  .boss-roar-banner{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);z-index:9993;pointer-events:none;text-align:center;font-family:Bungee,sans-serif;font-size:33px;white-space:nowrap;text-shadow:0 0 24px var(--rc,#ff3b30),0 3px 0 rgba(40,0,0,.85);}
+  .boss-roar-banner.go{animation:roarBan 1.25s cubic-bezier(.2,1.6,.4,1) forwards;}
+  @keyframes roarBan{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}20%{opacity:1;transform:translate(-50%,-50%) scale(1.16);}38%{transform:translate(-50%,-50%) scale(1);}80%{opacity:1;}100%{opacity:0;transform:translate(-50%,-66%) scale(1);}}
+  .boss-vortex{position:absolute;left:50%;top:16%;width:90px;height:90px;border-radius:50%;transform:translate(-50%,-50%);z-index:28;pointer-events:none;
+    background:conic-gradient(from 0deg,transparent,rgba(176,107,255,.55),transparent,rgba(120,80,255,.65),transparent);}
+  .boss-vortex.go{animation:vortexSpin .9s linear forwards;}
+  @keyframes vortexSpin{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(0);}25%{opacity:1;}100%{opacity:0;transform:translate(-50%,-50%) scale(2.5) rotate(720deg);}}
+  .boss-gear{position:absolute;z-index:26;pointer-events:none;}
+  /* boss MOCKS you — big laughing face pops over the arena */
+  .boss-mock-face{position:absolute;left:50%;top:13%;transform:translate(-50%,-50%);z-index:9994;pointer-events:none;font-size:64px;filter:drop-shadow(0 5px 12px rgba(0,0,0,.65));}
+  .boss-mock-face.go{animation:bossMockA 1.2s cubic-bezier(.2,1.6,.4,1) forwards;}
+  @keyframes bossMockA{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-20deg);}16%{opacity:1;transform:translate(-50%,-50%) scale(1.3) rotate(10deg);}32%{transform:translate(-50%,-50%) scale(1.02) rotate(-6deg);}50%{transform:translate(-50%,-50%) scale(1.14) rotate(5deg);}80%{opacity:1;transform:translate(-50%,-58%) scale(1);}100%{opacity:0;transform:translate(-50%,-74%) scale(.9);}}
+  /* enrage LIGHT burst + rig swell */
+  .boss-grow-flash{position:absolute;left:50%;top:18%;width:120px;height:120px;border-radius:50%;transform:translate(-50%,-50%);z-index:27;pointer-events:none;
+    background:radial-gradient(circle,rgba(255,255,255,.9),rgba(255,120,40,.55) 36%,transparent 70%);}
+  .boss-grow-flash.go{animation:bossGrowF .62s ease-out forwards;}
+  @keyframes bossGrowF{0%{opacity:0;transform:translate(-50%,-50%) scale(.3);}22%{opacity:1;}100%{opacity:0;transform:translate(-50%,-50%) scale(3.6);}}
+  .boss-char.boss-grow #brig{animation:bossSwell .58s cubic-bezier(.3,1.7,.4,1);}
+  @keyframes bossSwell{0%{transform:scale(1);}42%{transform:scale(1.16);}100%{transform:scale(1);}}
+  /* realm-boss spawn intro */
+  .boss-intro{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);z-index:9995;pointer-events:none;text-align:center;}
+  .boss-intro.go{animation:bossIntroA 1.9s ease forwards;}
+  .boss-intro .bi-realm{font-family:Rajdhani,sans-serif;font-weight:800;font-size:14px;letter-spacing:3px;color:var(--bic,#fff);opacity:.92;text-transform:uppercase;}
+  .boss-intro .bi-name{font-family:Bungee,sans-serif;font-size:30px;color:#fff;text-shadow:0 0 22px var(--bic,#fff),0 3px 0 rgba(0,0,0,.6);white-space:nowrap;}
+  @keyframes bossIntroA{0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}14%{opacity:1;transform:translate(-50%,-50%) scale(1.12);}26%{transform:translate(-50%,-50%) scale(1);}80%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-66%) scale(1);}}
+  /* ── SKILL CAST: boss physically CHARGES + fires a wave at the board (so skills come FROM the boss) ── */
+  .boss-char.boss-casting #brig{animation:bossCastA .5s cubic-bezier(.3,1.7,.4,1);filter:drop-shadow(0 0 18px var(--castc,#ff5a2a)) brightness(1.22) saturate(1.2);}
+  @keyframes bossCastA{0%{transform:translateY(0) scale(1);}30%{transform:translateY(-8px) scale(1.07);}55%{transform:translateY(16px) scale(1.1);}100%{transform:translateY(0) scale(1);}}
+  .cast-charge{position:absolute;width:48px;height:48px;border-radius:50%;transform:translate(-50%,-50%);z-index:32;pointer-events:none;mix-blend-mode:screen;animation:castChargeA .55s ease-out forwards;}
+  @keyframes castChargeA{0%{opacity:0;transform:translate(-50%,-50%) scale(.15);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}100%{opacity:.2;transform:translate(-50%,-50%) scale(.5);}}
+  .cast-wave{position:absolute;width:42px;height:42px;border-radius:50%;z-index:33;pointer-events:none;mix-blend-mode:screen;}
+  .cast-icon{position:absolute;transform:translate(-50%,-50%);z-index:34;pointer-events:none;font-size:30px;filter:drop-shadow(0 0 8px #000);}
+  /* CIPHER glitch sweep bar */
+  .cipher-sweep{position:absolute;left:0;right:0;height:46px;top:-46px;z-index:41;pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(255,106,213,.5),rgba(255,255,255,.85),rgba(255,106,213,.5),transparent);
+    box-shadow:0 0 22px rgba(255,106,213,.7);mix-blend-mode:screen;animation:cipherSweepA .7s linear forwards;}
+  @keyframes cipherSweepA{0%{top:-46px;opacity:0;}12%{opacity:1;}100%{top:100%;opacity:.3;}}
+  .duel-orb.orb-glitch{animation:orbGlitch .5s steps(2) 2;}
+  @keyframes orbGlitch{0%{transform:translate(-50%,-50%);}25%{transform:translate(calc(-50% - 3px),calc(-50% + 2px));filter:hue-rotate(40deg);}50%{transform:translate(calc(-50% + 3px),-50%);}75%{transform:translate(-50%,calc(-50% - 2px));filter:hue-rotate(-30deg);}}
+  /* FOG rolling cloud layer */
+  .boss-fog::before{content:'';position:absolute;inset:-20%;border-radius:inherit;
+    background:radial-gradient(circle at 30% 40%,rgba(120,80,200,.4),transparent 40%),radial-gradient(circle at 70% 60%,rgba(80,40,140,.4),transparent 42%),radial-gradient(circle at 50% 30%,rgba(150,100,255,.3),transparent 38%);
+    animation:fogRoll 3s linear infinite;}
+  @keyframes fogRoll{0%{transform:translateX(-8%) translateY(0);}50%{transform:translateX(8%) translateY(-4%);}100%{transform:translateX(-8%) translateY(0);}}`;
+  document.head.appendChild(s);
+}
+/* realm boss spawn intro — REALM + BOSS NAME slam in persona colour */
+function showBossIntro(persona){
+  const phone=document.getElementById('phone'); if(!phone||!persona) return;
+  injectBossShowCSS();
+  const w=(typeof worldOf==='function')?worldOf(pLevel):0;
+  const realm=(typeof WORLDS!=='undefined'&&WORLDS[w])?WORLDS[w].name:'BOSS';
+  const b=document.createElement('div'); b.className='boss-intro';
+  b.style.setProperty('--bic',persona.accent);
+  b.innerHTML='<div class="bi-realm">'+realm+'</div><div class="bi-name">'+persona.name+'</div>';
+  phone.appendChild(b); void b.offsetWidth; b.classList.add('go'); setTimeout(()=>b.remove(),1900);
+  initAudio(); beep(120,.4,'sawtooth',.16); setTimeout(()=>beep(80,.5,'sawtooth',.14),180);
+  if(typeof haptic==='function')haptic([50,40,80]);
+}
+/* the boss LAUGHS AT YOU — big mocking face + cackle + shake + taunt (works for rig & svg bosses) */
+const BOSS_MOCKS=['😈','😂','🤣','😜','😝','🤪','😏','👹','🤡','😹'];
+function bossMock(){
+  const phone=document.getElementById('phone'); if(!phone) return;
+  injectBossShowCSS();
+  const f=document.createElement('div'); f.className='boss-mock-face';
+  f.textContent=BOSS_MOCKS[Math.floor(Math.random()*BOSS_MOCKS.length)];
+  phone.appendChild(f); void f.offsetWidth; f.classList.add('go'); setTimeout(()=>f.remove(),1250);
+  if(typeof bossLaugh==='function') bossLaugh();
+  if(typeof showBossTaunt==='function') showBossTaunt();
+}
+/* orbs orbit/shuffle so you can't pre-aim — faster when the boss is angrier */
+function startDuelShuffle(){
+  stopDuelShuffle();
+  const tick=()=>{
+    if(duelActive&&isBoss&&gActive&&!bossStunned&&duelOrbs.length) shuffleDuelOrbs();
+    duelShuffleInt=setTimeout(tick, Math.max(1500, 2800-Math.max(0,_bossPhase)*350));
+  };
+  duelShuffleInt=setTimeout(tick, 2200);
+}
+function stopDuelShuffle(){ clearTimeout(duelShuffleInt); duelShuffleInt=null; }
+function shuffleDuelOrbs(){
+  if(!duelOrbs.length) return;
+  const pos=duelOrbs.map(o=>({l:o.el.style.left,t:o.el.style.top}));
+  for(let i=pos.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=pos[i]; pos[i]=pos[j]; pos[j]=tmp; }
+  duelOrbs.forEach((o,i)=>{ if(o.el){ o.el.style.left=pos[i].l; o.el.style.top=pos[i].t; } });
+}
+/* phase escalation flourish: boss ROARS + grows (css) + shockwave + banner */
+function bossPhaseShow(phase){
+  injectBossShowCSS();
+  const phone=document.getElementById('phone'); if(!phone) return;
+  const bc=document.getElementById('boss-char');
+  // bright LIGHT burst + double shockwave + the rig visibly SWELLS as it enrages
+  const gf=document.createElement('div'); gf.className='boss-grow-flash'; phone.appendChild(gf); void gf.offsetWidth; gf.classList.add('go'); setTimeout(()=>gf.remove(),650);
+  const sh=document.createElement('div'); sh.className='boss-shock'; phone.appendChild(sh); void sh.offsetWidth; sh.classList.add('go'); setTimeout(()=>sh.remove(),650);
+  setTimeout(()=>{ const sh2=document.createElement('div'); sh2.className='boss-shock'; phone.appendChild(sh2); void sh2.offsetWidth; sh2.classList.add('go'); setTimeout(()=>sh2.remove(),650); },120);
+  if(bc){ bc.classList.remove('boss-grow'); void bc.offsetWidth; bc.classList.add('boss-grow'); setTimeout(()=>bc.classList.remove('boss-grow'),600); }
+  if(typeof shakePhone==='function') shakePhone();
+  if(typeof bossEmitSpark==='function') bossEmitSpark(phase>=4?28:phase>=3?22:16);
+  if(typeof screenKick==='function') screenKick(phase>=3?12:9);
+  initAudio(); beep(phase>=4?90:phase>=3?120:160,.32,'sawtooth',.16); setTimeout(()=>beep(58,.36,'sawtooth',.13),150);
+  if(typeof haptic==='function') haptic([40,30,60,30,80]);
+  const labels={2:'ENRAGED!',3:'BERSERK!',4:'FINAL STAND!'}, cols={2:'#ff7a2a',3:'#ff3b30',4:'#ff1744'};
+  if(labels[phase]){ const b=document.createElement('div'); b.className='boss-roar-banner'; b.textContent=labels[phase]; b.style.setProperty('--rc',cols[phase]); b.style.color=cols[phase]; phone.appendChild(b); void b.offsetWidth; b.classList.add('go'); setTimeout(()=>b.remove(),1300); }
+  // BERSERK+ → the boss cackles as it powers up
+  if(phase>=3 && typeof bossMock==='function') setTimeout(bossMock,260);
+}
+/* CORRECT HIT = explosion on the boss (scales with combo) */
+function bossImpactBlast(){
+  injectBossShowCSS();
+  const phone=document.getElementById('phone'); if(!phone) return;
+  const big=streakCount>=5;
+  const sh=document.createElement('div'); sh.className='boss-shock'; phone.appendChild(sh); void sh.offsetWidth; sh.classList.add('go'); setTimeout(()=>sh.remove(),650);
+  if(typeof bossEmitSpark==='function') bossEmitSpark(big?18:11);
+  if(typeof screenKick==='function') screenKick(big?10:6);
+  const bc=document.getElementById('boss-char'); if(bc){ bc.classList.add('boss-hit'); setTimeout(()=>bc.classList.remove('boss-hit'),300); }
+  initAudio(); beep(540,.06,'square',.13); setTimeout(()=>beep(170,.16,'sawtooth',.14),60);
+}
+/* ── ⚡ CHAIN BOLT — lightning fries the decoy orbs ── */
+function bossLightningStrike(){
+  injectBossShowCSS();
+  announceBossAttack('CHAIN BOLT', '#6ad0ff', '⚡ ORBS FRIED');
+  const phone=document.getElementById('phone'), pr=phone?phone.getBoundingClientRect():null;
+  const targets=duelOrbs.filter(o=>!o.correct&&o.el).sort(()=>Math.random()-.5).slice(0,3);
+  targets.forEach((o,i)=>{ setTimeout(()=>{
+    const or=o.el.getBoundingClientRect();
+    if(typeof bossBolt==='function'&&pr) bossBolt(or.left-pr.left+or.width/2, or.top-pr.top+or.height/2, ()=>{ o.el.classList.add('orb-zapped'); setTimeout(()=>o.el&&o.el.classList.remove('orb-zapped'),500); });
+    else { o.el.classList.add('orb-zapped'); setTimeout(()=>o.el&&o.el.classList.remove('orb-zapped'),500); }
+    initAudio(); beep(900-i*120,.08,'sawtooth',.12);
+  }, i*150); });
+  if(typeof shakePhone==='function') shakePhone(); if(typeof haptic==='function') haptic([20,40,20]);
+}
+/* ── 🌀 VORTEX — sucks every orb in, respits a fresh set in new spots ── */
+function bossVortexShuffle(){
+  injectBossShowCSS();
+  announceBossAttack('VORTEX', '#b06bff', '🌀 ALL SCRAMBLED');
+  const phone=document.getElementById('phone');
+  if(phone){ const v=document.createElement('div'); v.className='boss-vortex'; phone.appendChild(v); void v.offsetWidth; v.classList.add('go'); setTimeout(()=>v.remove(),900); }
+  // orbs visibly SPIRAL into the vortex (staggered, spinning) — not an instant swap
+  duelOrbs.forEach((o,i)=>{ if(o.el){ setTimeout(()=>{ if(!o.el)return; o.el.style.transition='left .5s cubic-bezier(.5,0,.9,.5),top .5s cubic-bezier(.5,0,.9,.5),transform .5s,opacity .5s';
+    o.el.style.left='50%'; o.el.style.top='16%'; o.el.style.transform='translate(-50%,-50%) scale(.14) rotate(720deg)'; o.el.style.opacity='.2'; }, i*45); } });
+  initAudio(); beep(300,.3,'sawtooth',.14); setTimeout(()=>beep(110,.3,'sawtooth',.12),200);
+  if(typeof shakePhone==='function') shakePhone(); if(typeof haptic==='function') haptic([30,40,50]);
+  setTimeout(()=>{ if(duelActive&&isBoss&&gActive) spawnDuel(); }, 820);
+}
+/* ── ⚙️ GEAR STORM — spinning gears rain across the board + knock the orbs ── */
+function bossGearStormDuel(){
+  injectBossShowCSS();
+  announceBossAttack('GEAR STORM', '#d9c08a', '⚙️ GEARS FLY');
+  const board=document.getElementById('g-board'); if(!board) return;
+  for(let i=0;i<5;i++){ setTimeout(()=>{
+    const g=document.createElement('div'); g.className='boss-gear'; g.textContent='⚙️';
+    g.style.cssText+=';left:'+(8+Math.random()*84)+'%;top:-12%;font-size:'+(26+Math.random()*18)+'px;';
+    board.appendChild(g);
+    if(g.animate) g.animate([{transform:'translateY(0) rotate(0)',opacity:1},{transform:'translateY(440px) rotate(720deg)',opacity:.6}],{duration:1100,easing:'cubic-bezier(.4,0,.8,1)'});
+    setTimeout(()=>g.remove(),1150);
+  }, i*120); }
+  setTimeout(shuffleDuelOrbs, 420);
+  initAudio(); beep(200,.22,'sawtooth',.12); if(typeof shakePhone==='function') shakePhone();
+}
+/* ── 🎭 MIMIC — drops a fake orb showing the real answer; tapping it heals the boss ── */
+function bossFakeOrb(){
+  if(!duelActive||!duelOrbs.length||!waveEq){ bossFog(); return; }
+  injectBossShowCSS();
+  announceBossAttack('MIMIC', '#ff3b6a', '🎭 SPOT THE FAKE');
+  const board=document.getElementById('g-board'); const ans=waveEq.ans;
+  const el=document.createElement('div'); el.className='duel-orb orb-fake'; el.textContent=ans;
+  el.style.left=(22+Math.random()*56)+'%'; el.style.top=(20+Math.random()*52)+'%';
+  el.onpointerdown=ev=>{ ev.preventDefault(); ev.stopPropagation(); tapFakeOrb(el); };
+  board.appendChild(el); duelOrbs.push({el,val:ans,correct:false,fake:true});
+  initAudio(); beep(440,.1,'triangle',.12); if(typeof haptic==='function') haptic(20);
+}
+function tapFakeOrb(el){
+  if(!gActive||!isBoss) return;
+  el.classList.add('wrong');
+  streakCount=0; comboMult=1; lastComboTier=0; if(typeof updateCombo==='function')updateCombo(); if(typeof updateWaveCombo==='function')updateWaveCombo(false);
+  if(typeof impact==='function') impact('fail'); if(typeof bossMock==='function') bossMock(); else if(typeof bossLaugh==='function') bossLaugh();
+  if(bossHitsTaken>0){ bossHP=Math.min(bossMaxHP, bossHP+Math.ceil(bossMaxHP/bossHitsNeeded)); bossHitsTaken=Math.max(0,bossHitsTaken-1); if(typeof updateBossHP==='function') updateBossHP(); if(typeof showGoldPop==='function') showGoldPop('🎭 FAKE — BOSS HEALED'); }
+  if(gActive&&isBoss&&duelActive){ setTimeout(()=>{ if(gActive&&isBoss&&duelActive){ clearDuel(); spawnDuel(); } }, 480); }
+}
+/* ── 🌌 QUANTUM FLUX — orbs dance/reshuffle rapidly several times (signature chaos skill) ── */
+function bossFluxShuffle(){
+  if(!duelActive||!duelOrbs.length||!isBoss) return;
+  if(typeof announceBossAttack==='function') announceBossAttack('QUANTUM FLUX','#a855f7','🌌 ORBS DANCE');
+  let n=0; const iv=setInterval(()=>{ if(!duelActive||!isBoss||!gActive){clearInterval(iv);return;} if(typeof shuffleDuelOrbs==='function')shuffleDuelOrbs(); n++; if(n>=5)clearInterval(iv); },240);
+  if(typeof shakePhone==='function')shakePhone(); if(typeof haptic==='function')haptic([20,30,20,30]);
+}
+/* ══ 5 REALM BOSSES — each has its own name, colour, skill rotation & difficulty (worldOf drives which) ══
+   Skill MIX = the unique gameplay: VOID=darkness, WRAITH=relentless, CHRONO=time/gears, CIPHER=hide+fake, QUANTUM=all+fastest.
+   periodMul scales attack frequency (lower = harder). Math rotations run in the duel; word rotations on the letter grid. */
+let _bossPersona=null;
+const BOSS_PERSONAS=[
+  { key:'void',  name:'VOID CALCULATOR', accent:'#8b5cf6', eye:'#c4b5fd', taunt:'You are nothing.',
+    periodMul:1.12, shield:false, rig:'v',
+    math:[bossFog, bossHideNumbers, bossStun],
+    word:[bossFog, bossStun, wraithHintDevour] },
+  { key:'wraith',name:'WORD WRAITH',     accent:'#5af08a', eye:'#7af0a0', taunt:'Your mind is mine.',
+    periodMul:0.60, shield:true, rig:'w',
+    math:[bossVortexShuffle, bossFakeOrb, bossFog, bossLightningStrike, bossHideNumbers, bossStun],
+    word:[wraithLetterStorm, wraithChainLock, wraithHintDevour, bossFog, bossStun] },
+  { key:'chrono',name:'CHRONO DEVOURER', accent:'#ffaa2a', eye:'#ffd24a', taunt:'Your seconds are mine.',
+    periodMul:0.84, shield:false, rig:'c',
+    math:[chronoDevourOrb, bossVortexShuffle, bossGearStormDuel, bossStun, bossLightningStrike, bossFakeOrb],
+    word:[wraithChainLock, bossFog, bossStun, wraithHintDevour] },
+  { key:'amalgam',name:'THE AMALGAM',    accent:'#ff5a3c', eye:'#ff8a5c', taunt:'We are many.',
+    periodMul:0.72, shield:false, rig:'a',
+    math:[bossHideNumbers, bossFakeOrb, bossVortexShuffle, bossFog, bossStun, bossLightningStrike],
+    word:[wraithHintDevour, wraithChainLock, bossFog, bossStun] },
+  { key:'null',  name:'NULL KING',       accent:'#ffd86a', eye:'#ffd86a', taunt:'Bow to zero.',
+    periodMul:0.55, shield:true, rig:'n',
+    math:[bossVortexShuffle, bossFakeOrb, bossHideNumbers, bossLightningStrike, chronoDevourOrb, bossGearStormDuel, bossFluxShuffle, bossFog, bossStun],
+    word:[wraithLetterStorm, wraithChainLock, wraithHintDevour, bossFog, bossStun] }
+];
+function bossPersona(){ return BOSS_PERSONAS[(typeof worldOf==='function')?worldOf(pLevel):0] || BOSS_PERSONAS[0]; }
+/* ── SKILL CAST FX — boss colour/icon per skill + a charge→wave so every attack visibly comes FROM the boss ── */
+const SKILL_FX=new Map([
+  [bossFog,{c:'#9b5cff',ic:'🌫️'}],[bossHideNumbers,{c:'#ff6ad5',ic:'❓'}],[bossVortexShuffle,{c:'#b06bff',ic:'🌀'}],
+  [bossFakeOrb,{c:'#ff3b6a',ic:'🎭'}],[bossLightningStrike,{c:'#6ad0ff',ic:'⚡'}],[bossStun,{c:'#ffd84a',ic:'😵'}],
+  [bossGearStormDuel,{c:'#d9c08a',ic:'⚙️'}],[chronoDevourOrb,{c:'#b06bff',ic:'🌀'}],[bossFluxShuffle,{c:'#a855f7',ic:'🌌'}],
+  [chronoGearStorm,{c:'#ffb02a',ic:'⚙️'}],[chronoTimeSteal,{c:'#7c3aed',ic:'🔀'}],[bossZap,{c:'#6ad0ff',ic:'⚡'}],
+  [wraithLetterStorm,{c:'#5af08a',ic:'👻'}],[wraithChainLock,{c:'#5af08a',ic:'⛓'}],[wraithHintDevour,{c:'#5af08a',ic:'👅'}]
+]);
+function skillFx(fn){ return SKILL_FX.get(fn)||{c:'#ff5a2a',ic:'💥'}; }
+function bossCenter(){ const phone=document.getElementById('phone'); const mover=document.getElementById('brig-mover')||document.querySelector('.boss-svg')||document.getElementById('boss-char');
+  if(!phone||!mover) return null; const pr=phone.getBoundingClientRect(), br=mover.getBoundingClientRect();
+  return {pr, x:br.left-pr.left+br.width/2, y:br.top-pr.top+br.height*0.52}; }
+function bossCast(color){   // boss lunges + glows + a charge orb swells at its core
+  const bc=document.getElementById('boss-char'); if(!bc) return;
+  bc.style.setProperty('--castc',color||'#ff5a2a');
+  bc.classList.remove('boss-casting'); void bc.offsetWidth; bc.classList.add('boss-casting'); setTimeout(()=>bc.classList.remove('boss-casting'),520);
+  const c=bossCenter(); const phone=document.getElementById('phone'); if(!c||!phone) return;
+  const ch=document.createElement('div'); ch.className='cast-charge';
+  ch.style.cssText='left:'+c.x+'px;top:'+c.y+'px;background:radial-gradient(circle,#fff,'+color+' 55%,transparent 72%);box-shadow:0 0 26px '+color+';';
+  phone.appendChild(ch); setTimeout(()=>ch.remove(),560);
+  initAudio(); beep(330,.14,'sawtooth',.12);
+}
+function bossCastWave(color,icon,cb){   // an energy bolt+icon travels from the boss DOWN to the board, then fires the effect
+  const phone=document.getElementById('phone'), board=document.getElementById('g-board'), c=bossCenter();
+  if(!phone||!board||!c){ if(cb)cb(); return; }
+  const bd=board.getBoundingClientRect(), pr=c.pr;
+  const x2=bd.left-pr.left+bd.width/2, y2=bd.top-pr.top+Math.min(bd.height*0.42,150);
+  const dx=x2-c.x, dy=y2-c.y;
+  const w=document.createElement('div'); w.className='cast-wave';
+  w.style.cssText='left:'+c.x+'px;top:'+c.y+'px;background:radial-gradient(circle,#fff,'+color+' 50%,transparent 72%);box-shadow:0 0 28px '+color+';';
+  const ic=document.createElement('div'); ic.className='cast-icon'; ic.textContent=icon||'💥'; ic.style.cssText='left:'+c.x+'px;top:'+c.y+'px;';
+  phone.appendChild(w); phone.appendChild(ic);
+  const kf=[{transform:'translate(-50%,-50%) scale(.4)',opacity:.3},{transform:'translate(-50%,-50%) scale(1)',opacity:1,offset:.25},
+    {transform:'translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px)) scale(1.5)',opacity:.9}];
+  const opt={duration:300,easing:'cubic-bezier(.4,0,.7,1)',fill:'forwards'};
+  if(w.animate){ const a=w.animate(kf,opt); ic.animate(kf,opt); a.onfinish=()=>{ w.remove(); ic.remove(); if(typeof bossEmitSpark==='function') bossEmitSpark(8); if(cb)cb(); }; }
+  else { setTimeout(()=>{ w.remove(); ic.remove(); if(cb)cb(); },300); }
+}
 function bossAttackTick(){
   if(!isBoss||!gActive||chainActive) return;
   bossAtkStep++;
   let atk;
-  if(rigKind==='c'){
-    const seq = duelActive ? [chronoDevourOrb, chronoTimeSteal, bossStun] : [chronoGearStorm, bossZap, chronoTimeSteal, bossStun];
+  const persona=_bossPersona||bossPersona();
+  // skill set by MODE (word grid vs math duel) — the rig SPRITE is the realm boss, independent of mode
+  if(gSubMode==='word'){
+    const seq=persona.word;
     atk=seq[bossAtkStep%seq.length];
-  } else if(rigKind==='w'){
-    const seq=[wraithLetterStorm, wraithChainLock, bossStun, wraithHintDevour];
-    atk=seq[bossAtkStep%seq.length];
-    if(bossHP<=60 && !wraithShield.length && Math.random()<0.4) wraithWordShield();
+    if(persona.shield && bossHP<=60 && !wraithShield.length && Math.random()<0.4) wraithWordShield();
   } else {
-    atk=bossZap;
+    // duel boss → persona's MATH rotation; the (rare) falling-tile time mini-boss keeps its own set
+    const seq = duelActive ? persona.math : [chronoGearStorm, bossZap, chronoTimeSteal, bossStun];
+    atk=seq[bossAtkStep%seq.length];
   }
   // P3 PARRY: every 3rd attack is telegraphed — solve the 2s mini equation to reflect it (L10+)
   if(featUnlocked('parry') && !parryActive && bossAtkStep%3===0){ bossTelegraph(atk); return; }
-  // WIND-UP: boss visibly charges (scale+glow) + a ⚠ pip, THEN strikes — so attacks are readable
+  // WIND-UP → CAST: boss CHARGES (lunge+glow+charge orb), THEN fires a wave at the board that triggers the effect
+  const fx=skillFx(atk);
   const bc=document.getElementById('boss-char'), warn=document.getElementById('boss-warn');
   if(bc){ bc.classList.remove('boss-windup'); void bc.offsetWidth; bc.classList.add('boss-windup'); }
   if(warn){ warn.classList.remove('on'); void warn.offsetWidth; warn.classList.add('on'); }
+  if(typeof bossCast==='function') bossCast(fx.c);
   initAudio(); beep(160,.1,'sawtooth',.1); setTimeout(()=>beep(240,.12,'sawtooth',.1),140);   // charge-up growl
-  setTimeout(()=>{ if(isBoss&&gActive&&!chainActive) atk(); if(warn) warn.classList.remove('on'); if(bc) bc.classList.remove('boss-windup'); }, 520);   // fire after the wind-up, then clear the ⚠ pip
+  setTimeout(()=>{ if(warn) warn.classList.remove('on'); if(bc) bc.classList.remove('boss-windup');
+    if(isBoss&&gActive&&!chainActive){ if(typeof bossCastWave==='function') bossCastWave(fx.c, fx.ic, ()=>{ if(isBoss&&gActive&&!chainActive) atk(); }); else atk(); }
+  }, 520);   // fire after the wind-up
 }
 
 /* ═══════════ P0 WAVE CORE (ported from numa_gameplay_slice_v2) ═══════════
@@ -3392,7 +3769,7 @@ function genWaveEq(){
   let guard=0;
   // more options as you level up (4 early → up to 8) so the answer isn't instantly obvious
   const optionCount = Math.max(3, Math.min(4 + Math.floor(lvl/2), 8));
-  const decoyRange = Math.max(4, optionCount);
+  const decoyRange = isBoss ? 3 : Math.max(4, optionCount);   // boss: decoys cluster TIGHT around the answer — must compute, can't just spot the odd number
   while(dset.size<optionCount && guard++<120){ const d=ans+(Math.random()<.5?-1:1)*wrnd(1,decoyRange); if(d>0 && d!==ans) dset.add(d); }
   let _e=1; while(dset.size<optionCount){ if(ans+_e>0) dset.add(ans+_e); _e++; }
   waveEq={a,b,op,ans,answers:[...dset].sort(()=>Math.random()-.5)};
@@ -3568,8 +3945,14 @@ function tapWaveTile(t){
 }
 /* ── WRONG-TAP TAUNT — mocks the player on a wrong number ── */
 const WRONG_TAUNTS=['🤓 Nope!','😏 Not even close','🐌 Too slow?','💀 Math hurts?','🙃 Try again','🤖 ERR0R','😂 Bro...','🧮 Count again!','📉 Yikes','🤡 Honk honk','🫠 Really?','👎 Miss'];
+const WRONG_FACES=['😂','🤣','😜','😝','🤪','😏','🙄','😬','🤡','😈'];
 function showWrongTaunt(x,y){
   const board=document.getElementById('g-board'); if(!board) return;
+  // big mocking SMILE pops above the tap
+  const f=document.createElement('div'); f.className='wrong-mock';
+  f.textContent=WRONG_FACES[Math.floor(Math.random()*WRONG_FACES.length)];
+  f.style.left=x+'px'; f.style.top=(y-44)+'px';
+  board.appendChild(f); setTimeout(()=>f.remove(),1120);
   const d=document.createElement('div'); d.className='wrong-taunt';
   d.textContent=WRONG_TAUNTS[Math.floor(Math.random()*WRONG_TAUNTS.length)];
   d.style.left=x+'px'; d.style.top=y+'px';
@@ -3889,7 +4272,134 @@ function endFinalWave(){
   if(chip && chip.classList.contains('final')){ chip.classList.remove('final'); if(typeof updateObjChip==='function') updateObjChip(); }
 }
 
+/* ═══════════ PULSE — ELECTRIC MEMORY WHEEL ═══════════
+   Watch colored slices flash (each = a musical note), repeat the order. Sequence length grows with
+   level (Lv1=1 → Lv10=6). Bosses take colored-blast damage per completed sequence. */
+const PULSE_COLS=['#ff3b5c','#ff9f1c','#ffe14d','#2ec26b','#1ec8ff','#a855f7'];
+const PULSE_FREQS=[523,587,659,784,880,1046];   // C major pentatonic — the wheel plays a melody
+let pulseSeq=[],pulseInput=[],pulseBusy=false,pulseRound=0,pulseRoundsNeeded=3,_pulseTimers=[];
+function clearPulseTimers(){ _pulseTimers.forEach(t=>clearTimeout(t)); _pulseTimers=[]; pulseBusy=false; }
+// gentler early curve — grows ~1 every 2 levels (L1=1,L2=2,L4=3,L6=4,L8=5…) so beginners aren't drowned
+function pulseTargetLen(){ return Math.min(1+Math.floor(pLevel/2),8); }               // Lv1=1 → Lv6=4 → Lv14 cap 8
+function pulseFlashMs(){ return Math.max(360, 660-pLevel*20); }                       // a touch slower early/floor for readability
+function injectPulseCSS(){
+  if(document.getElementById('pulse-css')) return;
+  const s=document.createElement('style'); s.id='pulse-css';
+  s.textContent=`
+  .mode-card.pulse{--c:#ff4dd2;}
+  #phone.pulse-nav .bottom-nav{display:flex!important;}
+  #phone.pulse-nav.in-game .g-hud{display:flex!important;}
+  .pulse-wrap{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;}
+  .pulse-wheel{width:min(88%,320px);height:auto;filter:drop-shadow(0 12px 30px rgba(0,0,0,.55));}
+  .pulse-wheel .pslice-p{cursor:pointer;transition:opacity .12s,filter .12s,transform .08s;transform-origin:120px 120px;}
+  .pulse-wheel.dim .pslice-p{opacity:.44;}
+  .pulse-wheel .pslice-p.lit{opacity:1;filter:brightness(1.85) saturate(1.45);transform:scale(1.05);}
+  .pulse-wheel .pslice-p:active{opacity:.8;}
+  .pulse-hub-t{font-family:Bungee,sans-serif;font-size:13px;fill:#f0eaff;}
+  .pulse-hub-s{font-family:Rajdhani,sans-serif;font-size:8.5px;font-weight:700;fill:#9a8fc0;}
+  .pulse-blast{position:absolute;inset:0;pointer-events:none;border-radius:inherit;animation:pulseBlast .5s ease-out forwards;
+    background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.55),rgba(255,77,210,.28) 40%,transparent 66%);}
+  @keyframes pulseBlast{0%{opacity:.95;}100%{opacity:0;}}`;
+  document.head.appendChild(s);
+}
+let _pulseN=6,_pulseFreqMap=PULSE_FREQS.slice();
+function pulseSlices(){ return pLevel<=3?3 : pLevel<=9?4 : pLevel<=16?5 : 6; }   // hold 3/4 colors longer — 5 colors not until Lv10, 6 not until Lv17
+function buildPulseWheel(){
+  injectPulseCSS();
+  const board=document.getElementById('g-board'); if(!board) return;
+  const N=pulseSlices(); _pulseN=N; _pulseFreqMap=[];
+  const cx=120,cy=120,r=108,step=360/N,P=[];
+  for(let k=0;k<=N;k++){ const a=(-90+k*step)*Math.PI/180; P.push([+(cx+r*Math.cos(a)).toFixed(1),+(cy+r*Math.sin(a)).toFixed(1)]); }
+  let svg='';
+  for(let i=0;i<N;i++){ const ci=Math.floor(i*6/N); _pulseFreqMap[i]=PULSE_FREQS[ci];
+    svg+='<path class="pslice-p" data-i="'+i+'" d="M120,120 L'+P[i][0]+','+P[i][1]+' A108,108 0 0,1 '+P[i+1][0]+','+P[i+1][1]+' Z" fill="'+PULSE_COLS[ci]+'" stroke="#0b0714" stroke-width="2.5"/>'; }
+  board.innerHTML='<div class="pulse-wrap"><svg class="pulse-wheel dim" viewBox="0 0 240 240">'+svg
+    +'<circle cx="120" cy="120" r="40" fill="#0e0822" stroke="#3a2a55" stroke-width="2"/>'
+    +'<text id="pulse-hub" x="120" y="117" text-anchor="middle" class="pulse-hub-t">WATCH</text>'
+    +'<text id="pulse-sub" x="120" y="134" text-anchor="middle" class="pulse-hub-s"></text></svg></div>';
+  board.querySelectorAll('.pslice-p').forEach(p=>{ p.onpointerdown=ev=>{ev.preventDefault();ev.stopPropagation();tapPulseSlice(+p.getAttribute('data-i'));}; });
+}
+function setPulseLabel(m,s){ const h=document.getElementById('pulse-hub'),x=document.getElementById('pulse-sub'); if(h)h.textContent=m; if(x)x.textContent=s||''; }
+function pulseTone(i){ initAudio(); if(typeof beep==='function') beep(_pulseFreqMap[i]||523,.2,'triangle',.16); if(typeof haptic==='function') haptic(10); }
+function pulseFlash(i,dur){ const el=document.querySelector('.pslice-p[data-i="'+i+'"]'); if(el){ el.classList.add('lit'); setTimeout(()=>{ if(el) el.classList.remove('lit'); },dur); } pulseTone(i); }
+function setupPulseTarget(){
+  clearPulseTimers();
+  if(!isBoss){ const ph=document.getElementById('phone'); if(ph){ ph.classList.remove('boss-active'); ph.classList.add('pulse-nav'); } if(typeof hideBoss==='function') hideBoss(); }   // pulse-nav keeps the bottom nav (home + buttons) reachable
+  const board=document.getElementById('g-board'); if(board) board.className='grid-board theme-'+(((pLevel-1)%5)+1);
+  buildPulseWheel();
+  const tv=document.getElementById('g-target'); if(tv){ tv.style.display=''; tv.className='tp-val'; tv.innerHTML='<span class="eq-display">🎡 PULSE</span>'; }
+  const lbl=document.getElementById('tp-label'); if(lbl) lbl.textContent='🎡 Memory';
+  const tm=document.getElementById('tp-mode'); if(tm) tm.textContent='PULSE';
+  const tt=document.getElementById('timer-text'),tk=document.querySelector('.timer-track'); if(tt)tt.style.display='none'; if(tk)tk.style.display='none';
+  const ge=document.getElementById('g-tray'); if(ge) ge.innerHTML='<span class="tray-empty">🎡 Watch the colors, then repeat</span>';
+  const hbp=document.getElementById('hint-btn'); if(hbp) hbp.style.display='none';
+  const oc=document.getElementById('lvl-obj'); if(oc) oc.style.display='none';
+  pulseRound=0; pulseRoundsNeeded=isBoss?bossTarget:3; gActive=true;
+  startPulseRound();
+}
+function startPulseRound(){
+  pulseInput=[]; pulseSeq=[];
+  const len=pulseTargetLen(); for(let i=0;i<len;i++) pulseSeq.push(Math.floor(Math.random()*_pulseN));
+  setPulseLabel('WATCH', isBoss?'damage it!':'round '+(pulseRound+1)+'/'+pulseRoundsNeeded);
+  const wheel=document.querySelector('.pulse-wheel'); if(wheel) wheel.classList.add('dim');
+  playPulseSequence();
+}
+function playPulseSequence(){
+  clearPulseTimers(); pulseBusy=true;
+  const ms=pulseFlashMs();
+  pulseSeq.forEach((s,i)=>{ _pulseTimers.push(setTimeout(()=>pulseFlash(s,ms*0.6), 550+i*ms)); });
+  _pulseTimers.push(setTimeout(()=>{ pulseBusy=false; setPulseLabel('YOUR TURN','repeat it'); }, 550+pulseSeq.length*ms+120));
+}
+function tapPulseSlice(i){
+  if(pulseBusy||!gActive||bossStunned) return;
+  pulseFlash(i,200); pulseInput.push(i);
+  const k=pulseInput.length-1;
+  if(pulseInput[k]!==pulseSeq[k]){ pulseWrong(); return; }
+  if(pulseInput.length===pulseSeq.length) pulseRoundWin();
+}
+function pulseRoundWin(){
+  pulseBusy=true; pulseRound++;
+  initAudio(); pulseSeq.forEach((s,i)=>_pulseTimers.push(setTimeout(()=>{ if(typeof beep==='function') beep((_pulseFreqMap[s]||523)*1.5,.1,'triangle',.12); }, i*70)));
+  if(typeof impact==='function') impact('great');
+  const pts=Math.round(18*pulseSeq.length); pScore+=pts; pXP+=pts; pGold+=4+pulseSeq.length; pTotalSolved++;
+  updateHUD();
+  if(isBoss){
+    pulseColorBlastBoss(); dealBossDamage();
+    if(bossHP<=0){ setPulseLabel('DEFEATED!',''); _pulseTimers.push(setTimeout(onPulseBossDefeat,600)); return; }
+    setPulseLabel('HIT!','keep going'); _pulseTimers.push(setTimeout(startPulseRound,1000)); return;
+  }
+  if(typeof fireConfetti==='function') fireConfetti(16);
+  if(pulseRound>=pulseRoundsNeeded){ setPulseLabel('LEVEL UP!',''); _pulseTimers.push(setTimeout(pulseLevelComplete,750)); return; }
+  setPulseLabel('NICE!','next round'); _pulseTimers.push(setTimeout(startPulseRound,950));
+}
+function pulseWrong(){
+  pulseBusy=true; streakCount=0; comboMult=1;
+  if(typeof impact==='function') impact('fail'); if(typeof shakePhone==='function') shakePhone();
+  pLives--; levelLivesLost=(levelLivesLost||0)+1; updateHUD(); if(typeof wobbleHearts==='function') wobbleHearts();
+  if(pLives<=0){ gActive=false; clearPulseTimers(); if(typeof showGameOver==='function') showGameOver(); return; }
+  setPulseLabel('OOPS!','watch again');
+  _pulseTimers.push(setTimeout(()=>{ pulseInput=[]; playPulseSequence(); }, 1150));
+}
+function pulseColorBlastBoss(){
+  if(typeof bossImpactBlast==='function') bossImpactBlast();
+  if(typeof bossEmitSpark==='function') bossEmitSpark(14);
+  const board=document.getElementById('g-board'); if(board){ const f=document.createElement('div'); f.className='pulse-blast'; board.appendChild(f); setTimeout(()=>f.remove(),500); }
+}
+function pulseLevelComplete(){
+  gActive=false; clearPulseTimers();
+  const wasBoss=isBoss; pLevel++;
+  pendingBoss=(pLevel%5===0 && !wasBoss); bossKind=(pLevel%10===0)?'big':'mini';
+  if(typeof questAdvance==='function') questAdvance('levels',pLevel,true);
+  if(pendingBoss){ if(typeof showBossModal==='function') showBossModal(); }
+  else { if(typeof finishLevelUp==='function') finishLevelUp(wasBoss); }
+}
+function onPulseBossDefeat(){
+  clearPulseTimers(); gActive=false; pLevel++;
+  if(typeof questAdvance==='function') questAdvance('levels',pLevel,true);
+  if(typeof finishLevelUp==='function') finishLevelUp(true);
+}
 function setTarget(){
+  if(gMode==='pulse'){ setupPulseTarget(); return; }   // PULSE memory-wheel mode has its own loop
   if(loopRaf){cancelAnimationFrame(loopRaf);loopRaf=null;}
   if(typeof stopHintEnergy==='function') stopHintEnergy();
 
@@ -3927,6 +4437,7 @@ function setTarget(){
     // BOSS (non-time) = DUEL: answer orbs hug the boss, tap = direct strike (eyes stay on the boss)
     if(isBoss){
       // ALL bosses (incl. Time-Attack mini-boss) = DUEL: answer orbs hug the boss, NO falling numbers
+      if(typeof clearWaveMath==='function') clearWaveMath(false);   // wipe any leftover falling wave tiles (were bleeding behind the orbs)
       duelActive=true;
       const dl=document.getElementById('dangerline'); if(dl) dl.remove();
       spawnDuel();
@@ -3963,12 +4474,14 @@ function setTarget(){
     gActive=true;
     buildWordGrid();
     setLetterSlotsVisible(true);
+    if(typeof updateObjChip==='function') updateObjChip();   // "WORD x/N → LEVEL UP" progress
   }
 }
 
 /* ── TICK ── */
 function tick(){
   if(!gActive)return;
+  if(gMode==='pulse') return;   // PULSE has no countdown — the flash speed is the pressure
   // wave core: math levels have NO countdown (the danger line is the clock) — timer only in Time Attack / word mode
   if(gSubMode==='math' && gMode!=='time') return;
   timer--;
@@ -4476,7 +4989,7 @@ function handleSuccess(){
     setTimeout(()=>setTarget(), 500);
     return;
   }
-  const needed=isBoss?bossTarget:Math.min(5+pLevel,18);
+  const needed=isBoss?bossTarget:(gMode==='word'?Math.min(4+Math.floor(pLevel/4),8):Math.min(5+pLevel,18));   // word levels are shorter (fits 60s; stretches the word pool across 50 levels)
   if(solvedCount>=needed){
     const wasBoss=isBoss;
     endFinalWave();
@@ -4589,13 +5102,15 @@ function startBoss(){
   clearInterval(timerInt); timerInt=setInterval(tick,1000);
   if(loopRaf)cancelAnimationFrame(loopRaf);
   gameLoop();
-  startBossZaps(); // boss starts hurling lightning at the tiles
+  if(gMode!=='pulse') startBossZaps(); // boss starts hurling lightning at the tiles (PULSE boss = pure color-damage)
 }
 
 function setupBoss(){
   // pick boss type (CIPHER for word mode, else cycle through the 4)
   pickBossType();
   const bt=bossTypes[currentBossType];
+  _bossPersona=bossPersona();              // 5 realm bosses — identity + skills + difficulty by world
+  const persona=_bossPersona;
   bossMaxHP=100; bossHP=100; bossHitsTaken=0;
   bossHitsNeeded=bossTarget; // number of correct solves to defeat
   // show arena
@@ -4603,20 +5118,30 @@ function setupBoss(){
   arena.style.display='flex';
   const bc=document.getElementById('boss-char');
   bc.className='boss-char';
-  // apply boss type visuals
+  // apply persona visuals (colour + eyes tinted to the realm boss)
   const c1=document.getElementById('bossC1'), c2=document.getElementById('bossC2');
   if(c1) c1.setAttribute('stop-color',bt.c1);
   if(c2) c2.setAttribute('stop-color',bt.c2);
-  document.querySelectorAll('.boss-pupil').forEach(p=>{ p.setAttribute('fill',bt.eye); p.style.filter='drop-shadow(0 0 4px '+bt.eye+')'; });
-  document.getElementById('boss-name-tag').textContent=bt.name;
+  const eyeCol=persona.eye||bt.eye;
+  document.querySelectorAll('.boss-pupil').forEach(p=>{ p.setAttribute('fill',eyeCol); p.style.filter='drop-shadow(0 0 4px '+eyeCol+')'; });
+  // name = the REALM boss (VOID/WRAITH/CHRONO/CIPHER/QUANTUM), coloured to the persona accent
+  const nameTag=document.getElementById('boss-name-tag');
+  if(nameTag){ nameTag.textContent=persona.name; nameTag.style.color=persona.accent; nameTag.style.textShadow='0 0 10px '+persona.accent; }
+  if(typeof showBossIntro==='function') showBossIntro(persona);
   _bossPhase=-1;          // force phase flourish on first update
+  if(typeof injectBossShowCSS==='function') injectBossShowCSS();
   bossCharge=0;
   if(gSubMode==='word' && featUnlocked('bossCharge')){ showBossCharge(true); updateBossChargeUI(); }   // math boss = duel (direct strikes, no charge orb)
   else showBossCharge(false);
   updateBossHP();
   startBossIdleFx();      // ambient idle electricity
-  // P1: build the rigged img-part boss (Wraith for word, Chrono for math)
-  try{ buildBossRig(gSubMode==='word'?'w':'c'); }catch(e){ destroyBossRig(); }
+  // build the realm boss's OWN rig sprite (Void/Wraith/Chrono/Amalgam/Null King) — falls back to mode rig if the persona art is missing
+  try{
+    if(typeof BOSS_A==='undefined'||!BOSS_A) console.warn('[boss] BOSS_A missing — assets.js did not load; reload the page');
+    let rk=persona.rig||(gSubMode==='word'?'w':'c');
+    if(!BOSS_RIGS[rk]||!BOSS_A[BOSS_RIGS[rk].parts[0].k]) rk=(gSubMode==='word'?'w':'c');   // art missing → safe fallback
+    buildBossRig(rk);
+  }catch(e){ console.warn('[boss] rig build failed, using fallback', e); destroyBossRig(); }
 }
 
 let _bossPhase=-1, bossIdleInt=null;
@@ -4638,9 +5163,10 @@ function updateBossHP(){
   else if(pct<=75){ bc.classList.add('boss-p1'); phase=1; }    // yellow eyes
   if(phone){ phone.classList.toggle('boss-p3-on',phase>=3); phone.classList.toggle('boss-crit-on',phase>=4); }
   if(phase!==_bossPhase){                                       // entering a new phase → flourish
-    _bossPhase=phase;
+    const oldPhase=_bossPhase; _bossPhase=phase;
     if(phase>=1){ initAudio(); beep(phase>=3?180:phase>=2?240:320,0.12,'sawtooth',0.1); }
     if(phase>=3) bossEmitSpark(8);
+    if(phase>oldPhase && phase>=2 && typeof bossPhaseShow==='function') bossPhaseShow(phase);   // ROAR + grow + shockwave + banner
   }
   if(phase>=4){ initAudio(); beep(1200,0.04,'square',0.05); }   // alarm ping each hit when critical
 }
@@ -4674,7 +5200,7 @@ function startBossIdleFx(){
 // floating boss taunt (personality)
 function showBossTaunt(){
   const arena=document.getElementById('boss-arena');
-  const bt=(rigKind&&BOSS_RIGS[rigKind])||bossTypes[currentBossType];
+  const bt=(_bossPersona)||(rigKind&&BOSS_RIGS[rigKind])||bossTypes[currentBossType];
   if(!arena || !bt) return;
   if(arena.querySelector('.boss-taunt')) return;   // one at a time
   const d=document.createElement('div'); d.className='boss-taunt'; d.textContent='“'+bt.taunt+'”';
@@ -4759,9 +5285,12 @@ let bossZapInt=null;
 function startBossZaps(){
   clearInterval(bossZapInt);
   bossAtkStep=0;
-  const period=Math.max(3400, 5400-Math.floor(pLevel/10)*350);   // less frequent → time to read & solve between attacks
-  bossZapInt=setInterval(bossAttackTick, period);   // personality attack rotation (P1)
+  const persona=_bossPersona||bossPersona();
+  let period=Math.max(2400, 4200-Math.floor(pLevel/10)*400);
+  period=Math.max(1700, Math.round(period*(persona.periodMul||1)));   // per-realm: WRAITH/QUANTUM attack much faster (harder)
+  bossZapInt=setInterval(bossAttackTick, period);   // persona attack rotation
   setTimeout(bossAttackTick, 1600);
+  return period;
 }
 function stopBossZaps(){ clearInterval(bossZapInt); bossZapInt=null; clearInterval(bossIdleInt); bossIdleInt=null; if(typeof clearParry==='function') clearParry(); if(typeof clearBossFx==='function') clearBossFx(); const cv=document.getElementById('boss-fx'); if(cv){ const c=cv.getContext('2d'); c&&c.clearRect(0,0,cv.width,cv.height);} }
 /* draw a flickering bolt FROM the boss's hands TO a target (coords relative to #phone) */
@@ -4869,6 +5398,7 @@ function dealBossDamage(resultValue){
   bossHitsTaken++;
   const dmgPerHit=Math.ceil(bossMaxHP/bossHitsNeeded);
   bossHP=Math.max(0,bossHP-dmgPerHit);
+  if(typeof bossImpactBlast==='function') bossImpactBlast();   // explosion on EVERY boss hit (math duel, word charge, time, parry)
   // boss hit reaction
   const bc=document.getElementById('boss-char');
   if(bc){ bc.classList.add('boss-hit'); setTimeout(()=>bc.classList.remove('boss-hit'),350); }
@@ -5029,8 +5559,514 @@ function startInteractiveTutorial(mode){
   }
   ov.querySelector('#tut-skip').onclick=done;
 }
-// let players replay it from Settings
-function replayTutorial(){ try{localStorage.removeItem('numa_tut');}catch(e){} startInteractiveTutorial('math'); }
+// let players replay it from Settings — now launches the full TRAINING SHOW.
+// Keep numa_trained set so a replay doesn't re-grant the one-time welcome bonus.
+function replayTutorial(){ startTraining(true); }
+
+/* ════════════════════════════════════════════════════════════════════
+   TRAINING MODE — a ~90s guided "show" that teaches the core tap-the-answer
+   mechanic and hooks new players: rewards stream in, combos build, an
+   achievement pops, a mini-boss explodes, then a welcome bonus is granted.
+   Fully self-contained overlay (#training) — does NOT touch the game engine.
+   ════════════════════════════════════════════════════════════════════ */
+let _trainActive=false;
+function injectTrainCSS(){
+  if(document.getElementById('train-css'))return;
+  const s=document.createElement('style'); s.id='train-css';
+  s.textContent=`
+  #training{position:absolute;inset:0;z-index:9600;border-radius:inherit;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;padding:calc(16px + env(safe-area-inset-top)) 18px 22px;
+    background:radial-gradient(circle at 50% 28%,#0c1838 0%,#060b1c 58%,#02030a 100%);animation:loginIn .45s ease;font-family:'DM Sans',sans-serif;}
+  #training::before{content:'';position:absolute;inset:0;background:
+    repeating-linear-gradient(0deg,transparent 0 38px,rgba(0,212,255,.04) 38px 39px),
+    repeating-linear-gradient(90deg,transparent 0 38px,rgba(0,212,255,.04) 38px 39px);pointer-events:none;mask:radial-gradient(circle at 50% 40%,#000,transparent 78%);}
+  .tr-hud{display:flex;gap:10px;align-items:center;z-index:3;}
+  .tr-chip{display:flex;align-items:center;gap:6px;background:linear-gradient(160deg,rgba(20,30,55,.9),rgba(10,16,32,.95));
+    border:1px solid rgba(0,212,255,.3);border-radius:13px;padding:7px 13px;font-weight:800;font-size:15px;color:#eaf6ff;
+    box-shadow:0 4px 16px rgba(0,0,0,.4);min-width:78px;justify-content:center;}
+  .tr-chip.gem{border-color:rgba(168,85,247,.45);}
+  .tr-chip b{font-family:'Rajdhani',sans-serif;font-size:18px;letter-spacing:.5px;}
+  .tr-chip.pulse{animation:trChipPop .4s ease;}
+  @keyframes trChipPop{0%{transform:scale(1);}40%{transform:scale(1.28);filter:brightness(1.5);}100%{transform:scale(1);}}
+  .tr-skip{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;z-index:5;background:rgba(255,255,255,.06);
+    border:1px solid var(--bdr2);color:rgba(255,255,255,.55);font-weight:700;font-size:12px;padding:7px 13px;border-radius:11px;cursor:pointer;}
+  .tr-stage{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;gap:10px;}
+  .tr-title{font-family:'Bungee',sans-serif;font-size:26px;letter-spacing:1px;text-align:center;line-height:1.1;
+    background:linear-gradient(180deg,#fff,#9fe9ff);-webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 30px rgba(0,212,255,.5);min-height:32px;animation:trTitleIn .45s cubic-bezier(.34,1.5,.5,1);}
+  .tr-title.gold{background:linear-gradient(180deg,#fff3c4,#ffc94a);-webkit-background-clip:text;background-clip:text;text-shadow:0 0 30px rgba(255,201,74,.6);}
+  @keyframes trTitleIn{0%{opacity:0;transform:translateY(10px) scale(.92);}100%{opacity:1;transform:none;}}
+  .tr-sub{font-size:14px;font-weight:600;color:#bcd0e6;text-align:center;max-width:300px;min-height:20px;}
+  .tr-eq{font-family:'Bungee',sans-serif;font-size:40px;color:#f2eefa;letter-spacing:2px;
+    text-shadow:0 0 18px rgba(0,212,255,.55);min-height:48px;}
+  .tr-eq .q{color:#ffc94a;animation:eqQb 1s ease-in-out infinite;display:inline-block;}
+  .tr-eq .ok{color:#42e8a0;}
+  .tr-board{position:relative;width:320px;max-width:88vw;height:230px;}
+  .tr-dl{position:absolute;left:0;right:0;bottom:18px;height:3px;border-radius:3px;
+    background:linear-gradient(90deg,transparent,#ff5040,#ff5040,transparent);box-shadow:0 0 14px rgba(255,60,40,.85);opacity:0;transition:opacity .3s;}
+  .tr-dl.on{opacity:1;}
+  .tr-dl-lbl{position:absolute;left:0;right:0;bottom:24px;text-align:center;font-size:9px;font-weight:800;letter-spacing:2px;color:#ff7a6a;opacity:0;transition:opacity .3s;}
+  .tr-dl-lbl.on{opacity:1;}
+  .tr-tile{position:absolute;width:62px;height:62px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+    font-family:'Bungee',sans-serif;font-size:26px;color:#fff;cursor:pointer;background:linear-gradient(135deg,#00d4ff,#0369a1);
+    box-shadow:0 6px 0 rgba(0,0,0,.4),0 0 20px rgba(0,212,255,.35);transition:transform .12s;}
+  .tr-tile:active{transform:scale(.9);}
+  .tr-tile.glow{box-shadow:0 0 0 3px #fff,0 0 26px rgba(255,255,255,.7),0 6px 0 rgba(0,0,0,.4);animation:tutPulse 1s ease-in-out infinite;}
+  .tr-tile.dead{opacity:0;transform:scale(1.5);transition:all .25s;pointer-events:none;}
+  .tr-tile.wrong{animation:trShake .3s;}
+  @keyframes trShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+  .tr-coach{font-size:14px;font-weight:600;color:#e2e8f0;text-align:center;background:rgba(0,212,255,.1);
+    border:1px solid rgba(0,212,255,.28);border-radius:14px;padding:10px 16px;max-width:300px;min-height:22px;z-index:2;}
+  .tr-coach b{color:#00e5ff;}
+  .tr-finger{position:absolute;font-size:34px;z-index:9610;pointer-events:none;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6));
+    transition:left .35s cubic-bezier(.34,1.4,.6,1),top .35s cubic-bezier(.34,1.4,.6,1);animation:tutFinger 1s ease-in-out infinite;opacity:0;}
+  .tr-finger.on{opacity:1;}
+  .tr-fly{position:absolute;font-family:'Rajdhani',sans-serif;font-weight:800;font-size:20px;z-index:9620;pointer-events:none;color:#ffd24a;text-shadow:0 0 12px rgba(255,201,74,.8);}
+  .tr-combo{position:absolute;top:34%;left:50%;transform:translateX(-50%);font-family:'Bungee',sans-serif;font-size:34px;
+    color:#ffd24a;text-shadow:0 0 26px rgba(255,201,74,.8);z-index:9615;pointer-events:none;animation:trComboPop .9s ease forwards;}
+  @keyframes trComboPop{0%{opacity:0;transform:translateX(-50%) scale(.5);}30%{opacity:1;transform:translateX(-50%) scale(1.15);}100%{opacity:0;transform:translateX(-50%) scale(1) translateY(-30px);}}
+  /* mini-boss */
+  .tr-boss{position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;font-size:74px;
+    filter:drop-shadow(0 0 22px rgba(255,80,120,.6));animation:trBossFloat 2.4s ease-in-out infinite;}
+  @keyframes trBossFloat{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-12px) rotate(3deg);}}
+  .tr-boss.hit{animation:trBossHit .3s;}
+  @keyframes trBossHit{0%{transform:scale(1);}30%{transform:scale(1.18) rotate(8deg);filter:brightness(2) drop-shadow(0 0 30px #fff);}100%{transform:scale(1);}}
+  .tr-boss.dead{animation:trBossDie .8s forwards;}
+  @keyframes trBossDie{0%{transform:scale(1);opacity:1;}40%{transform:scale(1.4) rotate(20deg);filter:brightness(3);}100%{transform:scale(.2) rotate(160deg);opacity:0;}}
+  .tr-hpwrap{width:200px;height:14px;border-radius:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,80,120,.4);overflow:hidden;margin-top:4px;}
+  .tr-hp{height:100%;width:100%;border-radius:8px;background:linear-gradient(90deg,#ff4d6a,#ff9d4d);transition:width .4s cubic-bezier(.5,0,.3,1);}
+  /* graduation */
+  .tr-badges{display:flex;gap:12px;justify-content:center;margin:6px 0;flex-wrap:wrap;}
+  .tr-badge{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;transform:scale(.4) translateY(14px);}
+  .tr-badge.in{animation:trBadgeIn .55s cubic-bezier(.34,1.6,.5,1) forwards;}
+  @keyframes trBadgeIn{to{opacity:1;transform:none;}}
+  .tr-badge .bi{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;
+    background:linear-gradient(160deg,#1b2a4a,#0e1730);border:2px solid #ffc94a;box-shadow:0 0 22px rgba(255,201,74,.5);}
+  .tr-badge .bl{font-size:10px;font-weight:800;letter-spacing:.5px;color:#cbd9ea;text-transform:uppercase;}
+  .tr-play{margin-top:14px;font-family:'Bungee',sans-serif;font-size:19px;letter-spacing:1px;color:#04121f;cursor:pointer;
+    padding:15px 40px;border:none;border-radius:18px;background:linear-gradient(180deg,#5ff0ff,#00c2e6);
+    box-shadow:0 8px 0 #0090ad,0 12px 28px rgba(0,212,255,.5);animation:trPlayPulse 1.3s ease-in-out infinite;}
+  .tr-play:active{transform:translateY(4px);box-shadow:0 4px 0 #0090ad;}
+  @keyframes trPlayPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+  .tr-prog{display:flex;gap:7px;margin-top:8px;z-index:3;}
+  .tr-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.18);transition:all .3s;}
+  .tr-dot.on{background:#00d4ff;box-shadow:0 0 8px rgba(0,212,255,.8);transform:scale(1.25);}
+  .tr-dot.done{background:#42e8a0;}
+  /* WORD beat */
+  .tr-wslot{width:42px;height:50px;border-radius:11px;border:2px dashed rgba(0,212,255,.4);background:rgba(0,212,255,.06);
+    display:flex;align-items:center;justify-content:center;font-family:'Bungee',sans-serif;font-size:26px;color:#9fe9ff;}
+  .tr-wslot.filled{border-style:solid;border-color:#42e8a0;background:rgba(66,232,160,.14);color:#fff;animation:trChipPop .35s ease;box-shadow:0 0 16px rgba(66,232,160,.5);}
+  .tr-letter{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    font-family:'Bungee',sans-serif;font-size:24px;color:#fff;background:linear-gradient(135deg,#a855f7,#6d28d9);
+    box-shadow:0 5px 0 rgba(0,0,0,.4),0 0 18px rgba(168,85,247,.4);transition:transform .12s;}
+  .tr-letter:active{transform:scale(.9);}
+  .tr-letter.dead{opacity:0;transform:scale(1.4) translateY(-20px);transition:all .3s;pointer-events:none;}
+  .tr-letter.wrong{animation:trShake .3s;}
+  /* PULSE beat */
+  .tr-pad{width:84px;height:84px;border-radius:50%;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.4),inset 0 -6px 14px rgba(0,0,0,.3);
+    filter:brightness(.6) saturate(.85);transition:filter .12s,transform .12s,box-shadow .12s;}
+  .tr-pad:active{transform:scale(.94);}
+  .tr-pad.lit{filter:brightness(1.7) saturate(1.3);box-shadow:0 0 28px 6px currentColor,0 6px 0 rgba(0,0,0,.4);transform:scale(1.08);}
+  .tr-pad.wrong{animation:trShake .3s;}
+  /* CHRONO boss — REAL rig (BOSS_A sprites), reuses global #brig/#torsoP/.bgear CSS */
+  .tr-rig{position:relative;width:150px;height:158px;}
+  .tr-rig.hit #brig{animation:bgHitR .4s ease;}
+  .tr-rig.rage #brig img.part{filter:saturate(1.6) hue-rotate(-30deg) brightness(1.12) drop-shadow(0 0 9px rgba(255,60,40,.65));}
+  .tr-rig.die{animation:cbDie .95s forwards;will-change:transform;}
+  @keyframes cbDie{0%{transform:scale(1) rotate(0);opacity:1;}40%{transform:scale(1.35) rotate(34deg);filter:brightness(3);}100%{transform:scale(.1) rotate(230deg);opacity:0;}}
+  .tr-vortex{position:absolute;inset:-46px 0 -12px 0;pointer-events:none;border-radius:50%;mix-blend-mode:screen;
+    background:conic-gradient(from 0deg,transparent,rgba(168,85,247,.4),transparent,rgba(0,212,255,.34),transparent,rgba(168,85,247,.4),transparent);animation:trSwirl .55s linear infinite;}
+  @keyframes trSwirl{to{transform:rotate(360deg);}}
+  .tr-bcry{position:absolute;top:30%;left:50%;font-family:Bungee,sans-serif;font-size:21px;letter-spacing:1px;z-index:9618;pointer-events:none;
+    text-shadow:0 0 18px currentColor;white-space:nowrap;animation:trBcry 1.1s ease forwards;}
+  @keyframes trBcry{0%{opacity:0;transform:translateX(-50%) scale(.5);}25%{opacity:1;transform:translateX(-50%) scale(1.12);}80%{opacity:1;transform:translateX(-50%) scale(1);}100%{opacity:0;transform:translateX(-50%) scale(1);}}
+  .tr-bolt{position:absolute;height:4px;border-radius:3px;z-index:9617;pointer-events:none;box-shadow:0 0 12px #00e5ff;
+    background:linear-gradient(90deg,rgba(255,255,255,0),#00e5ff,#fff,#a855f7);animation:trBoltF .26s ease-out forwards;}
+  @keyframes trBoltF{0%{opacity:0;}20%{opacity:1;}100%{opacity:0;}}
+  `;
+  document.head.appendChild(s);
+}
+
+function startTraining(isReplay){
+  if(_trainActive)return; _trainActive=true;
+  injectTrainCSS();
+  const phone=document.getElementById('phone');
+  const old=document.getElementById('training'); if(old) old.remove();
+  const ov=document.createElement('div'); ov.id='training';
+  ov.innerHTML=
+    '<button class="tr-skip" id="tr-skip">Skip ✕</button>'
+   +'<div class="tr-hud">'
+   +'  <div class="tr-chip" id="tr-cgold">🪙 <b id="tr-gold">0</b></div>'
+   +'  <div class="tr-chip gem" id="tr-cgem">💎 <b id="tr-gem">0</b></div>'
+   +'</div>'
+   +'<div class="tr-stage">'
+   +'  <div class="tr-title" id="tr-title"></div>'
+   +'  <div class="tr-sub" id="tr-sub"></div>'
+   +'  <div class="tr-eq" id="tr-eq" style="display:none;"></div>'
+   +'  <div class="tr-board" id="tr-board">'
+   +'    <div class="tr-dl" id="tr-dl"></div><div class="tr-dl-lbl" id="tr-dl-lbl">DANGER LINE</div>'
+   +'    <div class="tr-finger" id="tr-finger">👆</div>'
+   +'  </div>'
+   +'</div>'
+   +'<div class="tr-coach" id="tr-coach"></div>'
+   +'<div class="tr-prog" id="tr-prog"></div>';
+  phone.appendChild(ov);
+
+  const $=s=>ov.querySelector(s);
+  const board=$('#tr-board'), elTitle=$('#tr-title'), elSub=$('#tr-sub'), elEq=$('#tr-eq'),
+        elCoach=$('#tr-coach'), finger=$('#tr-finger'), dl=$('#tr-dl'), dlLbl=$('#tr-dl-lbl'),
+        elGold=$('#tr-gold'), elGem=$('#tr-gem');
+  let shownGold=0, shownGem=0, gardActive=true;
+
+  // progress dots
+  const STEPS=7; const prog=$('#tr-prog');
+  for(let i=0;i<STEPS;i++){ const d=document.createElement('div'); d.className='tr-dot'; prog.appendChild(d); }
+  function setProg(i){ const d=prog.children; for(let k=0;k<d.length;k++){ d[k].className='tr-dot'+(k<i?' done':k===i?' on':''); } }
+
+  function aud(){ if(typeof initAudio==='function')initAudio(); }
+  function setHead(t,s,gold){ elTitle.textContent=t; elTitle.className='tr-title'+(gold?' gold':''); void elTitle.offsetWidth; elTitle.style.animation='none'; void elTitle.offsetWidth; elTitle.style.animation=''; elSub.textContent=s||''; }
+  function coach(html){ elCoach.innerHTML=html; }
+  function clearTiles(){ board.querySelectorAll('.tr-tile').forEach(t=>t.remove()); finger.classList.remove('on'); }
+
+  // animate the reward counter + a flying +N from a point
+  function addReward(gold,gem,fromX,fromY){
+    if(gold){ const tgt=shownGold+gold; tweenCount(elGold,shownGold,tgt); shownGold=tgt; bump('#tr-cgold');
+      flyReward('+'+gold+' 🪙','#ffd24a',fromX,fromY); }
+    if(gem){ const tgt=shownGem+gem; tweenCount(elGem,shownGem,tgt); shownGem=tgt; bump('#tr-cgem');
+      flyReward('+'+gem+' 💎','#c79bff',fromX,fromY+22); }
+  }
+  function bump(sel){ const c=$(sel); c.classList.remove('pulse'); void c.offsetWidth; c.classList.add('pulse'); }
+  function tweenCount(el,from,to){ const t0=performance.now(),dur=420; (function f(t){ const p=Math.min(1,(t-t0)/dur); el.textContent=Math.round(from+(to-from)*p); if(p<1)requestAnimationFrame(f); })(t0);
+    setTimeout(()=>{ el.textContent=to; },dur+30); }   // guaranteed final value even if rAF is throttled
+  function flyReward(txt,col,x,y){ if(x==null)return; const f=document.createElement('div'); f.className='tr-fly'; f.textContent=txt; f.style.color=col; f.style.left=x+'px'; f.style.top=y+'px';
+    board.appendChild(f); const tr=$('#tr-cgold').getBoundingClientRect(), br=board.getBoundingClientRect();
+    const dx=(tr.left-br.left+20)-x, dy=(tr.top-br.top)-y;
+    if(f.animate)f.animate([{transform:'translate(0,0) scale(1.2)',opacity:1},{transform:'translate('+dx*.5+'px,'+(dy*.5-12)+'px) scale(1)',opacity:1,offset:.5},{transform:'translate('+dx+'px,'+dy+'px) scale(.6)',opacity:0}],{duration:780,easing:'cubic-bezier(.5,0,.7,1)'});
+    setTimeout(()=>f.remove(),820);
+  }
+
+  // lay out N tiles across the board (optionally falling toward the danger line)
+  // opts: {answer, vals:[..], guide:bool, fall:bool, reward:[g,gem], onDone:fn}
+  function challenge(opts){
+    clearTiles();
+    const vals=opts.vals, n=vals.length, tiles=[];
+    let solved=false, fallAnim=[];
+    vals.forEach((v,i)=>{
+      const t=document.createElement('div'); t.className='tr-tile'; t.textContent=v;
+      // % layout — never stacks even if the board measures 0 mid-transition
+      t.style.left='calc('+(((i+0.5)/n)*100).toFixed(2)+'% - 31px)';
+      const topY=opts.fall? -64 : (28+ (i%2)*18);
+      t.style.top=topY+'px';
+      board.appendChild(t); tiles.push(t);
+      if(opts.fall){
+        const endY=board.clientHeight-92;
+        const a=t.animate([{transform:'translateY(0)'},{transform:'translateY('+(endY-topY)+'px)'}],{duration:3600,easing:'linear',fill:'forwards'});
+        fallAnim.push(a);
+        a.onfinish=()=>{ if(!solved){ // missed — friendly respawn, no punishment in training
+          coach('😅 Just missed it! Tap the answer a little sooner.'); respawn(); } };
+      }
+      t.onclick=()=>{
+        if(solved||!gardActive)return; aud();
+        if(parseInt(v,10)!==opts.answer){
+          t.classList.add('wrong'); setTimeout(()=>t.classList.remove('wrong'),320);
+          if(typeof beep==='function')beep(200,0.06,'square',0.06);
+          coach('❌ Not quite — a wrong tap only breaks your <b>combo</b>. Find <b>'+opts.eqAns+'</b>!');
+          return;
+        }
+        solved=true; fallAnim.forEach(a=>a.cancel?a.cancel():0);
+        if(typeof sfxTap==='function')sfxTap(); if(typeof haptic==='function')haptic(14);
+        finger.classList.remove('on');
+        const r=t.getBoundingClientRect(), br=board.getBoundingClientRect();
+        const cx=r.left-br.left+31, cy=r.top-br.top+31;
+        if(typeof emitSparks==='function')emitSparks(r.left-phone.getBoundingClientRect().left+31, r.top-phone.getBoundingClientRect().top+31, 22);
+        tiles.forEach(o=>o.classList.add('dead'));
+        if(elEq.style.display!=='none') elEq.innerHTML=opts.eqHTML.replace('<span class="q">?</span>','<span class="ok">'+opts.answer+'</span>');
+        if(opts.reward) addReward(opts.reward[0],opts.reward[1]||0,cx,cy);
+        if(typeof impact==='function')impact(opts.big?'huge':'great');
+        setTimeout(()=>{ clearTiles(); opts.onDone&&opts.onDone(cx,cy); }, opts.big?560:420);
+      };
+    });
+    function respawn(){ tiles.forEach(t=>t.remove()); setTimeout(()=>challenge(opts),120); }
+    if(opts.guide){ setTimeout(()=>{ const ci=vals.indexOf(opts.answer); const ce=tiles[ci]; if(!ce)return; ce.classList.add('glow');
+      const br=board.getBoundingClientRect(), cr=ce.getBoundingClientRect();
+      finger.style.left=(cr.left-br.left+22)+'px'; finger.style.top=(cr.top-br.top+58)+'px'; finger.classList.add('on'); },80); }
+  }
+  function showEq(html){ elEq.style.display=''; elEq.innerHTML=html; }
+  function hideEq(){ elEq.style.display='none'; }
+
+  /* ───── BEATS ───── */
+  function beatWelcome(){
+    setProg(0); hideEq(); dl.classList.remove('on'); dlLbl.classList.remove('on');
+    setHead('WELCOME, RECRUIT','60-second crash course. Let\'s make you dangerous.');
+    coach('In <b>NUMA BLAST</b> you <b>solve to blast</b>. Tap the right answer before it drops. Ready?');
+    if(typeof sfxGod==='function')sfxGod(); if(typeof haptic==='function')haptic([20,15,30]);
+    setTimeout(beatFirst,2100);
+  }
+  function beatFirst(){
+    setProg(0); setHead('TAP THE ANSWER','Tap the glowing tile to blast it.');
+    showEq('3 + 2 = <span class="q">?</span>');
+    coach('See the finger? Tap <b>5</b> to blast it. 💥');
+    challenge({answer:5,eqAns:'5',vals:[4,5,7],guide:true,eqHTML:'3 + 2 = <span class="q">?</span>',reward:[10,0],onDone:(x,y)=>{
+      setHead('NICE! 💥','Every solve = coins. Watch them stack.',true);
+      coach('⚡ <b>Boom.</b> That\'s the whole game. Now without the finger…');
+      setTimeout(beatDanger,1800);
+    }});
+  }
+  function beatDanger(){
+    setProg(1); setHead('BEAT THE DANGER LINE','Tap the answer before it crosses the red line.');
+    showEq('6 + 5 = <span class="q">?</span>');
+    dl.classList.add('on'); dlLbl.classList.add('on');
+    coach('Answers <b>fall</b>. Tap <b>11</b> before it hits the line! 🔻');
+    challenge({answer:11,eqAns:'11',vals:[10,11,13,9],fall:true,eqHTML:'6 + 5 = <span class="q">?</span>',reward:[15,0],onDone:()=>{
+      setHead('CLUTCH! ⚡','No life lost on a wrong tap — only the clock matters.',true);
+      coach('Now the fun part — <b>chain solves into COMBOS</b> for huge bonuses.');
+      dl.classList.remove('on'); dlLbl.classList.remove('on');
+      setTimeout(beatCombo,1800);
+    }});
+  }
+  function beatCombo(){
+    setProg(2); setHead('BUILD A COMBO','Solve 3 in a row. Don\'t stop!');
+    const set=[{a:4,b:4,ans:8,vals:[7,8,9]},{a:9,b:3,ans:12,vals:[11,12,13]},{a:7,b:8,ans:15,vals:[14,15,16]}];
+    let i=0; const labels=['','COMBO x2!','COMBO x3!'];
+    function nextC(){
+      if(i>=set.length){ unlockTrainBadge(); return; }
+      const c=set[i];
+      showEq(c.a+' + '+c.b+' = <span class="q">?</span>');
+      coach(i===0?'Solve fast to start the chain! 🔗':'Keep going — <b>'+labels[i]+'</b>');
+      challenge({answer:c.ans,eqAns:String(c.ans),vals:c.vals,eqHTML:c.a+' + '+c.b+' = <span class="q">?</span>',reward:[10+i*10,i===2?1:0],big:i===2,onDone:(x,y)=>{
+        i++;
+        if(i>=2){ comboBanner(labels[i-1]); }
+        else if(i===1){ comboBanner('COMBO x2!'); }
+        if(i>=set.length) setTimeout(unlockTrainBadge,700); else setTimeout(nextC,560);
+      }});
+    }
+    nextC();
+  }
+  function comboBanner(txt){ const b=document.createElement('div'); b.className='tr-combo'; b.textContent=txt; board.appendChild(b);
+    if(typeof bassBoom==='function')bassBoom(); setTimeout(()=>b.remove(),900); }
+  function unlockTrainBadge(){
+    setHead('COMBO KING! 🔥','Achievement unlocked — and you\'ve barely started.',true);
+    coach('🏅 <b>Combo King</b> earned! Now a different mode…');
+    if(typeof sfxLevelUp==='function')sfxLevelUp(); if(typeof fireConfetti==='function')fireConfetti(40);
+    setTimeout(beatWord,1700);
+  }
+  /* ── WORD HUNT mini — spell a word, letters burst into light ── */
+  function beatWord(){
+    setProg(3); hideEq(); clearTiles(); dl.classList.remove('on'); dlLbl.classList.remove('on');
+    setHead('WORD HUNT 🔤','Spell the word — letters burst into light.');
+    coach('Tap the letters in order to spell the animal. 🐱');
+    const word='CAT';
+    const wrap=document.createElement('div'); wrap.className='tr-mini';
+    wrap.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;';
+    wrap.innerHTML='<div style="font-size:48px;filter:drop-shadow(0 0 18px rgba(0,212,255,.5));">🐱</div>';
+    const slotRow=document.createElement('div'); slotRow.style.cssText='display:flex;gap:9px;'; const slots=[];
+    for(const ch of word){ const s=document.createElement('div'); s.className='tr-wslot'; slotRow.appendChild(s); slots.push(s); }
+    wrap.appendChild(slotRow);
+    const letterRow=document.createElement('div'); letterRow.style.cssText='display:flex;gap:11px;flex-wrap:wrap;justify-content:center;margin-top:14px;';
+    const letters=(word+'R').split('').sort(()=>Math.random()-0.5); let idx=0, done=false;
+    letters.forEach(ch=>{ const l=document.createElement('div'); l.className='tr-letter'; l.textContent=ch;
+      l.onclick=()=>{ if(done||!gardActive)return; aud();
+        if(ch===word[idx]){ if(typeof sfxTap==='function')sfxTap(); if(typeof haptic==='function')haptic(12);
+          slots[idx].textContent=ch; slots[idx].classList.add('filled'); l.classList.add('dead'); idx++;
+          if(idx>=word.length){ done=true; wordComplete(wrap); } }
+        else { l.classList.add('wrong'); setTimeout(()=>l.classList.remove('wrong'),320); if(typeof beep==='function')beep(200,.06,'square',.06); coach('❌ Wrong letter — spell <b>'+word+'</b>.'); } };
+      letterRow.appendChild(l); });
+    wrap.appendChild(letterRow); board.appendChild(wrap);
+  }
+  function wordComplete(wrap){
+    setHead('WORD BLASTED! ✨','Letters merge → light explosion.',true);
+    coach('💥 Beautiful. That\'s Word Hunt mode.');
+    const br=board.getBoundingClientRect(), pr=phone.getBoundingClientRect();
+    if(typeof emitSparks==='function')emitSparks(br.left-pr.left+br.width/2, br.top-pr.top+br.height*0.42, 44, ['#00d4ff','#a855f7','#ffd24a','#fff']);
+    if(typeof impact==='function')impact('huge'); if(typeof fireConfetti==='function')fireConfetti(34);
+    addReward(30,0, board.clientWidth/2, 120);
+    setTimeout(()=>{ wrap.remove(); beatPulse(); }, 1800);
+  }
+  /* ── PULSE mini — 2 rounds: watch the lights, repeat them, color blast ── */
+  function beatPulse(){
+    setProg(4); hideEq(); clearTiles();
+    setHead('PULSE ⚡','A memory mode — watch, then repeat.');
+    const wrap=document.createElement('div'); wrap.className='tr-mini';
+    wrap.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
+    const tag=document.createElement('div'); tag.id='tr-pulse-tag';
+    tag.style.cssText='font-family:Bungee,sans-serif;font-size:15px;letter-spacing:1px;color:#9fe9ff;min-height:18px;';
+    wrap.appendChild(tag);
+    const padRow=document.createElement('div'); padRow.style.cssText='display:flex;gap:18px;';
+    const cols=['#ff4dd2','#00d4ff','#ffd24a'], freqs=[330,440,554], pads=[];
+    cols.forEach((c,i)=>{ const p=document.createElement('div'); p.className='tr-pad';
+      p.style.background='radial-gradient(circle at 38% 32%,'+c+','+c+'66)'; p.style.color=c; p.dataset.i=i; pads.push(p); padRow.appendChild(p); });
+    wrap.appendChild(padRow); board.appendChild(wrap);
+    const rounds=[[0,2],[1,2,0]];   // round 1: 2 colors, round 2: all 3 — every lit pad is part of the sequence
+    let round=0, seq=[], inputting=false, ip=0, done=false;
+    function setTag(t){ if(tag) tag.textContent=t; }
+    function flash(i,dur){ if(!gardActive)return; const p=pads[i]; if(!p)return; p.classList.add('lit'); if(typeof beep==='function')beep(freqs[i],.22,'triangle',.2); setTimeout(()=>{ if(p)p.classList.remove('lit'); },dur||360); }
+    function play(){ if(!gardActive||done)return; inputting=false; ip=0; seq=rounds[round];
+      setHead('PULSE ⚡','Round '+(round+1)+' of '+rounds.length+' — watch the order.');
+      setTag('👀 WATCH'); coach('Memorize the lights…');
+      let t=550; seq.forEach(i=>{ setTimeout(()=>flash(i,420),t); t+=640; });
+      setTimeout(()=>{ if(done||!gardActive)return; inputting=true; setTag('👆 YOUR TURN'); coach('Now tap them in the <b>same order</b>!'); },t+150);
+    }
+    pads.forEach(p=>{ p.onclick=()=>{ if(!inputting||done||!gardActive)return; aud(); const i=+p.dataset.i;
+      if(i===seq[ip]){ flash(i,240); if(typeof haptic==='function')haptic(12); ip++;
+        if(ip>=seq.length){ inputting=false; round++;
+          if(round>=rounds.length){ done=true; pulseComplete(wrap,pads,seq); }
+          else { if(typeof impact==='function')impact('great'); if(typeof fireConfetti==='function')fireConfetti(16); setTag('✅ NICE!'); coach('Round 1 done — one harder round to go!'); setTimeout(play,1100); }
+        }
+      } else { inputting=false; p.classList.add('wrong'); setTimeout(()=>{ if(p)p.classList.remove('wrong'); },340); if(typeof beep==='function')beep(160,.1,'square',.1); setTag('❌ AGAIN'); coach('Not that one — watch the order again. 🔁'); setTimeout(play,900); }
+    }; });
+    setTimeout(play,800);
+  }
+  function pulseComplete(wrap,pads,seq){
+    setHead('PERFECT PULSE! 🌈','Bosses take color damage from this mode.',true);
+    coach('💥 Nailed it! Last test — the <b>BOSS</b>.');
+    const tag=document.getElementById('tr-pulse-tag'); if(tag) tag.textContent='🌈 PERFECT';
+    // victory ripple replays ONLY the solved sequence (never an off-sequence color)
+    seq.forEach((i,k)=>setTimeout(()=>{ const p=pads[i]; if(p){ p.classList.add('lit'); setTimeout(()=>{ if(p)p.classList.remove('lit'); },300); } if(typeof beep==='function')beep(440+k*120,.16,'triangle',.18); },k*170));
+    const br=board.getBoundingClientRect(), pr=phone.getBoundingClientRect();
+    if(typeof emitSparks==='function')emitSparks(br.left-pr.left+br.width/2, br.top-pr.top+br.height/2, 48, ['#ff4dd2','#00d4ff','#ffd24a','#fff','#a855f7']);
+    if(typeof impact==='function')impact('huge'); if(typeof fireConfetti==='function')fireConfetti(40);
+    addReward(40,1, board.clientWidth/2, 120);
+    setTimeout(()=>{ wrap.remove(); beatBoss(); }, 2000);
+  }
+  // boss-cry style announcement inside the training overlay
+  function announceTB(txt,col){ const a=document.createElement('div'); a.className='tr-bcry'; a.textContent=txt; a.style.color=col||'#fff'; board.appendChild(a); setTimeout(()=>a.remove(),1100); }
+  // a quick energy bolt from a tile to the boss
+  function boltToBoss(t,boss){ const pr=board.getBoundingClientRect(), tr=t.getBoundingClientRect(), br=boss.getBoundingClientRect();
+    const x1=tr.left-pr.left+31, y1=tr.top-pr.top+31, x2=br.left-pr.left+br.width/2, y2=br.top-pr.top+br.height/2;
+    const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy), ang=Math.atan2(dy,dx)*180/Math.PI;
+    const b=document.createElement('div'); b.className='tr-bolt';
+    b.style.cssText='position:absolute;left:'+x1+'px;top:'+y1+'px;width:'+len+'px;transform:rotate('+ang+'deg);transform-origin:0 50%;';
+    board.appendChild(b); setTimeout(()=>b.remove(),270); }
+  // ⏳ THE VORTEX — sucks the answer tiles into a swirl and drops them in shuffled spots (values stay, you must track them)
+  function doVortex(tiles,tarea){ if(!gardActive)return;
+    announceTB('🌀 TIME VORTEX','#c084fc');
+    const sw=document.createElement('div'); sw.className='tr-vortex'; tarea.appendChild(sw);
+    if(typeof screenKick==='function')screenKick(11); if(typeof haptic==='function')haptic([30,20,40]); if(typeof beep==='function')beep(180,.55,'sawtooth',.1);
+    const n=tiles.length, W=tarea.clientWidth||300, cx=W/2, slotW=W/n;
+    const shift=1+Math.floor(Math.random()*(n-1));   // rotate by 1..n-1 → EVERY tile lands in a new spot (never identity)
+    tiles.forEach((t,k)=>{ const startX=parseFloat(t.dataset.x||t.style.left)||0, slot=(k+shift)%n,
+        endX=Math.round(slotW*slot+(slotW-62)/2), toCx=cx-31-startX;
+      if(t.animate){ t.animate([
+        {transform:'translate(0,0) rotate(0) scale(1)'},
+        {transform:'translate('+toCx+'px,-10px) rotate(360deg) scale(.45)',offset:.5},
+        {transform:'translate('+(endX-startX)+'px,0) rotate(720deg) scale(1)'}],
+        {duration:1300,easing:'cubic-bezier(.5,0,.5,1)'}); }
+      setTimeout(()=>{ if(t.isConnected){ t.style.left=endX+'px'; t.dataset.x=endX; t.style.transform=''; } },1290);
+    });
+    setTimeout(()=>{ if(sw)sw.remove(); },1400);
+  }
+  function beatBoss(){
+    setProg(5); clearTiles(); hideEq();
+    setHead('CHRONO DEVOURER','It warps time — solve through the vortex!');
+    coach('⏳ This boss <b>scrambles the numbers</b>. Track the answer!');
+    board.innerHTML='';
+    const wrap=document.createElement('div'); wrap.className='tr-mini'; wrap.style.cssText='position:absolute;inset:0;';
+    const top=document.createElement('div'); top.style.cssText='position:absolute;left:0;right:0;top:4px;display:flex;flex-direction:column;align-items:center;gap:7px;';
+    const nm=document.createElement('div'); nm.style.cssText='font-family:Bungee,sans-serif;font-size:13px;color:#c79bff;letter-spacing:1px;'; nm.textContent='⏳ CHRONO DEVOURER';
+    // REAL boss rig — the same BOSS_A sprite parts the game uses (torso+arms+gears)
+    const boss=document.createElement('div'); boss.className='tr-rig';
+    const rd=(typeof BOSS_RIGS!=='undefined'&&BOSS_RIGS.c)?BOSS_RIGS.c:null;
+    let gearTimer=null;
+    if(rd && typeof BOSS_A!=='undefined'){
+      const scale=document.createElement('div'); scale.id='brig-scale';
+      const brig=document.createElement('div'); brig.id='brig';
+      rd.parts.forEach(p=>{ const img=document.createElement('img'); img.className='part'; img.id=p.id; img.src=BOSS_A[p.k];
+        img.style.cssText='width:'+p.w+'px;left:'+p.x+'px;top:'+p.y+'px;'; brig.appendChild(img); });
+      scale.appendChild(brig); boss.appendChild(scale);
+      // orbiting gears (own lightweight loop — the game's rigRaf doesn't run in training)
+      const gears=[]; [BOSS_A.g0,BOSS_A.g1,BOSS_A.g2,BOSS_A.g3].forEach((src,i)=>{ const g=document.createElement('img');
+        g.src=src; g.className='bgear'+(i%2?' front':''); const size=[26,19,16,22][i]; g.style.width=size+'px';
+        boss.appendChild(g); gears.push({el:g,ang:i*Math.PI/2,r:46+i*4,spd:(.5+i*.16)*(i%2?1:-1),size}); });
+      const cx0=75, cy0=58;
+      gearTimer=setInterval(()=>{ if(!boss.isConnected){ clearInterval(gearTimer); return; } const t=performance.now()/1000;
+        gears.forEach(g=>{ const a=g.ang+t*g.spd; g.el.style.left=(cx0+Math.cos(a)*g.r-g.size/2)+'px'; g.el.style.top=(cy0+Math.sin(a)*g.r-g.size/2)+'px'; g.el.style.transform='rotate('+(t*g.spd*140)+'deg)'; }); },33);
+    } else { boss.textContent='⏳'; boss.style.fontSize='72px'; }   // fallback if assets missing
+    const hpw=document.createElement('div'); hpw.className='tr-hpwrap'; const hp=document.createElement('div'); hp.className='tr-hp'; hpw.appendChild(hp);
+    top.appendChild(nm); top.appendChild(boss); top.appendChild(hpw); wrap.appendChild(top);
+    const tarea=document.createElement('div'); tarea.style.cssText='position:absolute;left:0;right:0;bottom:0;height:96px;'; wrap.appendChild(tarea);
+    board.appendChild(wrap);
+    // dramatic entrance — opacity/brightness only (NO transform, so the rig can never get stuck scaled-down)
+    if(boss.animate) boss.animate([{opacity:0,filter:'brightness(3.5)'},{opacity:1,filter:'brightness(1.6)',offset:.5},{opacity:1,filter:'brightness(1)'}],{duration:680,easing:'ease-out'});
+    if(typeof screenKick==='function')screenKick(10); if(typeof bassBoom==='function')bassBoom(); if(typeof haptic==='function')haptic([40,30,60]); announceTB('CHRONO DEVOURER','#ffaa2a');
+    const set=[{a:8,b:6,ans:14,vals:[13,14,15],vortex:false},{a:12,b:7,ans:19,vals:[18,19,20],vortex:true},{a:9,b:9,ans:18,vals:[17,18,19],vortex:true}];
+    let i=0;
+    function nextB(){
+      if(i>=set.length){ bossDead(boss); return; }
+      const c=set[i]; showEq(c.a+' + '+c.b+' = <span class="q">?</span>');
+      coach(c.vortex?'💥 Find <b>'+c.ans+'</b> — quick, before it warps!':'💥 Tap <b>'+c.ans+'</b> to blast it!');
+      const n=c.vals.length, slotW=(tarea.clientWidth||300)/n; let solved=false; const tiles=[];
+      tarea.querySelectorAll('.tr-tile').forEach(t=>t.remove());
+      c.vals.forEach((v,k)=>{ const t=document.createElement('div'); t.className='tr-tile'; t.textContent=v;
+        const x=Math.round(slotW*k+(slotW-62)/2); t.dataset.x=x; t.dataset.v=v; t.style.left=x+'px'; t.style.top='18px'; tarea.appendChild(t); tiles.push(t);
+        t.onclick=()=>{ if(solved||!gardActive)return; aud();
+          if(+t.dataset.v!==c.ans){ t.classList.add('wrong'); setTimeout(()=>t.classList.remove('wrong'),320); if(typeof beep==='function')beep(200,.06,'square',.06); coach('❌ Find <b>'+c.ans+'</b> — even in the chaos!'); return; }
+          solved=true; if(typeof sfxTap==='function')sfxTap();
+          tiles.forEach(o=>{ o.style.transform=''; o.classList.add('dead'); });
+          boltToBoss(t,boss); boss.classList.remove('hit'); void boss.offsetWidth; boss.classList.add('hit'); setTimeout(()=>boss.classList.remove('hit'),420);
+          const pr=phone.getBoundingClientRect(), bo=boss.getBoundingClientRect();
+          if(typeof emitSparks==='function')emitSparks(bo.left-pr.left+bo.width/2,bo.top-pr.top+bo.height/2,30,['#ffaa2a','#00d4ff','#ffd24a','#fff']);
+          if(typeof impact==='function')impact('great'); if(typeof haptic==='function')haptic([20,20]);
+          i++; const pct=Math.max(0,100-i*34); hp.style.width=pct+'%'; if(pct<=50) boss.classList.add('rage');
+          addReward(20,0,(tarea.clientWidth||300)/2,140);
+          setTimeout(nextB, i>=set.length?620:560);
+        };
+      });
+      if(c.vortex){ setTimeout(()=>{ if(!solved&&gardActive) doVortex(tiles,tarea); },700); }
+    }
+    nextB();
+  }
+  function bossDead(boss){
+    setProg(6); hideEq(); setHead('SYSTEM FAILURE ⚠','Chrono Devourer destroyed!',true);
+    coach('🎆 <b>Destroyed!</b> Collect your reward…');
+    boss.classList.add('die');
+    const pr=phone.getBoundingClientRect(), bo=boss.getBoundingClientRect();
+    if(typeof emitSparks==='function')emitSparks(bo.left-pr.left+bo.width/2,bo.top-pr.top+bo.height/2,54,['#ffaa2a','#ffd24a','#fff','#00d4ff','#ff5070']);
+    if(typeof impact==='function')impact('huge'); if(typeof bassBoom==='function')bassBoom();
+    if(typeof coinRain==='function'){ coinRain(); setTimeout(coinRain,400); }
+    if(typeof haptic==='function')haptic([40,30,50,30,90]);
+    setTimeout(beatGraduate,1900);
+  }
+  function beatGraduate(){
+    if(graduated)return; graduated=true; gardActive=false;   // run once — repeated Skip taps can't re-fire the reward
+    setProg(6); clearTiles(); hideEq(); board.innerHTML='';
+    setHead('TRAINING COMPLETE!','Here\'s a welcome gift to start strong.',true);
+    coach('You\'ve got this. Go blast some numbers. ⚡');
+    // badges pop in
+    const badges=[['💧','First Blood'],['🔥','Combo King'],['💀','Boss Slayer']];
+    const bw=document.createElement('div'); bw.className='tr-badges';
+    badges.forEach(b=>{ const d=document.createElement('div'); d.className='tr-badge'; d.innerHTML='<div class="bi">'+b[0]+'</div><div class="bl">'+b[1]+'</div>'; bw.appendChild(d); });
+    board.appendChild(bw);
+    badges.forEach((b,i)=>setTimeout(()=>{ bw.children[i].classList.add('in'); if(typeof beep==='function')beep(520+i*120,.12,'triangle',.18); },300+i*280));
+    // animate the headline reward
+    setTimeout(()=>{ addReward(200,5, board.clientWidth/2, 150); if(typeof fireConfetti==='function')fireConfetti(70); if(typeof sfxLevelUp==='function')sfxLevelUp(); },1250);
+    // PLAY button
+    const btn=document.createElement('button'); btn.className='tr-play'; btn.textContent='PLAY NOW ▸';
+    btn.onclick=()=>finish(true); board.appendChild(btn);
+    // unlock the real achievements quietly so the badges screen reflects them
+    setTimeout(()=>{ ['first_blood','combo_king','boss_slayer'].forEach(id=>{ try{ if(typeof pAchievements!=='undefined'&&!pAchievements.includes(id))pAchievements.push(id);}catch(e){} }); },1600);
+  }
+
+  const alreadyTrained=!!localStorage_get('numa_trained');   // replays don't re-grant the welcome bonus
+  function grantBonus(){
+    if(!alreadyTrained){ try{ pGold+=200; pGems+=5; if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet(); }catch(e){} }
+    try{ localStorage_set('numa_trained','1'); localStorage_set('numa_tut','1'); }catch(e){}
+  }
+  let finished=false, graduated=false;
+  function finish(grant){
+    if(finished)return; finished=true; gardActive=false;
+    if(grant) grantBonus(); else { try{ localStorage_set('numa_trained','1'); localStorage_set('numa_tut','1'); }catch(e){} }
+    ov.style.transition='opacity .4s'; ov.style.opacity='0';
+    setTimeout(()=>{ ov.remove(); _trainActive=false;
+      if(grant){ if(typeof startGame==='function')startGame('math'); if(typeof showBuyToast==='function' && !alreadyTrained)setTimeout(()=>showBuyToast('⚡ +200🪙 +5💎 Welcome bonus!'),500); }
+      else if(typeof showScreen==='function'){ showScreen('home'); }
+    },420);
+  }
+  // Skip jumps straight to the graduation payoff (still teaches the reward + CTA)
+  $('#tr-skip').onclick=()=>{ if(finished||graduated)return; gardActive=false; try{ board.querySelectorAll('.tr-tile').forEach(t=>t.remove()); }catch(e){} beatGraduate(); };
+
+  beatWelcome();
+}
+
 function continueGame(){
   document.getElementById('levelModal').style.display='none';
   // SURPRISE ROUND — sometimes drop a random mini-mode before the next level (variety / "what's next?")
@@ -5118,24 +6154,33 @@ function srTarget(body,sub,close){
     if(picked.length===2){
       const sum=picked[0].v+picked[1].v;
       if(sum===target){ picked.forEach(p=>p.btn.classList.add('ok')); initAudio(); if(typeof popSound==='function')popSound(4); close(true); }
-      else { picked.forEach(p=>{p.btn.classList.add('bad');}); if(typeof wrongSound==='function')wrongSound(); if(typeof shakePhone==='function')shakePhone();
-        setTimeout(()=>picked.forEach(p=>p.btn.classList.remove('sel','bad')),400); picked=[]; }
+      else { const wrong=picked; picked=[];   // capture the pair BEFORE resetting so the timeout clears the RIGHT chips (not a fresh [])
+        wrong.forEach(p=>p.btn.classList.add('bad')); if(typeof wrongSound==='function')wrongSound(); if(typeof shakePhone==='function')shakePhone();
+        setTimeout(()=>wrong.forEach(p=>p.btn.classList.remove('sel','bad')),400); }
     }
   });
 }
-/* 🧠 MEMORY FLASH — show 3 numbers, hide, ask the middle one */
+/* 🧠 MEMORY FLASH — show a sequence, hide, repeat it in the SAME ORDER (Simon-style, intuitive) */
 function srMemory(body,sub,close){
-  const seq=[wrnd(2,9),wrnd(2,9),wrnd(2,9)];
-  sub.textContent='Memorize!';
+  const seq=[]; while(seq.length<3){ const n=wrnd(2,9); if(!seq.includes(n)) seq.push(n); }   // distinct numbers
+  sub.textContent='Memorize the ORDER!';
   body.innerHTML='<div class="sr-eq sr-flash">'+seq.join('   ')+'</div>';
   setTimeout(()=>{
-    sub.textContent='Which was in the MIDDLE?';
-    const opts=srShuffle([seq[1], seq[0], seq[2], wrnd(2,9)].filter((v,i,arr)=>arr.indexOf(v)===i));
-    if(!opts.includes(seq[1])) opts[0]=seq[1];
-    body.innerHTML='<div class="sr-eq">? ? ?</div><div class="sr-opts">'+srChips(srShuffle(opts))+'</div>';
+    sub.textContent='Now tap them in the SAME order ▶';
+    let idx=0;
+    body.innerHTML='<div class="sr-eq" id="sr-mprog"></div><div class="sr-opts">'+srChips(srShuffle(seq.slice()))+'</div>';
+    const prog=body.querySelector('#sr-mprog');
+    const draw=()=>{ prog.textContent=seq.map((v,i)=>i<idx?v:'•').join('  '); };
+    draw();
     body.querySelectorAll('.sr-chip').forEach(btn=>btn.onpointerdown=ev=>{ev.preventDefault();
-      if(parseInt(btn.dataset.v)===seq[1]){ btn.classList.add('ok'); initAudio(); if(typeof popSound==='function')popSound(3); close(true); }
-      else { btn.classList.add('bad'); if(typeof wrongSound==='function')wrongSound(); if(typeof shakePhone==='function')shakePhone(); }
+      if(btn.classList.contains('ok')) return;
+      if(parseInt(btn.dataset.v)===seq[idx]){
+        btn.classList.add('ok'); idx++; initAudio(); if(typeof popSound==='function')popSound(idx); draw();
+        if(idx>=seq.length){ if(typeof haptic==='function')haptic([15,15,25]); close(true); }
+      } else {
+        btn.classList.add('bad'); if(typeof wrongSound==='function')wrongSound(); if(typeof shakePhone==='function')shakePhone();
+        idx=0; body.querySelectorAll('.sr-chip').forEach(c=>c.classList.remove('ok','bad')); setTimeout(draw,150);   // wrong → restart the sequence
+      }
     });
   },1600);
 }
@@ -5864,6 +6909,9 @@ function updateHUD(){
     if(pill) pill.textContent='⏱️ WAVE '+taWave;
     const tb=(typeof modeBest==='function')?modeBest('time'):0;
     if(prog) prog.textContent='🔥 '+pScore+(tb>0?(' · BEST '+tb):'');
+  } else if(gMode==='pulse'){
+    if(pill) pill.textContent='🎡 PULSE';
+    if(prog) prog.textContent='Lv '+pLevel+(isBoss?' 💀':'');
   } else {
     const modeEmoji=gSubMode==='word'?'🔤':'🔢';
     if(pill) pill.textContent=modeEmoji+' '+(gSubMode==='math'?'MATH':'WORD');
@@ -7162,7 +8210,9 @@ function dismissSplash(){
   sp.classList.add('hiding');
   setTimeout(()=>{ if(sp) sp.style.display='none'; }, 600);
   // route: already signed in → straight to game; otherwise show login
-  if(isAuthed()){ applyAuthProfile(); }
+  if(isAuthed()){ applyAuthProfile();
+    if(!localStorage_get('numa_trained')) setTimeout(()=>startTraining(false),650);
+  }
   else { setTimeout(showLogin, 350); }
 }
 
@@ -7235,6 +8285,11 @@ function finishLogin(msg){
   applyAuthProfile();
   hideLogin();
   if(typeof haptic==='function') haptic([20,15,30]);
+  // NEW PLAYERS → guided Training Mode (teaches + hooks). Returning/trained users skip it.
+  if(!localStorage_get('numa_trained')){
+    setTimeout(()=>startTraining(false),560);
+    return;
+  }
   if(typeof showBuyToast==='function') setTimeout(()=>showBuyToast(msg),520);
 }
 function applyAuthProfile(){
