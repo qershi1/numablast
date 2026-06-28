@@ -2785,7 +2785,7 @@ function startGame(mode){
   if(loopRaf)cancelAnimationFrame(loopRaf);
   if(gSubMode==='word') buildWordGrid();
   else gameLoop();
-  buildActive=false; _lastBuildAt=-9;   // reset MIXED-CORE build-wave cadence
+  buildActive=false; _lastBuildAt=-9; cwActive=false; _lastChainAt=-9;   // reset MIXED-CORE build/chain cadence
   startWaveWatchdog();   // self-heal: keep the falling-tile loop alive across waves
 }
 
@@ -3403,7 +3403,7 @@ function chronoDevourOrb(){
 }
 function onBossDuelDefeated(){
   gActive=false; clearDuel();
-  pLevel++; solvedCount=0;
+  pLevel++; solvedCount=0; _lastBuildAt=-9; _lastChainAt=-9;
   if(typeof isGuest!=='undefined' && isGuest && pLevel>GUEST_CAP){ pLevel=GUEST_CAP; updateHUD(); stopBossZaps&&stopBossZaps(); isBoss=false; hideBoss&&hideBoss(); showGuestWall&&showGuestWall(); return; }
   if(typeof questAdvance==='function') questAdvance('levels',pLevel,true);
   finishLevelUp(true);
@@ -3804,8 +3804,10 @@ function waveFallSpeed(){
 function spawnWaveMath(){
   if(!gActive||gSubMode!=='math') return;
   if(typeof clearBuild==='function') clearBuild(false);
-  // ── MIXED CORE: some normal waves become BUILD-THE-TARGET (construct, not just recognize) ──
-  if(typeof shouldBuildWave==='function' && shouldBuildWave()){ spawnBuildWave(); return; }
+  if(typeof clearChain==='function') clearChain(false);
+  // ── MIXED CORE: variety so it never feels like the same wave twice ──
+  if(typeof shouldChainWave==='function' && shouldChainWave()){ spawnChainWave(); return; }   // ⚡ build an expression to hit the target (lightning chain)
+  if(typeof shouldBuildWave==='function' && shouldBuildWave()){ spawnBuildWave(); return; }     // 🎯 sum tiles to make N
   genWaveEq(); renderWaveEq();
   const board=document.getElementById('g-board');
   const bw=board.clientWidth||354;
@@ -3848,7 +3850,7 @@ let waveWatchdog=null;
 function startWaveWatchdog(){
   clearInterval(waveWatchdog);
   waveWatchdog=setInterval(()=>{
-    if(buildActive) return;   // BUILD wave is self-timed — no falling loop to heal
+    if(buildActive || cwActive || chainActive) return;   // BUILD/CHAIN/god-chain are self-timed — no falling loop to heal
     if(gActive && gSubMode==='math' && !duelActive && document.getElementById('game-screen') && getComputedStyle(document.getElementById('game-screen')).display!=='none'){
       if(!lastFrame || (performance.now()-lastFrame)>300){   // loop stalled → kick it
         if(loopRaf) cancelAnimationFrame(loopRaf);
@@ -3861,6 +3863,7 @@ function startWaveWatchdog(){
 function stopWaveWatchdog(){ clearInterval(waveWatchdog); waveWatchdog=null; }
 function clearWaveMath(fade){
   if(typeof clearBuild==='function') clearBuild(fade);
+  if(typeof clearChain==='function') clearChain(fade);
   fallers.forEach(t=>{ if(!t.el) return;
     if(fade){ t.el.style.transition='opacity .25s'; t.el.style.opacity='0'; setTimeout(()=>t.el.remove(),260); }
     else t.el.remove(); });
@@ -4134,6 +4137,188 @@ function clearBuild(fade){
   const wrap=document.querySelector('.build-wrap');
   if(wrap){ if(fade){ wrap.style.transition='opacity .25s'; wrap.style.opacity='0'; setTimeout(()=>{ if(wrap.parentNode) wrap.remove(); },260); } else wrap.remove(); }
   buildTiles=[]; buildSum=0;
+}
+
+/* ═══════════ ⚡ CHAIN WAVE — build an expression from numbers + operators to HIT the target, tiles linked by lightning ═══════════
+   "= N" target. Tap number → sign → number… (evaluated left-to-right). Hit N exactly = BLAST. ↺ Clear to restart the chain. */
+let cwActive=false, cwTarget=0, chainVal=null, chainExpect='num', chainPendingOp=null, cwSeq=[], cwTiles=[], chainTimeout=null, _lastChainAt=-9, _chainPrevEl=null;
+function shouldChainWave(){
+  if(isBoss || gMode==='time' || gSubMode!=='math' || !gActive) return false;
+  const needed=Math.min(5+pLevel,18);
+  if(pLevel<3) return false;                       // unlocks after L3 (learn base loop + build first)
+  if(solvedCount<=0) return false;
+  if(solvedCount>=needed-1) return false;          // final wave keeps its own drama
+  if(solvedCount-_lastChainAt<2) return false;     // never back-to-back
+  if(typeof _lastBuildAt!=='undefined' && solvedCount-_lastBuildAt<1) return false;
+  return Math.random()<0.35;
+}
+function _divisors(n){ const d=[]; for(let i=2;i<=12 && i<n;i++){ if(n%i===0) d.push(i); } return d; }
+function genChainSet(){
+  const lvl=effLevel();
+  const ops = lvl>=5?['+','-','×','÷'] : lvl>=4?['+','-','×'] : ['+','-'];
+  const nOperands = lvl>=6?3:2;
+  let nums,used,result,guard=0,ok;
+  do{
+    ok=true; const a=wrnd(2,9); result=a; nums=[a]; used=[];
+    for(let i=1;i<nOperands;i++){
+      let placed=false;
+      for(let tryN=0;tryN<14 && !placed;tryN++){
+        const op=ops[Math.floor(Math.random()*ops.length)];
+        let b;
+        if(op==='÷'){ const dv=_divisors(result); if(!dv.length) continue; b=dv[Math.floor(Math.random()*dv.length)]; result=result/b; }
+        else if(op==='-'){ b=wrnd(2,9); if(result-b<1) continue; result=result-b; }
+        else if(op==='×'){ b=wrnd(2,9); if(result*b>140) continue; result=result*b; }
+        else { b=wrnd(2,9); result=result+b; }
+        nums.push(b); used.push(op); placed=true;
+      }
+      if(!placed){ ok=false; break; }
+    }
+    guard++;
+  } while(guard<60 && !(ok && result>=3 && result<=180 && Number.isInteger(result)));
+  const decoyNums=[]; for(let i=0;i<(lvl>=5?2:1);i++) decoyNums.push(wrnd(2,9));
+  return {target:result, nums, ops:used, decoyNums};
+}
+function injectChainCSS(){
+  if(document.getElementById('chain-css')) return;
+  const s=document.createElement('style'); s.id='chain-css';
+  s.textContent=`
+  .chain-eq b{color:#ffd84a;font-size:1.3em;text-shadow:0 0 16px rgba(255,216,74,.6);}
+  .chain-fx{position:absolute;inset:0;z-index:14;pointer-events:none;}
+  .chain-wrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:16px 12px 12px;gap:12px;z-index:6;}
+  .chain-expr{min-height:34px;font-family:Bungee,sans-serif;font-size:23px;color:#eaf2ff;letter-spacing:1px;text-align:center;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;}
+  .chain-expr i{font-style:normal;opacity:.55;font-size:.8em;}
+  .chain-expr b{color:#43e0a0;text-shadow:0 0 14px rgba(67,224,160,.55);}
+  .chain-expr .cx-empty{font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:#8fa0c0;letter-spacing:1px;}
+  .chain-grid{display:flex;flex-wrap:wrap;gap:11px;justify-content:center;align-content:center;flex:1;max-width:340px;}
+  .ctile{width:66px;height:66px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:Bungee,sans-serif;font-size:26px;color:#fff;cursor:pointer;user-select:none;
+    box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12);transform:scale(0);animation:btileIn .32s cubic-bezier(.2,1.6,.4,1) forwards;transition:transform .12s,box-shadow .2s,border-color .2s,color .2s,filter .2s;}
+  .ctile:active{transform:scale(.9);}
+  .ctile.cnum{background:linear-gradient(160deg,#16335c,#0c1e3a);border:2px solid rgba(80,170,255,.5);}
+  .ctile.cop{background:linear-gradient(160deg,#3a1f55,#21102f);border:2px solid rgba(190,120,255,.6);font-size:30px;color:#e9c8ff;}
+  .ctile.cpick{filter:brightness(1.35);border-color:#ffd84a;color:#ffd84a;box-shadow:0 0 22px rgba(255,216,74,.7),inset 0 0 10px rgba(255,216,74,.25);}
+  .ctile.csolved{border-color:#ffd84a;color:#fff;box-shadow:0 0 30px rgba(255,216,74,.9);animation:btilePop .4s ease;}
+  .ctile.cbad{animation:cbad .34s;}
+  @keyframes cbad{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+  .chain-foot{display:flex;align-items:center;gap:10px;width:100%;max-width:340px;}
+  .chain-clear{font-family:Rajdhani,sans-serif;font-weight:800;font-size:13px;letter-spacing:.5px;color:#cdd6ff;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:8px 13px;cursor:pointer;flex-shrink:0;}
+  .chain-clear:active{transform:scale(.94);}
+  .chain-timer{flex:1;height:6px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden;}
+  .chain-timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff5e8a,#ff2d55);box-shadow:0 0 10px rgba(255,45,85,.7);}
+  .chain-pop{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-family:Bungee,sans-serif;font-size:23px;color:#ff5e8a;z-index:30;text-shadow:0 0 16px rgba(255,45,85,.7);pointer-events:none;animation:buildPop .85s ease forwards;}`;
+  document.head.appendChild(s);
+}
+function _sh(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i];a[i]=a[j];a[j]=t; } return a; }
+function spawnChainWave(){
+  injectChainCSS();
+  if(typeof clearBuild==='function') clearBuild(false); clearChain(false);
+  const set=genChainSet();
+  cwTarget=set.target; chainVal=null; chainExpect='num'; chainPendingOp=null; cwSeq=[]; cwTiles=[]; _chainPrevEl=null;
+  cwActive=true; waveActive=false; waveTime=0; _lastChainAt=solvedCount;
+  targetVal=set.target; primarySolution=[]; guaranteedSeq=[];
+  const tv=document.getElementById('g-target');
+  if(tv){ tv.style.display=''; tv.className='tp-val'; tv.innerHTML='<span class="eq-display chain-eq">= <b>'+set.target+'</b></span>';
+    if(tv.animate) tv.animate([{transform:'scale(.6)',opacity:0},{transform:'scale(1.12)',opacity:1},{transform:'scale(1)'}],{duration:320,easing:'cubic-bezier(.2,1.5,.4,1)'}); }
+  const lbl=document.getElementById('tp-label'); if(lbl) lbl.textContent='⚡ Chain';
+  const ge=document.getElementById('g-tray'); if(ge) ge.innerHTML='<span class="tray-empty">⚡ Chain numbers & signs to hit the target</span>';
+  const board=document.getElementById('g-board');
+  board.innerHTML='<canvas class="chain-fx" id="chainfx"></canvas><div class="chain-wrap">'
+    +'<div class="chain-expr" id="cexpr"><span class="cx-empty">tap a number to start…</span></div>'
+    +'<div class="chain-grid" id="cgrid"></div>'
+    +'<div class="chain-foot"><button class="chain-clear" id="cclear">↺ Clear</button><div class="chain-timer"><i id="ctimer"></i></div></div>'
+    +'</div>';
+  const grid=document.getElementById('cgrid');
+  const numDefs=_sh(set.nums.concat(set.decoyNums)).map(v=>({kind:'num',val:v}));
+  const opDefs=_sh(set.ops.slice()).map(o=>({kind:'op',val:o}));
+  const defs=_sh(numDefs.concat(opDefs));
+  defs.forEach((d,i)=>{ const el=document.createElement('div'); el.className='ctile '+(d.kind==='op'?'cop':'cnum'); el.textContent=d.val; el.style.animationDelay=(i*42)+'ms';
+    const t={el,kind:d.kind,val:d.val,used:false}; el.onpointerdown=ev=>{ev.preventDefault();ev.stopPropagation();tapChainTile(t);}; grid.appendChild(el); cwTiles.push(t); });
+  const cc=document.getElementById('cclear'); if(cc) cc.onpointerdown=ev=>{ev.preventDefault();ev.stopPropagation();chainClear();};
+  initAudio(); beep(523,.09,'triangle',.13); setTimeout(()=>beep(784,.12,'triangle',.12),90); if(typeof haptic==='function') haptic([10,20,30]);
+  const dur=Math.max(7000, 12000-effLevel()*300);
+  const ct=document.getElementById('ctimer'); if(ct){ ct.style.transition='none'; ct.style.width='100%'; void ct.offsetWidth; ct.style.transition='width '+dur+'ms linear'; ct.style.width='0%'; }
+  chainTimeout=setTimeout(chainMiss,dur);
+  const cv=document.getElementById('chainfx'); if(cv){ const br=board.getBoundingClientRect(); cv.width=br.width; cv.height=br.height; }
+  gActive=true;
+}
+function chainBolt(el){
+  const cv=document.getElementById('chainfx'), board=document.getElementById('g-board');
+  if(cv && board && _chainPrevEl && _chainPrevEl!==el && typeof drawEnergyBolt==='function'){
+    const ctx=cv.getContext('2d'), br=board.getBoundingClientRect(), a=_chainPrevEl.getBoundingClientRect(), b=el.getBoundingClientRect();
+    drawEnergyBolt(ctx, a.left-br.left+a.width/2, a.top-br.top+a.height/2, b.left-br.left+b.width/2, b.top-br.top+b.height/2);
+    initAudio(); beep(660,.05,'sawtooth',.08);
+  }
+  _chainPrevEl=el;
+}
+function updateChainExpr(){
+  const e=document.getElementById('cexpr'); if(!e) return;
+  if(!cwSeq.length){ e.innerHTML='<span class="cx-empty">tap a number to start…</span>'; return; }
+  let s=cwSeq.map(t=>t.val).join(' ');
+  if(chainExpect==='num' && chainPendingOp) s+=' …';
+  e.innerHTML=s+' <i>=</i> <b>'+(chainVal===null?'?':chainVal)+'</b>';
+}
+function chainNudge(el){ if(el){ el.classList.remove('cbad'); void el.offsetWidth; el.classList.add('cbad'); } if(typeof beep==='function') beep(200,.06,'square',.07); }
+function tapChainTile(t){
+  if(!gActive||!cwActive||t.used) return; initAudio();
+  if(chainExpect==='num'){
+    if(t.kind!=='num'){ chainNudge(t.el); return; }
+    let nv;
+    if(chainVal===null) nv=t.val;
+    else { const op=chainPendingOp;
+      if(op==='÷'){ if(chainVal % t.val !==0){ chainNudge(t.el); return; } nv=chainVal/t.val; }
+      else if(op==='×') nv=chainVal*t.val;
+      else if(op==='-') nv=chainVal-t.val;
+      else nv=chainVal+t.val; }
+    t.used=true; t.el.classList.add('cpick'); chainBolt(t.el);
+    cwSeq.push(t); chainVal=nv; chainPendingOp=null; chainExpect='op';
+    beep(440+Math.min(chainVal/cwTarget,1)*260,.08,'sine',.12); updateChainExpr();
+    if(chainVal===cwTarget){ chainSolve(); return; }
+    if(typeof haptic==='function') haptic(12);
+  } else {
+    if(t.kind!=='op'){ chainNudge(t.el); return; }
+    t.used=true; t.el.classList.add('cpick'); chainBolt(t.el);
+    cwSeq.push(t); chainPendingOp=t.val; chainExpect='num';
+    beep(330,.07,'triangle',.1); updateChainExpr();
+  }
+}
+function chainClear(){
+  cwSeq.forEach(t=>{ t.used=false; if(t.el) t.el.classList.remove('cpick'); });
+  cwSeq=[]; chainVal=null; chainExpect='num'; chainPendingOp=null; _chainPrevEl=null;
+  const cv=document.getElementById('chainfx'); if(cv){ const c=cv.getContext('2d'); c&&c.clearRect(0,0,cv.width,cv.height); }
+  updateChainExpr(); if(typeof beep==='function') beep(220,.08,'square',.08); if(typeof haptic==='function') haptic(15);
+}
+function showChainPop(txt){ const board=document.getElementById('g-board'); if(!board) return; const d=document.createElement('div'); d.className='chain-pop'; d.textContent=txt; board.appendChild(d); setTimeout(()=>d.remove(),850); }
+function chainSolve(){
+  const steps=cwSeq.length;
+  cwTiles.forEach(t=>{ if(t.used){ t.el.classList.remove('cpick'); t.el.classList.add('csolved'); } });
+  const board=document.getElementById('g-board');
+  if(board){ if(typeof waveBurst==='function') waveBurst(board.clientWidth/2, board.clientHeight*0.5, '#ffd84a');
+    if(typeof flyScore==='function') flyScore(board.clientWidth/2-12, board.clientHeight*0.42, '+'+Math.round(18*comboMult*((streakCount>=8)?2:1))); }
+  if(typeof impact==='function') impact('huge');
+  clearChain(true);
+  handleSuccess();
+  updateWaveCombo(true);
+  if(steps>=5){ pGold+=12; if(typeof showGoldPop==='function') setTimeout(()=>showGoldPop('⚡ '+Math.ceil(steps/2)+'-STEP CHAIN! +12🪙'),220); if(typeof updateHUD==='function') updateHUD(); }
+}
+function chainMiss(){
+  if(!cwActive) return;
+  if(typeof loseHeartSound==='function') loseHeartSound();
+  if(typeof haptic==='function') haptic([60,40,80]);
+  pLives--; levelLivesLost++; levelTimedOut=true;
+  streakCount=0; comboMult=1; lastComboTier=0; if(typeof updateCombo==='function')updateCombo(); updateWaveCombo(false);
+  if(typeof burnBank==='function') burnBank();
+  if(typeof impact==='function') impact('fail');
+  showChainPop('⏱ TIME UP');
+  clearChain(false);
+  if(typeof wobbleHearts==='function') wobbleHearts();
+  updateHUD();
+  if(pLives<=0){ gActive=false; clearInterval(timerInt); if(loopRaf)cancelAnimationFrame(loopRaf); showGameOver(); return; }
+  setTimeout(()=>{ if(document.getElementById('game-screen') && getComputedStyle(document.getElementById('game-screen')).display!=='none') setTarget(); }, 700);
+}
+function clearChain(fade){
+  cwActive=false; if(chainTimeout){ clearTimeout(chainTimeout); chainTimeout=null; }
+  const wrap=document.querySelector('.chain-wrap');
+  if(wrap){ if(fade){ wrap.style.transition='opacity .25s'; wrap.style.opacity='0'; setTimeout(()=>{ if(wrap.parentNode) wrap.remove(); },260); } else wrap.remove(); }
+  cwTiles=[]; cwSeq=[]; chainVal=null; chainExpect='num'; chainPendingOp=null; _chainPrevEl=null;
 }
 
 /* ═══════════ P3: PERFECT WAVE · COMBO BANK · PARRY · FINAL WAVE ═══════════ */
@@ -4999,6 +5184,7 @@ function handleSuccess(){
     const wasBoss=isBoss;
     endFinalWave();
     gActive=false; pLevel++; solvedCount=0;
+    _lastBuildAt=-9; _lastChainAt=-9;   // reset build/chain cadence each level (else solvedCount-_last<2 blocks them after L1)
     // GUEST CAP: free play ends after Level 10 — gate further progress behind sign-up
     if(isGuest && pLevel>GUEST_CAP){
       pLevel=GUEST_CAP; updateHUD();
@@ -5031,8 +5217,8 @@ function handleSuccess(){
 function showBossModal(){
   pendingBoss=false;
   pickBossType();
-  // rigged bosses introduce themselves (Wraith = word, Chrono = math)
-  const bt=BOSS_RIGS[(gSubMode==='word')?'w':'c']||bossTypes[currentBossType];
+  // the modal must introduce the REALM boss (persona by world), not a mode-based guess
+  const bt=(typeof bossPersona==='function'?bossPersona():null)||BOSS_RIGS[(gSubMode==='word')?'w':'c']||bossTypes[currentBossType];
   const mini=(bossKind==='mini');
   bossTarget = mini ? 5 : (8+Math.floor(pLevel/10)*2);
   const bsub=document.getElementById('boss-sub');
