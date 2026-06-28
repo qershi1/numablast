@@ -15,6 +15,7 @@
     firebase.initializeApp(firebaseConfig);
     window.fbAuth = firebase.auth();
     try{ window.fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); }catch(e){}
+    try{ if(firebase.firestore) window.fbDb = firebase.firestore(); }catch(e){ console.warn('[firebase] firestore init', e); }
     window.fbReady = true;
     console.log('[firebase] ready · project', firebaseConfig.projectId);
   }catch(e){ console.warn('[firebase] init failed', e); }

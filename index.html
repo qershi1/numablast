@@ -286,6 +286,25 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .g-mode-pill{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:var(--acc);background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:4px 10px;letter-spacing:.5px;}
 .g-progress{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--mut);}
 .g-right{display:flex;align-items:center;gap:10px;}
+/* LEVEL PROGRESS BAR */
+.lvl-track{position:relative;height:15px;margin:1px 0 9px;border-radius:8px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.55);z-index:5;}
+.boss-active .lvl-track{display:none!important;}
+.lvl-track-fill{position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:8px;
+  background:linear-gradient(90deg,#00d4ff,#43e0a0,#ffd84a);box-shadow:0 0 12px rgba(67,224,160,.55);
+  transition:width .4s cubic-bezier(.3,1.5,.5,1);}
+.lvl-track-fill::after{content:'';position:absolute;top:0;bottom:0;width:45%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:lvlShine 1.8s linear infinite;}
+@keyframes lvlShine{0%{left:-50%;}100%{left:120%;}}
+.lvl-track-lbl{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-family:Rajdhani,sans-serif;font-weight:800;
+  font-size:9.5px;letter-spacing:1.5px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.85);z-index:2;}
+.lvl-track-frac{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-family:Rajdhani,sans-serif;font-weight:800;
+  font-size:9.5px;letter-spacing:.5px;color:rgba(255,255,255,.85);text-shadow:0 1px 2px rgba(0,0,0,.85);z-index:2;}
+.lvl-track.near-full{animation:lvlNear .5s ease-in-out infinite;}
+.lvl-track.near-full .lvl-track-fill{box-shadow:0 0 18px rgba(255,216,74,.9);}
+@keyframes lvlNear{0%,100%{box-shadow:inset 0 1px 3px rgba(0,0,0,.55),0 0 0 rgba(255,216,74,0);}50%{box-shadow:inset 0 1px 3px rgba(0,0,0,.55),0 0 12px rgba(255,216,74,.6);}}
+.lvl-track.bump .lvl-track-fill{animation:lvlBump .4s ease;}
+@keyframes lvlBump{0%{filter:brightness(1);}40%{filter:brightness(1.7);}100%{filter:brightness(1);}}
 .g-lives{display:flex;gap:3px;align-items:center;}
 .heart-emoji{font-size:17px;line-height:1;transition:transform .2s;}
 .heart-emoji.lost{opacity:0.6;filter:grayscale(0.5);}
@@ -1584,6 +1603,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 <!-- Firebase Auth (compat CDN — no bundler needed) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 </head>
 <body>
@@ -2042,6 +2062,13 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         </div>
       </div>
 
+      <!-- LEVEL PROGRESS BAR (fills as you solve; pulses near the top) -->
+      <div class="lvl-track" id="lvl-track">
+        <div class="lvl-track-fill" id="lvl-track-fill"></div>
+        <span class="lvl-track-lbl" id="lvl-track-lbl">LV 1</span>
+        <span class="lvl-track-frac" id="lvl-track-frac">0/6</span>
+      </div>
+
       <!-- TARGET PANEL -->
       <div class="target-panel" id="target-panel">
         <div class="tp-top">
@@ -2108,6 +2135,9 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         <canvas id="hint-canvas" style="position:absolute;inset:0;z-index:12;pointer-events:none;border-radius:18px;"></canvas>
         <div class="streak-fire" id="streak-fire"></div>
       </div>
+
+      <!-- PLAYER SKILL BAR (active abilities, unlock by level) -->
+      <div id="skill-bar"></div>
 
       <!-- TRAY + ACTIONS -->
       <div class="tray-section" style="position:relative;">
@@ -2604,6 +2634,9 @@ const WORLDS=[
   {name:'NULL REALM',    boss:'NULL KING'},
 ];
 function worldOf(level){ return Math.min(Math.floor((level-1)/10), WORLDS.length-1); }
+// solves needed to fill the level bar — grows with level (cap 24) so it fills SLOWER as you climb
+function levelNeed(){ return Math.min(5+pLevel,24); }
+let _lastBarSolved=0;
 /* per-world painted backdrop — EXTERNAL files (world1=lava,2=forest,3=desert,4=ice,5=space) keep index.html small */
 function worldBg(w){ return 'world'+(Math.max(0,Math.min(w,4))+1)+'.jpg'; }
 let _curBgWorld=-1;
@@ -2786,6 +2819,7 @@ function startGame(mode){
   if(gSubMode==='word') buildWordGrid();
   else gameLoop();
   buildActive=false; _lastBuildAt=-9; cwActive=false; _lastChainAt=-9;   // reset MIXED-CORE build/chain cadence
+  if(typeof resetSkills==='function'){ resetSkills(); renderSkillBar(); }   // player skills: fresh charges each run
   startWaveWatchdog();   // self-heal: keep the falling-tile loop alive across waves
 }
 
@@ -3794,7 +3828,7 @@ function waveFallSpeed(){
   // curve now climbs ~3× slower per level. sl maps L1→1, L7→3, L20→~7.3, so what used to hit by L7
   // arrives near L20. L1 start is unchanged; intra-level accel softened 1.038→1.028 too.
   const sl=1+(effLevel()-1)/3;
-  let v=Math.min((80+sl*4)*Math.pow(1.028,solvedCount),225);  // px/sec
+  let v=Math.min((70+sl*3.5)*Math.pow(1.026,solvedCount),198);  // px/sec — softened ~12% so tiles linger a touch longer (more read time)
   if(gMode==='time') v*=1.2;
   if(isBoss) v*=1.03;   // boss barely faster (was ×1.1 — felt too fast once solves stacked)
   // soften the adaptive difficulty so a win-streak can't compound into a speed spike (esp. during a long boss)
@@ -3839,7 +3873,7 @@ function spawnWaveMath(){
   waveActive=true; slowmoUsed=false; waveTime=0;
   const hb=document.getElementById('hint-btn'); if(hb) hb.classList.remove('nudge');
   // P3 FINAL WAVE: dramatic entrance on the level's last solve (normal levels only)
-  if(!isBoss && gMode!=='time' && solvedCount===Math.min(5+pLevel,18)-1){
+  if(!isBoss && gMode!=='time' && solvedCount===levelNeed()-1){
     if(!finalWaveOn) startFinalWave();
   } else if(finalWaveOn) endFinalWave();
 }
@@ -3968,7 +4002,7 @@ function showWrongTaunt(x,y){
 /* the correct tile crossed the danger line → lose a heart */
 function missCorrectWave(){
   loseHeartSound(); if(typeof haptic==='function') haptic([60,40,80]);
-  pLives--; levelLivesLost++; levelTimedOut=true;
+  if(typeof consumeShield==='function'&&consumeShield()){ } else { pLives--; levelLivesLost++; levelTimedOut=true; }
   streakCount=0; comboMult=1; lastComboTier=0; updateCombo(); updateWaveCombo(false);
   burnBank();
   updateHUD(); impact('fail');
@@ -3987,7 +4021,7 @@ let buildActive=false, buildSum=0, buildTarget=0, buildTiles=[], buildTimeout=nu
 
 function shouldBuildWave(){
   if(isBoss || gMode==='time' || gSubMode!=='math' || !gActive) return false;
-  const needed=Math.min(5+pLevel,18);
+  const needed=levelNeed();
   if(pLevel<2) return false;                     // L1 teaches the base loop first
   if(solvedCount<=0) return false;               // first wave of a level stays familiar
   if(solvedCount>=needed-1) return false;        // final wave keeps its own drama
@@ -4112,6 +4146,7 @@ function buildBust(){
   if(typeof haptic==='function') haptic([40,30,60]);
   const wrap=document.querySelector('.build-wrap'); if(wrap){ wrap.classList.remove('bust'); void wrap.offsetWidth; wrap.classList.add('bust'); }
   showBuildPop('💥 OVERSHOOT');
+  if(typeof showWrongTaunt==='function'){ const bd=document.getElementById('g-board'); if(bd) showWrongTaunt(bd.clientWidth/2, bd.clientHeight*0.36); }   // mocking smile on overshoot
   buildTiles.forEach(t=>{ t.used=false; if(t.el) t.el.classList.remove('picked'); });
   const bs=document.getElementById('bsum'); if(bs) bs.textContent='0';
   const bar=document.getElementById('bbar'); if(bar) bar.style.width='0%';
@@ -4120,7 +4155,7 @@ function buildMiss(){
   if(!buildActive) return;
   if(typeof loseHeartSound==='function') loseHeartSound();
   if(typeof haptic==='function') haptic([60,40,80]);
-  pLives--; levelLivesLost++; levelTimedOut=true;
+  if(typeof consumeShield==='function'&&consumeShield()){ } else { pLives--; levelLivesLost++; levelTimedOut=true; }
   streakCount=0; comboMult=1; lastComboTier=0; if(typeof updateCombo==='function')updateCombo(); updateWaveCombo(false);
   if(typeof burnBank==='function') burnBank();
   if(typeof impact==='function') impact('fail');
@@ -4144,7 +4179,7 @@ function clearBuild(fade){
 let cwActive=false, cwTarget=0, chainVal=null, chainExpect='num', chainPendingOp=null, cwSeq=[], cwTiles=[], chainTimeout=null, _lastChainAt=-9, _chainPrevEl=null;
 function shouldChainWave(){
   if(isBoss || gMode==='time' || gSubMode!=='math' || !gActive) return false;
-  const needed=Math.min(5+pLevel,18);
+  const needed=levelNeed();
   if(pLevel<3) return false;                       // unlocks after L3 (learn base loop + build first)
   if(solvedCount<=0) return false;
   if(solvedCount>=needed-1) return false;          // final wave keeps its own drama
@@ -4303,7 +4338,7 @@ function chainMiss(){
   if(!cwActive) return;
   if(typeof loseHeartSound==='function') loseHeartSound();
   if(typeof haptic==='function') haptic([60,40,80]);
-  pLives--; levelLivesLost++; levelTimedOut=true;
+  if(typeof consumeShield==='function'&&consumeShield()){ } else { pLives--; levelLivesLost++; levelTimedOut=true; }
   streakCount=0; comboMult=1; lastComboTier=0; if(typeof updateCombo==='function')updateCombo(); updateWaveCombo(false);
   if(typeof burnBank==='function') burnBank();
   if(typeof impact==='function') impact('fail');
@@ -4320,6 +4355,78 @@ function clearChain(fade){
   if(wrap){ if(fade){ wrap.style.transition='opacity .25s'; wrap.style.opacity='0'; setTimeout(()=>{ if(wrap.parentNode) wrap.remove(); },260); } else wrap.remove(); }
   cwTiles=[]; cwSeq=[]; chainVal=null; chainExpect='num'; chainPendingOp=null; _chainPrevEl=null;
 }
+
+/* ═══════════ ⭐ PLAYER SKILLS — active abilities unlocked by level, spent from a shared CHARGE pool that fills as you solve ═══════════ */
+const SKILL_MAX_CHARGE=3, SKILL_SOLVES_PER_CHARGE=4;
+let skillCharges=1, _skillSolveCnt=0, skillShield=false, skillOvercharge=false, _skillTsToken=0;
+const SKILL_DEFS=[
+  {id:'freeze',ic:'❄️',name:'FREEZE', lvl:3,  col:'#7adfff'},
+  {id:'purge', ic:'💣',name:'PURGE',  lvl:5,  col:'#ff8a3c'},
+  {id:'slowmo',ic:'🐌',name:'SLOW-MO',lvl:7,  col:'#a7f0ff'},
+  {id:'over',  ic:'⚡',name:'CHARGE', lvl:10, col:'#ffd84a'},
+  {id:'shield',ic:'🛡️',name:'SHIELD', lvl:13, col:'#43e0a0'}
+];
+function skillsUnlocked(){ return SKILL_DEFS.filter(s=>pLevel>=s.lvl); }
+function skillBarVisible(){ return gActive && gSubMode==='math' && gMode!=='pulse' && !isBoss && skillsUnlocked().length>0; }
+function injectSkillCSS(){
+  if(document.getElementById('skill-css')) return;
+  const s=document.createElement('style'); s.id='skill-css';
+  s.textContent=`
+  #skill-bar{display:none;align-items:center;gap:6px;justify-content:center;padding:4px 0 2px;flex-wrap:wrap;z-index:6;position:relative;}
+  .boss-active #skill-bar,.in-game.boss-active #skill-bar{display:none!important;}
+  .sk-charge{display:flex;align-items:center;gap:3px;font-size:11px;color:#ffd84a;font-family:Rajdhani,sans-serif;font-weight:800;}
+  .sk-charge i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.14);transition:background .2s,box-shadow .2s;}
+  .sk-charge i.on{background:#ffd84a;box-shadow:0 0 7px rgba(255,216,74,.8);}
+  .sk-btn{display:flex;align-items:center;gap:4px;padding:5px 9px 5px 7px;border-radius:13px;cursor:pointer;
+    background:linear-gradient(160deg,rgba(40,30,62,.85),rgba(20,14,32,.9));border:1px solid rgba(255,255,255,.1);
+    font-family:Rajdhani,sans-serif;font-weight:800;font-size:10px;letter-spacing:.5px;color:#9a8fc0;transition:transform .1s,filter .2s,border-color .2s,opacity .2s;opacity:.5;}
+  .sk-btn .sk-ic{font-size:16px;filter:grayscale(.5);}
+  .sk-btn.ready{opacity:1;color:#eaf2ff;border-color:rgba(120,200,255,.4);}
+  .sk-btn.ready .sk-ic{filter:none;}
+  .sk-btn.ready:active{transform:scale(.9);}
+  .sk-btn.active{border-color:#43e0a0;color:#43e0a0;box-shadow:0 0 12px rgba(67,224,160,.45);animation:skActive 1s ease-in-out infinite;}
+  @keyframes skActive{0%,100%{filter:brightness(1);}50%{filter:brightness(1.4);}}
+  .sk-flash{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font-family:Bungee,sans-serif;font-size:30px;z-index:9990;pointer-events:none;text-shadow:0 0 22px currentColor;animation:skFlashA 1s ease forwards;}
+  @keyframes skFlashA{0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}22%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}80%{opacity:1;}100%{opacity:0;transform:translate(-50%,-66%) scale(1);}}
+  .sk-toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);background:rgba(10,16,32,.92);border:1px solid rgba(255,255,255,.14);
+    border-radius:12px;padding:7px 14px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:12px;color:#eaf2ff;z-index:9991;pointer-events:none;white-space:nowrap;animation:skToastA 1.6s ease forwards;}
+  @keyframes skToastA{0%{opacity:0;transform:translateX(-50%) translateY(8px);}15%,75%{opacity:1;transform:translateX(-50%) translateY(0);}100%{opacity:0;transform:translateX(-50%) translateY(-6px);}}`;
+  document.head.appendChild(s);
+}
+function renderSkillBar(){
+  injectSkillCSS();
+  const bar=document.getElementById('skill-bar'); if(!bar) return;
+  if(!skillBarVisible()){ bar.style.display='none'; return; }
+  bar.style.display='flex';
+  const un=skillsUnlocked();
+  let pips=''; for(let i=0;i<SKILL_MAX_CHARGE;i++) pips+='<i class="'+(i<skillCharges?'on':'')+'"></i>';
+  bar.innerHTML='<div class="sk-charge">⚡'+pips+'</div>'+un.map(s=>{
+    const armed=(s.id==='shield'&&skillShield)||(s.id==='over'&&skillOvercharge);
+    return '<button class="sk-btn'+(skillCharges>0?' ready':'')+(armed?' active':'')+'" data-sk="'+s.id+'" onclick="useSkill(\''+s.id+'\')"><span class="sk-ic">'+s.ic+'</span><span class="sk-nm">'+s.name+'</span></button>';
+  }).join('');
+}
+function gainSkillCharge(){ _skillSolveCnt++; if(_skillSolveCnt>=SKILL_SOLVES_PER_CHARGE){ _skillSolveCnt=0; if(skillCharges<SKILL_MAX_CHARGE){ skillCharges++; renderSkillBar(); } } }
+function skFlash(txt,col){ const ph=document.getElementById('phone'); if(!ph) return; const d=document.createElement('div'); d.className='sk-flash'; d.textContent=txt; d.style.color=col||'#fff'; ph.appendChild(d); setTimeout(()=>d.remove(),1000); }
+function showSkillToast(msg){ const ph=document.getElementById('phone'); if(!ph) return; const d=document.createElement('div'); d.className='sk-toast'; d.textContent=msg; ph.appendChild(d); setTimeout(()=>d.remove(),1600); }
+function _skillRestoreTs(token,val){ const t=token; setTimeout(()=>{ if(_skillTsToken===t) timescale=1; }, val); }
+function useSkill(id){
+  if(!skillBarVisible()) return;
+  const def=SKILL_DEFS.find(s=>s.id===id); if(!def || pLevel<def.lvl) return;
+  if((id==='shield'&&skillShield)||(id==='over'&&skillOvercharge)) return;   // already armed
+  if(skillCharges<=0){ showSkillToast('Need ⚡ — keep solving to charge!'); if(typeof haptic==='function')haptic([30,30]); return; }
+  skillCharges--; initAudio(); if(typeof haptic==='function')haptic(20);
+  if(id==='freeze'){ _skillTsToken++; timescale=0.05; skFlash('❄️ FREEZE',def.col); beep(880,.12,'sine',.13); _skillRestoreTs(_skillTsToken,2000); }
+  else if(id==='slowmo'){ _skillTsToken++; timescale=0.42; skFlash('🐌 SLOW-MO',def.col); beep(520,.2,'sine',.12); _skillRestoreTs(_skillTsToken,3500); }
+  else if(id==='purge'){ skFlash('💣 PURGE',def.col); beep(170,.18,'sawtooth',.15);
+    if(typeof fallers!=='undefined' && fallers.length){ fallers.forEach(f=>{ if(!f.correct && f.val!=='BONUS' && f.el){ f.el.style.transition='transform .25s,opacity .25s'; f.el.style.opacity='0'; const tf=f.el.style.transform||''; f.el.style.transform=tf+' scale(1.4)'; setTimeout(()=>f.el&&f.el.remove(),260); f.dead=true; } }); fallers=fallers.filter(f=>!f.dead); }
+    if(typeof triggerSparks==='function') triggerSparks(20,true); }
+  else if(id==='over'){ skillOvercharge=true; skFlash('⚡ OVERCHARGE',def.col); showSkillToast('⚡ Next solve ×3 + chain lightning!'); }
+  else if(id==='shield'){ skillShield=true; skFlash('🛡️ SHIELD',def.col); showSkillToast('🛡️ Blocks your next miss'); }
+  renderSkillBar();
+}
+// called by life-loss paths — returns true if the hit was blocked by a shield
+function consumeShield(){ if(skillShield){ skillShield=false; if(typeof skFlash==='function') skFlash('🛡️ BLOCKED','#43e0a0'); if(typeof haptic==='function')haptic([20,40,20]); renderSkillBar(); return true; } return false; }
+function resetSkills(){ skillCharges=1; _skillSolveCnt=0; skillShield=false; skillOvercharge=false; _skillTsToken++; }
 
 /* ═══════════ P3: PERFECT WAVE · COMBO BANK · PARRY · FINAL WAVE ═══════════ */
 let levelPerfectWaves=0, bankPts=0, parryActive=false, finalWaveOn=false;
@@ -4692,7 +4799,7 @@ function timeUpHeartBreak(){
   clearInterval(timerInt);
   if(loopRaf)cancelAnimationFrame(loopRaf);
   initAudio(); sfxWrong(); haptic([60,40,80]);
-  pLives--; levelTimedOut=true; levelLivesLost++;
+  if(typeof consumeShield==='function'&&consumeShield()){ } else { pLives--; levelTimedOut=true; levelLivesLost++; }
   burnBank();
   recentLosses++; recentWins=0;
   if(recentLosses>=2){ difficultyMod=Math.max(difficultyMod-0.12,0.7); recentLosses=0; }
@@ -5062,7 +5169,8 @@ function handleSuccess(){
   const exprBonus=Math.max(0,opCount-1);              // extra ops beyond the first
   const exprMult=1+0.6*exprBonus;                     // +60% per extra operation
   const feverMult=(gSubMode==='math'&&streakCount>=8)?2:1;   // FEVER (streak 8+): double points
-  const pts=Math.round(basePts*comboMult*bossBonus*exprMult*feverMult);
+  let pts=Math.round(basePts*comboMult*bossBonus*exprMult*feverMult);
+  if(typeof skillOvercharge!=='undefined' && skillOvercharge){ pts*=3; skillOvercharge=false; if(typeof skFlash==='function') skFlash('⚡ ×3!','#ffd84a'); if(typeof triggerSparks==='function') triggerSparks(24,true); }   // OVERCHARGE skill
   let goldEarned=Math.round((2+comboMult)*bossBonus*exprMult);   // gold trimmed — it's a soft consumable currency, kept scarcer
   if(exprBonus>0) setTimeout(()=>showGoldPop('⚡ '+(opCount)+'-OP CHAIN! +'+Math.round((exprMult-1)*100)+'%'),200);
   // GOD MODE: huge bonus + chance for gem
@@ -5072,6 +5180,7 @@ function handleSuccess(){
   // Boss solve: guaranteed gem
   if(isBoss && Math.random()<0.22){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); }
   pScore+=pts; pGold+=goldEarned; pXP+=pts; solvedCount++; pTotalSolved++;
+  if(typeof gainSkillCharge==='function'){ gainSkillCharge(); renderSkillBar(); }   // solving fills the skill charge pool
   streakCount++;
   // per-level tracking for stars + objectives
   if(comboMult>levelMaxComboMult) levelMaxComboMult=comboMult;
@@ -5179,7 +5288,7 @@ function handleSuccess(){
     setTimeout(()=>setTarget(), 500);
     return;
   }
-  const needed=isBoss?bossTarget:(gMode==='word'?Math.min(4+Math.floor(pLevel/4),8):Math.min(5+pLevel,18));   // word levels are shorter (fits 60s; stretches the word pool across 50 levels)
+  const needed=isBoss?bossTarget:(gMode==='word'?Math.min(4+Math.floor(pLevel/4),8):levelNeed());   // word levels are shorter (fits 60s; stretches the word pool across 50 levels)
   if(solvedCount>=needed){
     const wasBoss=isBoss;
     endFinalWave();
@@ -7093,7 +7202,7 @@ function updateHUD(){
   for(let i=0;i<shown;i++) h+='<span class="heart-emoji'+(i<pLives?'':' lost')+'">'+(i<pLives?'❤️':'🖤')+'</span>';
   document.getElementById('g-lives').innerHTML=h;
   const rank=pLevel<3?'ROOKIE':pLevel<6?'PRO':'MASTER';
-  const needed=isBoss?bossTarget:Math.min(5+pLevel,18);
+  const needed=isBoss?bossTarget:levelNeed();
   const pill=document.getElementById('g-mode-pill');
   const prog=document.getElementById('g-progress');
   if(gMode==='time'){
@@ -7108,6 +7217,20 @@ function updateHUD(){
     if(pill) pill.textContent=modeEmoji+' '+(gSubMode==='math'?'MATH':'WORD');
     if(prog) prog.textContent=solvedCount+'/'+needed+(isBoss?' 💀':'');
   }
+  // LEVEL PROGRESS BAR — fills as you solve; glows + pulses near the top
+  (function(){ const tr=document.getElementById('lvl-track'); if(!tr) return;
+    const fill=document.getElementById('lvl-track-fill'), lbl=document.getElementById('lvl-track-lbl'), fr=document.getElementById('lvl-track-frac');
+    if(isBoss || gMode==='time' || gMode==='pulse'){ tr.style.display='none'; return; }
+    tr.style.display='';
+    const pct=Math.max(0,Math.min(100,(solvedCount/Math.max(1,needed))*100));
+    if(fill) fill.style.width=pct+'%';
+    if(lbl) lbl.textContent='LV '+pLevel;
+    if(fr) fr.textContent=solvedCount+' / '+needed;
+    tr.classList.toggle('near-full', solvedCount>=needed-2 && solvedCount<needed);
+    if(solvedCount>(_lastBarSolved||0)){ tr.classList.remove('bump'); void tr.offsetWidth; tr.classList.add('bump'); }
+    _lastBarSolved=solvedCount;
+  })();
+  if(typeof renderSkillBar==='function') renderSkillBar();   // keep the player skill bar in sync
   document.getElementById('g-score').textContent=pScore;
   document.getElementById('m-gold').textContent=pGold;
   const mgems=document.getElementById('m-gems');if(mgems)mgems.textContent=pGems;
@@ -7345,7 +7468,7 @@ const fakeRosters={
 let currentLbMode='math';
 function modeBest(mode){ return parseInt(localStorage_get('numa_best_'+mode)||'0'); }
 function setModeBest(mode,score){
-  if(score>modeBest(mode)) localStorage_set('numa_best_'+mode,String(score));
+  if(score>modeBest(mode)){ localStorage_set('numa_best_'+mode,String(score)); if(typeof submitScore==='function') submitScore(mode,score); }
 }
 function switchLbTab(mode,el){
   currentLbMode=mode;
@@ -7356,14 +7479,45 @@ function switchLbTab(mode,el){
   initAudio(); sfxClick();
   renderLeaderboard();
 }
+function _avatarEmoji(){ const a=(typeof playerAvatar!=='undefined')?playerAvatar:''; return (a && !a.startsWith('data:'))?a:'🙂'; }
+// lazily get the Firestore handle (robust against config init timing/caching)
+function fbDB(){ if(!window.fbDb && typeof firebase!=='undefined' && firebase.firestore){ try{ window.fbDb=firebase.firestore(); }catch(e){} } return window.fbDb; }
+// write the player's new best to the GLOBAL leaderboard (signed-in, non-guest only)
+function submitScore(mode,score){
+  try{
+    const db=fbDB();
+    if(!db || !window.fbAuth || !window.fbAuth.currentUser || isGuest || !(score>0)) return;
+    const u=window.fbAuth.currentUser;
+    const data={ name:(playerName||'Player').slice(0,16), av:_avatarEmoji(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
+    data[mode]=score;   // merge keeps other modes; we only call this on a NEW local best so it's monotonic
+    db.collection('scores').doc(u.uid).set(data,{merge:true}).catch(e=>console.warn('[lb] write',e));
+  }catch(e){ console.warn('[lb] submit',e); }
+}
 function renderLeaderboard(){
   const list=document.getElementById('lb-list');
   if(!list)return;
-  const roster=fakeRosters[currentLbMode]||fakeRosters.math;
-  const myBest=modeBest(currentLbMode);
-  const all=[...roster.map(p=>({name:p.n,score:p.s,emoji:p.e})),{name:playerName,score:myBest,emoji:playerAvatar,you:true}];
-  all.sort((a,b)=>b.score-a.score);
-  list.innerHTML='';
+  const mode=currentLbMode;
+  const myBest=modeBest(mode);
+  const meUid=(window.fbAuth&&window.fbAuth.currentUser)?window.fbAuth.currentUser.uid:null;
+  const bots=(fakeRosters[mode]||fakeRosters.math).map(p=>({name:p.n,score:p.s,emoji:p.e}));
+  const paint=(real)=>{
+    let all=real.filter(p=>p.score>0);
+    if(meUid && all.some(p=>p.uid===meUid)){ all.forEach(p=>{ if(p.uid===meUid){ p.you=true; if(myBest>p.score) p.score=myBest; } }); }
+    else { all.push({name:(playerName||'Player'),score:myBest,emoji:(typeof playerAvatar!=='undefined'?playerAvatar:'🙂'),you:true,uid:meUid}); }
+    for(const b of bots){ if(all.length>=20) break; all.push(b); }   // bot filler so it never looks empty (real players bump them off)
+    all.sort((a,b)=>b.score-a.score);
+    list.innerHTML='';
+    _paintLbRows(list, all);
+  };
+  paint([]);   // show bots + you INSTANTLY (never a blank list while Firestore loads/fails)
+  const db=fbDB();
+  if(db){
+    db.collection('scores').orderBy(mode,'desc').limit(50).get()
+      .then(snap=>{ const real=[]; snap.forEach(d=>{ const x=d.data()||{}; if(typeof x[mode]==='number' && x[mode]>0) real.push({name:(x.name||'Player'),score:x[mode],emoji:(x.av||'🙂'),uid:d.id}); }); if(mode===currentLbMode) paint(real); })   // re-paint with real data when it arrives
+      .catch(e=>{ console.warn('[lb] read',e); });
+  }
+}
+function _paintLbRows(list, all){
   all.forEach((p,i)=>{
     const rank=i+1;
     const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
