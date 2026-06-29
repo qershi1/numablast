@@ -8660,19 +8660,39 @@ function loginWith(provider){
   }
   finishLogin('⚡ Signed in! Welcome back.');
 }
-// when the page returns from a REDIRECT sign-in (mobile path), finish the login
+// shared: apply a signed-in Firebase user to the local session + route into the game.
+// Works whether the splash is still up (we just flip authMethod so dismissSplash routes
+// straight to the game) or the login overlay is already showing (finishLogin hides it).
+function _applyFbUser(u, provider){
+  if(!u) return;
+  if(authMethod===provider && isAuthed()) return; // already done this session
+  provider = provider || localStorage_get('numa_pending_auth') ||
+             (u.providerData&&u.providerData[0]&&/apple/i.test(u.providerData[0].providerId)?'apple':'google');
+  try{ localStorage.removeItem('numa_pending_auth'); }catch(e){}
+  authMethod=provider; isGuest=false;
+  localStorage_set('numa_auth',provider);
+  if(u.displayName){ playerName=u.displayName; localStorage_set('numa_name',playerName); }
+  if(u.email) localStorage_set('numa_email',u.email);
+  const lg=document.getElementById('login');
+  const loginShowing = lg && (lg.classList.contains('show') || (lg.style.display!=='none' && getComputedStyle(lg).display!=='none'));
+  if(splashDismissed && loginShowing){
+    if(typeof finishLogin==='function') finishLogin('⚡ Signed in! Welcome.');
+  } else {
+    // splash still up (or login not yet shown) — just refresh the profile; dismissSplash will route to game
+    if(typeof applyAuthProfile==='function') applyAuthProfile();
+  }
+}
+// when the page returns from a REDIRECT sign-in (mobile path), finish the login.
+// We listen on BOTH getRedirectResult AND onAuthStateChanged: Safari/ITP can leave
+// getRedirectResult empty even when persistence succeeded, so the auth-state listener
+// is the reliable path that actually catches the restored user.
 function _handleRedirectAuth(){
   if(!window.fbAuth) return;
+  window.fbAuth.onAuthStateChanged(function(u){
+    if(u && !isAuthed()){ _applyFbUser(u, null); }
+  });
   window.fbAuth.getRedirectResult().then(function(res){
-    if(res && res.user){
-      const u=res.user, provider=localStorage_get('numa_pending_auth')||'google';
-      try{ localStorage.removeItem('numa_pending_auth'); }catch(e){}
-      authMethod=provider; isGuest=false;
-      localStorage_set('numa_auth',provider);
-      if(u.displayName){ playerName=u.displayName; localStorage_set('numa_name',playerName); }
-      if(u.email) localStorage_set('numa_email',u.email);
-      if(typeof finishLogin==='function') finishLogin('⚡ Signed in! Welcome.');
-    }
+    if(res && res.user){ _applyFbUser(res.user, localStorage_get('numa_pending_auth')||'google'); }
   }).catch(function(e){ const err=document.getElementById('lg-err'); if(err) err.textContent=fbErr(e); console.warn('[firebase] redirect result', e); });
 }
 try{ _handleRedirectAuth(); }catch(e){}
