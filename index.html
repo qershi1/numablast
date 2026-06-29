@@ -8618,6 +8618,20 @@ function loginWith(provider){
     if(provider==='google') p=new firebase.auth.GoogleAuthProvider();
     else { p=new firebase.auth.OAuthProvider('apple.com'); p.addScope('email'); p.addScope('name'); }
     if(err) err.textContent='Connecting…';
+    // iOS Safari / mobile webviews block the async popup that signInWithPopup opens
+    // (it "flashes" a blank tab and dies). Go straight to a full-page REDIRECT there,
+    // called synchronously inside this tap so Safari allows the navigation.
+    const _isMobile = /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent)
+      || (navigator.maxTouchPoints>1 && /Macintosh/.test(navigator.userAgent)) // iPadOS reports as Mac
+      || window.matchMedia('(pointer:coarse)').matches;
+    if(_isMobile){
+      try{
+        localStorage_set('numa_pending_auth',provider);
+        if(err) err.textContent=(provider==='google'?'Opening Google…':'Opening Apple…');
+        window.fbAuth.signInWithRedirect(p);
+      }catch(e2){ if(err) err.textContent=fbErr(e2); console.warn('[firebase] redirect start', e2); }
+      return;
+    }
     window.fbAuth.signInWithPopup(p).then(res=>{
       const u=res.user;
       authMethod=provider; isGuest=false;
