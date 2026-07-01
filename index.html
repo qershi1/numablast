@@ -1679,6 +1679,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .lg-back{background:none;border:none;color:rgba(255,255,255,.5);font-family:'DM Sans',sans-serif;
   font-size:13px;font-weight:600;cursor:pointer;align-self:center;margin-top:4px;}
 .lg-err{color:#ff6b6b;font-size:11.5px;text-align:center;min-height:14px;font-weight:600;}
+.lg-switch-mode{text-align:center;font-size:12.5px;color:rgba(255,255,255,.55);cursor:pointer;margin-top:2px;font-family:'DM Sans',sans-serif;}
+.lg-switch-mode b{color:#00d4ff;font-weight:700;}
 </style>
 <!-- Firebase Auth (compat CDN — no bundler needed) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -1745,9 +1747,10 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
       <div class="lg-form" id="lg-form">
         <input class="lg-field" id="lg-name" type="text" autocomplete="name" placeholder="Display name" maxlength="16">
         <input class="lg-field" id="lg-email" type="email" autocomplete="email" placeholder="Email">
-        <input class="lg-field" id="lg-pass" type="password" autocomplete="new-password" placeholder="Password (min 6)">
+        <input class="lg-field" id="lg-pass" type="password" autocomplete="current-password" placeholder="Password (min 6)">
         <div class="lg-err" id="lg-err"></div>
-        <button class="lg-btn lg-register" onclick="submitRegister()">⚡ Create Account & Play</button>
+        <button class="lg-btn lg-register" id="lg-submit-btn" onclick="submitAuthForm()">⚡ Create Account & Play</button>
+        <div class="lg-switch-mode" id="lg-switch-mode" onclick="toggleAuthMode()">Already have an account? <b>Sign In</b></div>
         <button class="lg-back" onclick="hideRegister()">← Back</button>
       </div>
 
@@ -8700,15 +8703,64 @@ function hideLogin(){
   lg.classList.add('hiding');
   setTimeout(()=>{ lg.classList.remove('show','hiding'); lg.style.display='none'; }, 460);
 }
+let authFormMode='register';   // 'register' | 'signin' — toggled via the "Already have an account?" link
 function showRegister(){
   initAudio(); sfxClick();
   document.getElementById('lg-main').style.display='none';
   document.getElementById('lg-form').classList.add('show');
   document.getElementById('lg-err').textContent='';
+  authFormMode='register'; _applyAuthFormMode();   // always reopen fresh in "create account" mode
 }
 function hideRegister(){
   document.getElementById('lg-main').style.display='flex';
   const f=document.getElementById('lg-form'); if(f) f.classList.remove('show');
+}
+function _applyAuthFormMode(){
+  const nameField=document.getElementById('lg-name'), btn=document.getElementById('lg-submit-btn'), sw=document.getElementById('lg-switch-mode');
+  if(authFormMode==='signin'){
+    if(nameField) nameField.style.display='none';
+    if(btn) btn.textContent='⚡ Sign In & Play';
+    if(sw) sw.innerHTML='New here? <b>Create Account</b>';
+  } else {
+    if(nameField) nameField.style.display='';
+    if(btn) btn.textContent='⚡ Create Account & Play';
+    if(sw) sw.innerHTML='Already have an account? <b>Sign In</b>';
+  }
+}
+function toggleAuthMode(){
+  initAudio(); sfxClick();
+  authFormMode=(authFormMode==='register')?'signin':'register';
+  const err=document.getElementById('lg-err'); if(err) err.textContent='';
+  _applyAuthFormMode();
+}
+function submitAuthForm(){ if(authFormMode==='signin') submitSignIn(); else submitRegister(); }
+// EMAIL SIGN-IN for returning email/password accounts (previously missing — createUserWithEmailAndPassword
+// was the only email path, so anyone who registered had no way to log back in on a fresh session).
+function submitSignIn(){
+  initAudio();
+  const email=document.getElementById('lg-email').value.trim();
+  const pass=document.getElementById('lg-pass').value;
+  const err=document.getElementById('lg-err');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ err.textContent='Enter a valid email.'; return; }
+  if(pass.length<6){ err.textContent='Password must be at least 6 characters.'; return; }
+  err.textContent='';
+  if(window.fbAuth && typeof firebase!=='undefined'){
+    err.textContent='Signing in…';
+    window.fbAuth.signInWithEmailAndPassword(email,pass).then(res=>{
+      const u=res.user;
+      authMethod='email'; isGuest=false;
+      localStorage_set('numa_auth','email'); localStorage_set('numa_email',email);
+      if(u&&u.displayName){ playerName=u.displayName; localStorage_set('numa_name',playerName); }
+      err.textContent=''; sfxLevelUp&&sfxLevelUp();
+      finishLogin('⚡ Welcome back!');
+    }).catch(e=>{ err.textContent=fbErr(e); console.warn('[firebase] signin', e); });
+    return;
+  }
+  // FALLBACK STUB (no Firebase SDK)
+  authMethod='email'; isGuest=false;
+  localStorage_set('numa_auth','email'); localStorage_set('numa_email',email);
+  sfxLevelUp&&sfxLevelUp();
+  finishLogin('⚡ Welcome back!');
 }
 // friendly message from a Firebase auth error
 function fbErr(e){
@@ -8874,8 +8926,12 @@ function applyAuthProfile(){
 function logout(){
   authMethod=''; isGuest=false;
   try{ localStorage.removeItem('numa_auth'); }catch(e){}
-  try{ if(window.fbAuth) window.fbAuth.signOut(); }catch(e){}   // also end the Firebase session
-  location.reload();
+  const doReload=()=>location.reload();
+  // MUST await signOut before reloading — reloading immediately raced Firebase's async signOut,
+  // so the new page load's onAuthStateChanged could still see the OLD session and silently
+  // re-sign the player back in, making "Sign Out" look unresponsive (nothing visibly changed).
+  try{ if(window.fbAuth) window.fbAuth.signOut().then(doReload).catch(doReload); else doReload(); }
+  catch(e){ doReload(); }
 }
 function hideModal(id){ const m=document.getElementById(id); if(m) m.style.display='none'; }
 function showGuestWall(){
