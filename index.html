@@ -77,8 +77,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .coin-ic{width:17px;height:17px;border-radius:50%;flex-shrink:0;
   background:radial-gradient(circle at 35% 28%,#fff1b8,#ffd24a 45%,#d88a10 80%);
   box-shadow:0 0 7px rgba(255,190,60,.6),inset 0 1px 1px rgba(255,255,255,.6),inset 0 -2px 3px rgba(150,90,0,.5);}
-.gem-ic{width:15px;height:16px;flex-shrink:0;background:linear-gradient(135deg,#aef0ff,#7adfff 35%,#2a7ae0);
-  clip-path:polygon(50% 0,100% 36%,80% 100%,20% 100%,0 36%);filter:drop-shadow(0 0 5px rgba(80,180,255,.7));}
+.gem-ic{width:16px;height:16px;flex-shrink:0;background:linear-gradient(135deg,#aef0ff,#7adfff 35%,#2a7ae0);
+  clip-path:polygon(50% 0,100% 38%,50% 100%,0 38%);filter:drop-shadow(0 0 5px rgba(80,180,255,.7));}
 .cur-plus{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;margin-left:1px;
   background:rgba(255,255,255,.14);color:#fff;font-size:13px;font-weight:800;line-height:1;}
 
@@ -692,6 +692,32 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 /* GRID BOARD */
 .grid-board{flex:1;background:rgba(8,12,20,0.35);border:1px solid rgba(255,255,255,0.1);border-radius:18px;position:relative;overflow:hidden;backdrop-filter:blur(0px);}
 .grid-board::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(8,12,20,.4) 100%);pointer-events:none;border-radius:18px;z-index:2;}
+/* board-frame wraps #g-board purely so these edge lights have a stable paint layer — #g-board's
+   OWN innerHTML gets replaced wholesale by BUILD/CHAIN waves, which would wipe a child/pseudo here. */
+.board-frame{position:relative;flex:1;display:flex;min-height:0;}
+/* FINAL STRETCH — KNIGHT RIDER style scanner beam sweeping up↕down the LEFT+RIGHT edges as a level
+   nears completion: yellow (2 solves left), red+faster (last one). Two layers per edge: a dim
+   constant edge tint (so the danger zone reads even mid-sweep) + a bright hot-core beam that bounces
+   top-to-bottom via animated background-position (survives #g-board content resets, unlike a child). */
+.board-frame::before,.board-frame::after{content:'';position:absolute;top:0;bottom:0;width:18px;z-index:8;pointer-events:none;opacity:0;
+  background-repeat:no-repeat;background-size:100% 100%,100% 36%;}
+.board-frame::before{left:0;}
+.board-frame::after{right:0;}
+.board-frame.edge-warn::before,.board-frame.edge-warn::after{
+  opacity:1;
+  background-image:linear-gradient(rgba(255,216,74,.22),rgba(255,216,74,.22)),
+                    linear-gradient(rgba(255,216,74,0),rgba(255,250,220,.98) 45%,rgba(255,216,74,.9) 65%,rgba(255,216,74,0));
+  filter:drop-shadow(0 0 6px rgba(255,216,74,.9));
+  animation:edgeScan 1s ease-in-out infinite alternate;
+}
+.board-frame.edge-crit::before,.board-frame.edge-crit::after{
+  opacity:1;
+  background-image:linear-gradient(rgba(255,55,55,.28),rgba(255,55,55,.28)),
+                    linear-gradient(rgba(255,55,55,0),rgba(255,240,240,1) 45%,rgba(255,55,55,.95) 65%,rgba(255,55,55,0));
+  filter:drop-shadow(0 0 10px rgba(255,55,55,1));
+  animation:edgeScan .45s ease-in-out infinite alternate;
+}
+@keyframes edgeScan{0%{background-position:0 0,0 -36%;}100%{background-position:0 0,0 136%;}}
 
 /* TILE GRID (for letter mode) */
 .tile-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px;}
@@ -1307,56 +1333,110 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .theme-8bit .score-chip{border-radius:0 !important;border:2px solid rgba(255,255,255,0.2) !important;}
 
 /* ═══ THEMES ═══ */
-/* NEON THEME — cyberpunk glowing */
-.phone.theme-neon{box-shadow:0 0 0 8px #0a0d13,0 0 0 9px rgba(0,255,200,.2),0 0 50px rgba(0,255,200,.3),0 40px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);}
+/* Each theme now reskins the WHOLE app shell (background wash, PLAY button, bottom-nav accent,
+   home mode-cards, avatar ring) — not just the falling tiles — so themes actually read as different
+   at a glance, not just during a gameplay wave. */
+
+/* NEON THEME — cyberpunk glowing (cyan → blue → violet) */
+.phone.theme-neon{box-shadow:0 0 0 8px #0a0d13,0 0 0 9px rgba(0,255,200,.2),0 0 50px rgba(0,255,200,.3),0 40px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);
+  background:radial-gradient(120% 70% at 10% -10%,rgba(0,255,200,.14),transparent 55%),radial-gradient(120% 70% at 100% 110%,rgba(150,0,255,.14),transparent 55%),#05080f;}
 .theme-neon .gtile,.theme-neon .ltile{box-shadow:0 4px 0 rgba(0,0,0,.5),0 0 22px rgba(0,255,200,.6)!important;border:1px solid rgba(0,255,200,.4);}
 .theme-neon .gt-num,.theme-neon .lt-num{background:linear-gradient(135deg,#00ffc8,#0088ff)!important;}
 .theme-neon .gt-op,.theme-neon .lt-op{background:linear-gradient(135deg,#ff00e5,#aa00ff)!important;}
 .theme-neon .gt-word{background:linear-gradient(135deg,#00ffc8,#ff00e5)!important;}
 .theme-neon .target-panel{border-color:rgba(0,255,200,.5)!important;box-shadow:0 0 25px rgba(0,255,200,.2);}
-.theme-neon .grid-board{border-color:rgba(0,255,200,.3)!important;}
+.theme-neon .grid-board{border-color:rgba(0,255,200,.3)!important;background:rgba(0,40,45,.28)!important;}
 .theme-neon .tp-hint{color:#00ffc8!important;text-shadow:0 0 16px rgba(0,255,200,.5)!important;}
 .theme-neon .gold-chip{box-shadow:0 0 12px rgba(0,255,200,.2);}
+.theme-neon .mode-card{background:linear-gradient(160deg,rgba(0,60,55,.55),rgba(6,16,26,.94))!important;border-color:rgba(0,255,200,.22)!important;}
+.theme-neon .home-play{background:linear-gradient(180deg,#00ffc8 0%,#00a8ff 55%,#7a00ff 100%)!important;
+  box-shadow:0 8px 26px rgba(0,210,255,.45),0 0 36px rgba(0,230,255,.3),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,40,70,.5)!important;}
+.theme-neon .home-play::after{border-color:rgba(0,255,220,.5)!important;}
+.theme-neon .nav-btn.active,.theme-neon .nav-btn.active i,.theme-neon .nav-btn.active svg,.theme-neon .nav-btn.active span{color:#00ffc8!important;}
+.theme-neon .nav-btn.active .nav-emoji{filter:grayscale(0) brightness(1.1) drop-shadow(0 0 9px rgba(0,255,200,.7))!important;}
+.theme-neon .nav-btn::before{background:linear-gradient(90deg,#00ffc8,#0088ff)!important;box-shadow:0 0 8px rgba(0,255,200,.7)!important;}
+.theme-neon .avatar-ring{background:conic-gradient(#00ffc8 calc(var(--xp,40deg)), rgba(255,255,255,.12) 0)!important;}
 
-/* SUNSET THEME — warm gradient */
-.phone.theme-sunset{box-shadow:0 0 0 8px #1a0d08,0 0 0 9px rgba(255,140,60,.2),0 0 50px rgba(255,120,40,.25),0 40px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);}
+/* SUNSET THEME — warm dusk gradient (orange → coral → magenta) */
+.phone.theme-sunset{box-shadow:0 0 0 8px #1a0d08,0 0 0 9px rgba(255,140,60,.2),0 0 50px rgba(255,120,40,.25),0 40px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);
+  background:radial-gradient(120% 70% at 15% -10%,rgba(255,140,60,.16),transparent 55%),radial-gradient(120% 70% at 100% 110%,rgba(255,50,110,.14),transparent 55%),#140a08;}
 .theme-sunset .gtile,.theme-sunset .ltile{box-shadow:0 4px 0 rgba(80,20,0,.6),0 0 18px rgba(255,140,60,.5)!important;}
 .theme-sunset .gt-num,.theme-sunset .lt-num{background:linear-gradient(135deg,#ff9a3c,#ff5e62)!important;}
 .theme-sunset .gt-op,.theme-sunset .lt-op{background:linear-gradient(135deg,#ff5e62,#c2185b)!important;}
 .theme-sunset .gt-word{background:linear-gradient(135deg,#ffb347,#ff5e62)!important;}
 .theme-sunset .target-panel{border-color:rgba(255,140,60,.5)!important;background:rgba(40,15,10,0.6)!important;}
-.theme-sunset .grid-board{border-color:rgba(255,140,60,.3)!important;}
+.theme-sunset .grid-board{border-color:rgba(255,140,60,.3)!important;background:rgba(40,14,10,.32)!important;}
 .theme-sunset .tp-hint{color:#ffb347!important;}
+.theme-sunset .mode-card{background:linear-gradient(160deg,rgba(70,30,20,.55),rgba(20,10,10,.94))!important;border-color:rgba(255,140,60,.22)!important;}
+.theme-sunset .home-play{background:linear-gradient(180deg,#ffb347 0%,#ff5e62 55%,#c2185b 100%)!important;
+  box-shadow:0 8px 26px rgba(255,90,90,.45),0 0 36px rgba(255,90,90,.28),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(90,10,30,.5)!important;}
+.theme-sunset .home-play::after{border-color:rgba(255,150,90,.5)!important;}
+.theme-sunset .nav-btn.active,.theme-sunset .nav-btn.active i,.theme-sunset .nav-btn.active svg,.theme-sunset .nav-btn.active span{color:#ff9a5a!important;}
+.theme-sunset .nav-btn.active .nav-emoji{filter:grayscale(0) brightness(1.1) drop-shadow(0 0 9px rgba(255,140,60,.7))!important;}
+.theme-sunset .nav-btn::before{background:linear-gradient(90deg,#ffb347,#ff5e62)!important;box-shadow:0 0 8px rgba(255,140,60,.7)!important;}
+.theme-sunset .avatar-ring{background:conic-gradient(#ff9a5a calc(var(--xp,40deg)), rgba(255,255,255,.12) 0)!important;}
 
-/* CANDY THEME — sweet pink/purple */
-.phone.theme-candy{box-shadow:0 0 0 8px #2a0f24,0 0 0 9px rgba(255,140,200,.25),0 0 50px rgba(255,120,190,.3),0 40px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);}
+/* CANDY THEME — sweet pink/purple pop */
+.phone.theme-candy{box-shadow:0 0 0 8px #2a0f24,0 0 0 9px rgba(255,140,200,.25),0 0 50px rgba(255,120,190,.3),0 40px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);
+  background:radial-gradient(120% 70% at 15% -10%,rgba(255,140,200,.16),transparent 55%),radial-gradient(120% 70% at 100% 110%,rgba(167,139,250,.16),transparent 55%),#140a16;}
 .theme-candy .gtile,.theme-candy .ltile{box-shadow:0 4px 0 rgba(120,20,80,.5),0 0 18px rgba(255,140,200,.5)!important;}
 .theme-candy .gt-num,.theme-candy .lt-num{background:linear-gradient(135deg,#ff8fd0,#ff5ea8)!important;}
 .theme-candy .gt-op,.theme-candy .lt-op{background:linear-gradient(135deg,#a78bfa,#7c3aed)!important;}
 .theme-candy .gt-word{background:linear-gradient(135deg,#ffd1ec,#ff8fd0)!important;}
 .theme-candy .target-panel{border-color:rgba(255,140,200,.5)!important;}
-.theme-candy .grid-board{border-color:rgba(255,140,200,.3)!important;}
+.theme-candy .grid-board{border-color:rgba(255,140,200,.3)!important;background:rgba(40,12,32,.32)!important;}
 .theme-candy .tp-hint{color:#ff9ed6!important;}
+.theme-candy .mode-card{background:linear-gradient(160deg,rgba(70,25,55,.55),rgba(22,10,20,.94))!important;border-color:rgba(255,140,200,.22)!important;}
+.theme-candy .home-play{background:linear-gradient(180deg,#ff8fd0 0%,#ff5ea8 55%,#7c3aed 100%)!important;
+  box-shadow:0 8px 26px rgba(255,90,190,.4),0 0 36px rgba(200,90,255,.28),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(70,10,60,.5)!important;}
+.theme-candy .home-play::after{border-color:rgba(255,150,220,.5)!important;}
+.theme-candy .nav-btn.active,.theme-candy .nav-btn.active i,.theme-candy .nav-btn.active svg,.theme-candy .nav-btn.active span{color:#ff8fd0!important;}
+.theme-candy .nav-btn.active .nav-emoji{filter:grayscale(0) brightness(1.1) drop-shadow(0 0 9px rgba(255,140,200,.7))!important;}
+.theme-candy .nav-btn::before{background:linear-gradient(90deg,#ff8fd0,#a78bfa)!important;box-shadow:0 0 8px rgba(255,140,200,.7)!important;}
+.theme-candy .avatar-ring{background:conic-gradient(#ff8fd0 calc(var(--xp,40deg)), rgba(255,255,255,.12) 0)!important;}
 
-/* PAPER/DOODLE THEME — sketched cream tiles */
-.phone.theme-paper{box-shadow:0 0 0 8px #1c1a14,0 0 0 9px rgba(210,200,170,.25),0 0 40px rgba(200,190,160,.2),0 40px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);}
+/* PAPER/DOODLE THEME — the one LIGHT theme: warm cream notebook, dark ink text (deliberately the
+   most dramatically different option — flips the whole home screen from dark to a paper-white look) */
+.phone.theme-paper{box-shadow:0 0 0 8px #1c1a14,0 0 0 9px rgba(210,200,170,.25),0 0 40px rgba(200,190,160,.2),0 40px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);
+  background:linear-gradient(175deg,#f4ecd8 0%,#e9dcbc 100%);}
 .theme-paper .gtile,.theme-paper .ltile{box-shadow:0 4px 0 rgba(60,55,40,.5),0 0 12px rgba(0,0,0,.3)!important;border:2px solid rgba(60,50,35,.5)!important;}
 .theme-paper .gt-num,.theme-paper .lt-num{background:linear-gradient(135deg,#efe6cf,#d9cba6)!important;color:#3a3320!important;}
 .theme-paper .gt-op,.theme-paper .lt-op{background:linear-gradient(135deg,#9fb8a0,#6f8f72)!important;color:#22301f!important;}
 .theme-paper .gt-word{background:linear-gradient(135deg,#e9c98f,#d6a85f)!important;color:#3a2a14!important;}
-.theme-paper .target-panel{border-color:rgba(210,200,170,.4)!important;}
-.theme-paper .grid-board{border-color:rgba(210,200,170,.25)!important;}
-.theme-paper .tp-hint{color:#e9d9b0!important;}
+.theme-paper .target-panel{border-color:rgba(210,200,170,.4)!important;background:rgba(255,252,240,.7)!important;}
+.theme-paper .grid-board{border-color:rgba(120,105,70,.35)!important;background:rgba(255,252,240,.55)!important;}
+.theme-paper .tp-hint{color:#6f5f3a!important;text-shadow:none!important;}
+.theme-paper .mode-card{background:linear-gradient(160deg,rgba(255,252,242,.9),rgba(233,220,188,.85))!important;border-color:rgba(120,105,70,.3)!important;
+  box-shadow:0 10px 24px -10px rgba(80,60,20,.35),inset 0 1px 0 rgba(255,255,255,.7)!important;}
+.theme-paper .card-name{color:#3a3320!important;} .theme-paper .card-meta{color:#7a6f4e!important;}
+.theme-paper .home-play{background:linear-gradient(180deg,#d9c48a 0%,#b78a4a 55%,#8a5e2a 100%)!important;color:#2a1e0c!important;
+  text-shadow:0 1px 0 rgba(255,240,210,.5)!important;
+  box-shadow:0 8px 26px rgba(140,100,40,.4),0 0 30px rgba(180,140,70,.25),inset 0 2px 0 rgba(255,250,230,.6),inset 0 -3px 0 rgba(60,35,0,.4)!important;}
+.theme-paper .home-play::after{border-color:rgba(140,105,50,.5)!important;}
+.theme-paper .nav-btn.active,.theme-paper .nav-btn.active i,.theme-paper .nav-btn.active svg,.theme-paper .nav-btn.active span{color:#8a5e2a!important;}
+.theme-paper .nav-btn.active .nav-emoji{filter:grayscale(0) brightness(1.1) drop-shadow(0 0 6px rgba(140,100,40,.6))!important;}
+.theme-paper .nav-btn::before{background:linear-gradient(90deg,#d9c48a,#8a5e2a)!important;box-shadow:0 0 6px rgba(140,100,40,.6)!important;}
+.theme-paper .avatar-ring{background:conic-gradient(#b78a4a calc(var(--xp,40deg)), rgba(0,0,0,.12) 0)!important;}
+.theme-paper .home-logo .hl-name,.theme-paper .home-logo .hl-sub{filter:none!important;}
 
-/* ZEN THEME — calm teal/green */
-.phone.theme-zen{box-shadow:0 0 0 8px #0c1814,0 0 0 9px rgba(120,200,170,.22),0 0 45px rgba(80,180,150,.22),0 40px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);}
+/* ZEN THEME — calm teal/green minimal */
+.phone.theme-zen{box-shadow:0 0 0 8px #0c1814,0 0 0 9px rgba(120,200,170,.22),0 0 45px rgba(80,180,150,.22),0 40px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);
+  background:radial-gradient(120% 70% at 15% -10%,rgba(120,200,170,.14),transparent 55%),radial-gradient(120% 70% at 100% 110%,rgba(80,180,150,.12),transparent 55%),#07120f;}
 .theme-zen .gtile,.theme-zen .ltile{box-shadow:0 4px 0 rgba(10,50,40,.5),0 0 16px rgba(80,200,160,.4)!important;}
 .theme-zen .gt-num,.theme-zen .lt-num{background:linear-gradient(135deg,#7fd4b5,#3fae8c)!important;}
 .theme-zen .gt-op,.theme-zen .lt-op{background:linear-gradient(135deg,#9ad0c0,#6aa890)!important;}
 .theme-zen .gt-word{background:linear-gradient(135deg,#bfe8d6,#7fd4b5)!important;}
 .theme-zen .target-panel{border-color:rgba(120,200,170,.5)!important;}
-.theme-zen .grid-board{border-color:rgba(120,200,170,.3)!important;}
+.theme-zen .grid-board{border-color:rgba(120,200,170,.3)!important;background:rgba(10,40,32,.3)!important;}
 .theme-zen .tp-hint{color:#9fe0c6!important;}
+.theme-zen .mode-card{background:linear-gradient(160deg,rgba(20,55,45,.55),rgba(8,20,17,.94))!important;border-color:rgba(120,200,170,.22)!important;}
+.theme-zen .home-play{background:linear-gradient(180deg,#bfe8d6 0%,#7fd4b5 55%,#2e8f70 100%)!important;color:#0a2018!important;text-shadow:0 1px 0 rgba(230,255,245,.4)!important;
+  box-shadow:0 8px 26px rgba(80,200,160,.4),0 0 36px rgba(80,200,160,.25),inset 0 2px 0 rgba(255,255,255,.4),inset 0 -3px 0 rgba(10,50,35,.5)!important;}
+.theme-zen .home-play::after{border-color:rgba(140,220,190,.5)!important;}
+.theme-zen .nav-btn.active,.theme-zen .nav-btn.active i,.theme-zen .nav-btn.active svg,.theme-zen .nav-btn.active span{color:#7fd4b5!important;}
+.theme-zen .nav-btn.active .nav-emoji{filter:grayscale(0) brightness(1.1) drop-shadow(0 0 9px rgba(120,200,170,.7))!important;}
+.theme-zen .nav-btn::before{background:linear-gradient(90deg,#bfe8d6,#3fae8c)!important;box-shadow:0 0 8px rgba(120,200,170,.7)!important;}
+.theme-zen .avatar-ring{background:conic-gradient(#7fd4b5 calc(var(--xp,40deg)), rgba(255,255,255,.12) 0)!important;}
 
 /* GOD BANNER */
 #god-banner{position:absolute;top:34%;left:50%;transform:translate(-50%,-50%);z-index:8000;pointer-events:none;
@@ -1837,78 +1917,27 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
           <div class="gem-chip"><span class="coin-badge">💎</span><span id="mkt-gems">10</span></div>
         </div>
       </div>
-      <!-- DEAL OF THE DAY (rotates daily, live countdown — urgency) -->
-      <div class="daily-deal" id="daily-deal" onclick="buyDailyDeal()">
-        <div class="dd-flag">🔥 DEAL OF THE DAY · ends in <span id="dd-timer">--:--:--</span></div>
-        <div class="dd-icon" id="dd-icon">🎁</div>
-        <div class="dd-body"><div class="dd-title" id="dd-title">Daily Deal</div><div class="dd-desc" id="dd-desc">—</div></div>
-        <div class="dd-buy"><div class="dd-old" id="dd-old"></div><div class="dd-price" id="dd-price">—</div></div>
-      </div>
-      <!-- STARTER PACK (one-time hero offer) -->
-      <div class="starter-pack" id="starter-pack" onclick="buyStarterPack()">
-        <div class="sp-flag">-60% · LIMITED</div>
-        <div class="sp-gift">🎁</div>
+      <!-- NUMA PLUS — the single real-money offer: a MONTHLY membership. Same bundle pays out
+           every renewal (not just the first month), so it's worth resubscribing. -->
+      <div class="starter-pack" id="value-pack" onclick="buyValuePack()">
+        <div class="sp-flag">⭐ MEMBERSHIP · MONTHLY</div>
+        <div class="sp-gift">💎</div>
         <div class="sp-body">
-          <div class="sp-title">Starter Pack</div>
-          <div class="sp-desc">200 💎 + 1000 🪙 + Neon Theme</div>
+          <div class="sp-title">Numa Plus</div>
+          <div class="sp-desc">No ads + 5000 🪙 + 10 💎 every month</div>
         </div>
-        <div class="sp-buy"><div class="sp-old">$7.99</div><div class="sp-price">$1.99</div></div>
+        <div class="sp-buy"><div class="sp-price">$1.99<span style="font-size:9px;opacity:.85;">/mo</span></div></div>
       </div>
-      <!-- REMOVE ADS (one-time real-money) -->
-      <div class="mkt-item remove-ads" id="remove-ads" onclick="buyRemoveAds()">
-        <div class="mkt-icon">🚫</div>
-        <div class="mkt-info"><div class="mkt-name">Remove Ads</div><div class="mkt-desc">No interstitials · +30 💎 thank-you bonus</div></div>
-        <div class="mkt-price iap">$1.99</div>
-      </div>
-      <div class="sec-lbl">⚡ Power-Ups</div>
-      <div class="mkt-item" onclick="buyItem('hint')">
-        <div class="mkt-icon">💡</div>
-        <div class="mkt-info"><div class="mkt-name">Hint Pack ×3</div><div class="mkt-desc">Reveals the next correct tile</div></div>
-        <div class="mkt-price">🪙 30</div>
-      </div>
-      <div class="mkt-item" onclick="buyLifeGold()">
-        <div class="mkt-icon">❤️</div>
-        <div class="mkt-info"><div class="mkt-name">Extra Life</div><div class="mkt-desc">+1 heart (max 5)</div></div>
-        <div class="mkt-price">🪙 60</div>
-      </div>
-      <div class="mkt-item" onclick="buyItem('time')">
-        <div class="mkt-icon">⏰</div>
-        <div class="mkt-info"><div class="mkt-name">+30 Seconds</div><div class="mkt-desc">Extend your timer</div></div>
-        <div class="mkt-price">🪙 40</div>
-      </div>
+      <div class="sec-lbl">💎 Spend Gems</div>
       <div class="mkt-item" onclick="buyRefillGem()">
         <div class="mkt-icon">💖</div>
         <div class="mkt-info"><div class="mkt-name">Instant Refill</div><div class="mkt-desc">Fill all hearts now</div></div>
         <div class="mkt-price">💎 4</div>
       </div>
-      <div class="mkt-item" onclick="watchAdForLife()">
-        <div class="mkt-icon">📺</div>
-        <div class="mkt-info"><div class="mkt-name">Free Life (Ad)</div><div class="mkt-desc">Watch a short ad for +1 heart</div></div>
-        <div class="mkt-price" style="color:#10b981;">FREE</div>
-      </div>
-      <div class="sec-lbl" style="margin-top:8px;">💎 Get Gems</div>
-      <div class="mkt-item gem-pack" onclick="buyGems('s')">
-        <div class="mkt-icon">💎</div>
-        <div class="mkt-info"><div class="mkt-name">Gem Pouch</div><div class="mkt-desc">120 Gems</div></div>
-        <div class="mkt-price iap">$1.99</div>
-      </div>
-      <div class="mkt-item gem-pack" onclick="buyGems('xl')">
-        <div class="pack-badge">Best Value</div>
-        <div class="mkt-icon">👑</div>
-        <div class="mkt-info"><div class="mkt-name">Gem Vault</div><div class="mkt-desc">2200 Gems</div></div>
-        <div class="mkt-price iap">$1.99</div>
-      </div>
-      <div class="sec-lbl" style="margin-top:8px;">🎁 Best-Value Bundles</div>
-      <div class="mkt-item bundle-item" onclick="buyBundle('power')">
-        <div class="pack-badge">+220% value</div>
-        <div class="mkt-icon">🎒</div>
-        <div class="mkt-info"><div class="mkt-name">Power Pack</div><div class="mkt-desc">100 💎 + 800 🪙 + 5 Hints</div></div>
-        <div class="mkt-price iap">$1.99</div>
-      </div>
-      <div class="mkt-item bundle-item" onclick="buyBundle('pro')">
-        <div class="mkt-icon">🧰</div>
-        <div class="mkt-info"><div class="mkt-name">Pro Bundle</div><div class="mkt-desc">700 💎 + 3000 🪙 + Refill + Theme</div></div>
-        <div class="mkt-price iap">$1.99</div>
+      <div class="mkt-item" onclick="buyHintsGem()">
+        <div class="mkt-icon">💡</div>
+        <div class="mkt-info"><div class="mkt-name">Hint Pack ×5</div><div class="mkt-desc">Reveals the next correct tile</div></div>
+        <div class="mkt-price">💎 3</div>
       </div>
       <div class="sec-lbl" style="margin-top:8px;">🎨 Themes (Gems 💎)</div>
       <div class="mkt-item" data-theme-id="default" onclick="buyTheme('default')">
@@ -2130,10 +2159,13 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         </div>
       </div>
 
-      <!-- BOARD -->
-      <div class="grid-board theme-1" id="g-board">
-        <canvas id="hint-canvas" style="position:absolute;inset:0;z-index:12;pointer-events:none;border-radius:18px;"></canvas>
-        <div class="streak-fire" id="streak-fire"></div>
+      <!-- BOARD (wrapped so the edge warning lights have their own paint layer — #g-board's
+           innerHTML gets fully replaced by BUILD/CHAIN waves, which would wipe a child element) -->
+      <div class="board-frame" id="board-frame">
+        <div class="grid-board theme-1" id="g-board">
+          <canvas id="hint-canvas" style="position:absolute;inset:0;z-index:12;pointer-events:none;border-radius:18px;"></canvas>
+          <div class="streak-fire" id="streak-fire"></div>
+        </div>
       </div>
 
       <!-- PLAYER SKILL BAR (active abilities, unlock by level) -->
@@ -2289,6 +2321,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 /* ── STATE ── */
 let gActive=false,gMode='',gSubMode='';
 let pGold=500,pLives=3,pLevel=1,pScore=0,pXP=0,pHints=5;
+// every gold FAUCET routes through here (kept as a single choke point for any future perk/multiplier)
+function gainGold(n){ pGold+=Math.round(n); return n; }
 let difficultyMod=1.0; // adaptive: <1 easier, >1 harder
 let pendingBoss=false;
 let bossKind='big';            // 'mini' (every 5 lvls) | 'big' (every 10)
@@ -3383,7 +3417,7 @@ function tapDuel(correct, el){
     const tier=comboTier(streakCount); comboMult=tier.mult;
     if(comboMult>=3 && typeof unlockTitle==='function') unlockTitle('combo_king');
     updateCombo(); updateWaveCombo(true);
-    const pts=Math.round(20*comboMult); pScore+=pts; pXP+=Math.round(pts/2); pGold+=2; solvedCount++; pTotalSolved++;
+    const pts=Math.round(20*comboMult); pScore+=pts; pXP+=Math.round(pts/2); gainGold(2); solvedCount++; pTotalSolved++;
     if(typeof questAdvance==='function'){ questAdvance('solve',1); questAdvance('combo',streakCount,true); }
     const board=document.getElementById('g-board'), br=board.getBoundingClientRect(), er=el.getBoundingClientRect();
     flyScore(er.left-br.left, er.top-br.top-8, '+'+pts);
@@ -3831,6 +3865,13 @@ function waveFallSpeed(){
   let v=Math.min((70+sl*3.5)*Math.pow(1.026,solvedCount),198);  // px/sec — softened ~12% so tiles linger a touch longer (more read time)
   if(gMode==='time') v*=1.2;
   if(isBoss) v*=1.03;   // boss barely faster (was ×1.1 — felt too fast once solves stacked)
+  // FINAL STRETCH RUSH: the last couple solves of a level speed up for tension (matches the
+  // yellow→red level-bar warning) — "telaş" as the level is about to complete.
+  if(!isBoss && gMode!=='time'){
+    const remaining=levelNeed()-solvedCount;
+    if(remaining===2) v*=1.15;
+    else if(remaining<=1) v*=1.32;
+  }
   // soften the adaptive difficulty so a win-streak can't compound into a speed spike (esp. during a long boss)
   const softMod=1+(difficultyMod-1)*0.5;
   return v*softMod;
@@ -4136,7 +4177,7 @@ function buildSolve(){
   clearBuild(true);
   handleSuccess();
   updateWaveCombo(true);
-  if(usedCount>=3){ pGold+=10; if(typeof showGoldPop==='function') setTimeout(()=>showGoldPop('🧩 '+usedCount+'-TILE BUILD! +10🪙'),220); if(typeof updateHUD==='function') updateHUD(); }
+  if(usedCount>=3){ gainGold(10); if(typeof showGoldPop==='function') setTimeout(()=>showGoldPop('🧩 '+usedCount+'-TILE BUILD! +10🪙'),220); if(typeof updateHUD==='function') updateHUD(); }
 }
 function buildBust(){
   buildSum=0;
@@ -4232,8 +4273,8 @@ function injectChainCSS(){
   .ctile.cop{background:linear-gradient(160deg,#3a1f55,#21102f);border:2px solid rgba(190,120,255,.6);font-size:30px;color:#e9c8ff;}
   .ctile.cpick{filter:brightness(1.35);border-color:#ffd84a;color:#ffd84a;box-shadow:0 0 22px rgba(255,216,74,.7),inset 0 0 10px rgba(255,216,74,.25);}
   .ctile.csolved{border-color:#ffd84a;color:#fff;box-shadow:0 0 30px rgba(255,216,74,.9);animation:btilePop .4s ease;}
-  .ctile.cbad{animation:cbad .34s;}
-  @keyframes cbad{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+  .ctile.cbad{animation:cbad .34s;border-color:#ff4444 !important;color:#ff4444 !important;box-shadow:0 0 18px rgba(255,68,68,.8) !important;}
+  @keyframes cbad{0%,100%{transform:translateX(0);}20%{transform:translateX(-9px);}40%{transform:translateX(8px);}60%{transform:translateX(-6px);}80%{transform:translateX(4px);}}
   .chain-foot{display:flex;align-items:center;gap:10px;width:100%;max-width:340px;}
   .chain-clear{font-family:Rajdhani,sans-serif;font-weight:800;font-size:13px;letter-spacing:.5px;color:#cdd6ff;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:8px 13px;cursor:pointer;flex-shrink:0;}
   .chain-clear:active{transform:scale(.94);}
@@ -4291,9 +4332,12 @@ function updateChainExpr(){
   if(chainExpect==='num' && chainPendingOp) s+=' …';
   e.innerHTML=s+' <i>=</i> <b>'+(chainVal===null?'?':chainVal)+'</b>';
 }
-function chainNudge(el){ if(el){ el.classList.remove('cbad'); void el.offsetWidth; el.classList.add('cbad'); } if(typeof beep==='function') beep(200,.06,'square',.07); }
+function chainNudge(el){ if(el){ el.classList.remove('cbad'); void el.offsetWidth; el.classList.add('cbad'); setTimeout(()=>{ if(el) el.classList.remove('cbad'); },340); } if(typeof beep==='function') beep(200,.06,'square',.07); }
 function tapChainTile(t){
-  if(!gActive||!cwActive||t.used) return; initAudio();
+  // guard against a stale tile from a PREVIOUS wave: if a tap event was already queued when the
+  // wave transitioned (board.innerHTML replaced), t.el is detached from the DOM — ignore it,
+  // otherwise it can push a ghost entry into the NEW wave's cwSeq and desync the chain state.
+  if(!gActive||!cwActive||t.used||!t.el||!t.el.isConnected) return; initAudio();
   if(chainExpect==='num'){
     if(t.kind!=='num'){ chainNudge(t.el); return; }
     let nv;
@@ -4332,7 +4376,7 @@ function chainSolve(){
   clearChain(true);
   handleSuccess();
   updateWaveCombo(true);
-  if(steps>=5){ pGold+=12; if(typeof showGoldPop==='function') setTimeout(()=>showGoldPop('⚡ '+Math.ceil(steps/2)+'-STEP CHAIN! +12🪙'),220); if(typeof updateHUD==='function') updateHUD(); }
+  if(steps>=5){ gainGold(12); if(typeof showGoldPop==='function') setTimeout(()=>showGoldPop('⚡ '+Math.ceil(steps/2)+'-STEP CHAIN! +12🪙'),220); if(typeof updateHUD==='function') updateHUD(); }
 }
 function chainMiss(){
   if(!cwActive) return;
@@ -4360,14 +4404,14 @@ function clearChain(fade){
 const SKILL_MAX_CHARGE=3, SKILL_SOLVES_PER_CHARGE=4;
 let skillCharges=1, _skillSolveCnt=0, skillShield=false, skillOvercharge=false, _skillTsToken=0;
 const SKILL_DEFS=[
-  {id:'freeze',ic:'❄️',name:'FREEZE', lvl:3,  col:'#7adfff'},
-  {id:'purge', ic:'💣',name:'PURGE',  lvl:5,  col:'#ff8a3c'},
-  {id:'slowmo',ic:'🐌',name:'SLOW-MO',lvl:7,  col:'#a7f0ff'},
-  {id:'over',  ic:'⚡',name:'CHARGE', lvl:10, col:'#ffd84a'},
-  {id:'shield',ic:'🛡️',name:'SHIELD', lvl:13, col:'#43e0a0'}
+  {id:'freeze',ic:'❄️',name:'FREEZE', lvl:3,  col:'#7adfff', cost:30},
+  {id:'purge', ic:'💣',name:'PURGE',  lvl:5,  col:'#ff8a3c', cost:45},
+  {id:'slowmo',ic:'🐌',name:'SLOW-MO',lvl:7,  col:'#a7f0ff', cost:35},
+  {id:'over',  ic:'⚡',name:'CHARGE', lvl:10, col:'#ffd84a', cost:60},
+  {id:'shield',ic:'🛡️',name:'SHIELD', lvl:13, col:'#43e0a0', cost:50}
 ];
 function skillsUnlocked(){ return SKILL_DEFS.filter(s=>pLevel>=s.lvl); }
-function skillBarVisible(){ return gActive && gSubMode==='math' && gMode!=='pulse' && !isBoss && skillsUnlocked().length>0; }
+function skillBarVisible(){ return gActive && !isBoss && skillsUnlocked().length>0; }   // skills available in EVERY mode (math/word/combo/time/pulse), not just math
 function injectSkillCSS(){
   if(document.getElementById('skill-css')) return;
   const s=document.createElement('style'); s.id='skill-css';
@@ -4381,6 +4425,7 @@ function injectSkillCSS(){
     background:linear-gradient(160deg,rgba(40,30,62,.85),rgba(20,14,32,.9));border:1px solid rgba(255,255,255,.1);
     font-family:Rajdhani,sans-serif;font-weight:800;font-size:10px;letter-spacing:.5px;color:#9a8fc0;transition:transform .1s,filter .2s,border-color .2s,opacity .2s;opacity:.5;}
   .sk-btn .sk-ic{font-size:16px;filter:grayscale(.5);}
+  .sk-btn .sk-cost{font-size:9px;font-weight:800;color:#ffd84a;margin-left:1px;letter-spacing:0;}
   .sk-btn.ready{opacity:1;color:#eaf2ff;border-color:rgba(120,200,255,.4);}
   .sk-btn.ready .sk-ic{filter:none;}
   .sk-btn.ready:active{transform:scale(.9);}
@@ -4399,10 +4444,10 @@ function renderSkillBar(){
   if(!skillBarVisible()){ bar.style.display='none'; return; }
   bar.style.display='flex';
   const un=skillsUnlocked();
-  let pips=''; for(let i=0;i<SKILL_MAX_CHARGE;i++) pips+='<i class="'+(i<skillCharges?'on':'')+'"></i>';
-  bar.innerHTML='<div class="sk-charge">⚡'+pips+'</div>'+un.map(s=>{
+  bar.innerHTML=un.map(s=>{
     const armed=(s.id==='shield'&&skillShield)||(s.id==='over'&&skillOvercharge);
-    return '<button class="sk-btn'+(skillCharges>0?' ready':'')+(armed?' active':'')+'" data-sk="'+s.id+'" onclick="useSkill(\''+s.id+'\')"><span class="sk-ic">'+s.ic+'</span><span class="sk-nm">'+s.name+'</span></button>';
+    const afford=pGold>=s.cost;
+    return '<button class="sk-btn'+((afford||armed)?' ready':'')+(armed?' active':'')+'" data-sk="'+s.id+'" onclick="useSkill(\''+s.id+'\')"><span class="sk-ic">'+s.ic+'</span><span class="sk-nm">'+s.name+'</span><span class="sk-cost">🪙'+s.cost+'</span></button>';
   }).join('');
 }
 function gainSkillCharge(){ _skillSolveCnt++; if(_skillSolveCnt>=SKILL_SOLVES_PER_CHARGE){ _skillSolveCnt=0; if(skillCharges<SKILL_MAX_CHARGE){ skillCharges++; renderSkillBar(); } } }
@@ -4413,8 +4458,11 @@ function useSkill(id){
   if(!skillBarVisible()) return;
   const def=SKILL_DEFS.find(s=>s.id===id); if(!def || pLevel<def.lvl) return;
   if((id==='shield'&&skillShield)||(id==='over'&&skillOvercharge)) return;   // already armed
-  if(skillCharges<=0){ showSkillToast('Need ⚡ — keep solving to charge!'); if(typeof haptic==='function')haptic([30,30]); return; }
-  skillCharges--; initAudio(); if(typeof haptic==='function')haptic(20);
+  if(pGold<def.cost){ showSkillToast('Need 🪙'+def.cost+' — earn gold by solving!'); if(typeof haptic==='function')haptic([30,30]); return; }
+  // PURGE only makes sense when there are decoy fallers — don't charge gold for a no-op (word/pulse)
+  if(id==='purge'){ const anyDecoy=(typeof fallers!=='undefined' && fallers.some(f=>!f.correct && f.val!=='BONUS' && !f.dead && f.el)); if(!anyDecoy){ showSkillToast('💣 Nothing to purge here!'); if(typeof haptic==='function')haptic([30,30]); return; } }
+  pGold-=def.cost; if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet();
+  initAudio(); if(typeof haptic==='function')haptic(20);
   if(id==='freeze'){ _skillTsToken++; timescale=0.05; skFlash('❄️ FREEZE',def.col); beep(880,.12,'sine',.13); _skillRestoreTs(_skillTsToken,2000); }
   else if(id==='slowmo'){ _skillTsToken++; timescale=0.42; skFlash('🐌 SLOW-MO',def.col); beep(520,.2,'sine',.12); _skillRestoreTs(_skillTsToken,3500); }
   else if(id==='purge'){ skFlash('💣 PURGE',def.col); beep(170,.18,'sawtooth',.15);
@@ -4463,8 +4511,8 @@ function depositBank(amount){
 function cashBank(){
   if(bankPts<=0) return;
   const won=bankPts; bankPts=0;
-  const coins=Math.max(5,Math.round(won/8));
-  pScore+=won; pXP+=Math.round(won/2); pGold+=coins;
+  const coins=Math.max(3,Math.round(won/16));
+  pScore+=won; pXP+=Math.round(won/2); gainGold(coins);
   initAudio(); sfxGold(); if(typeof haptic==='function') haptic([15,20,35]);
   showGoldPop('🏦 BANKED +'+won+' · +'+coins+' 🪙');
   if(typeof fireConfetti==='function') fireConfetti(26);
@@ -4658,7 +4706,7 @@ function pulseRoundWin(){
   pulseBusy=true; pulseRound++;
   initAudio(); pulseSeq.forEach((s,i)=>_pulseTimers.push(setTimeout(()=>{ if(typeof beep==='function') beep((_pulseFreqMap[s]||523)*1.5,.1,'triangle',.12); }, i*70)));
   if(typeof impact==='function') impact('great');
-  const pts=Math.round(18*pulseSeq.length); pScore+=pts; pXP+=pts; pGold+=4+pulseSeq.length; pTotalSolved++;
+  const pts=Math.round(18*pulseSeq.length); pScore+=pts; pXP+=pts; gainGold(4+pulseSeq.length); pTotalSolved++;
   updateHUD();
   if(isBoss){
     pulseColorBlastBoss(); dealBossDamage();
@@ -5002,7 +5050,7 @@ function collectBonus(obj){
   const t=obj.bonus;
   if(t.type==='time'){ timer=Math.min(timer+t.reward, TA_MAX); showGoldPop('⏱️ +'+t.reward+'s'); haptic(20); }
   else if(t.type==='gem'){ pGems+=t.reward; showGoldPop('💎 +'+t.reward); }
-  else if(t.type==='coin'){ pGold+=t.reward; showGoldPop('🪙 +'+t.reward); }
+  else if(t.type==='coin'){ gainGold(t.reward); showGoldPop('🪙 +'+t.reward); }
   else if(t.type==='star'){ pXP+=50; pScore+=30; showGoldPop('⭐ +50 XP'); }
   triggerSparks(20,true);
   updateHUD();
@@ -5171,16 +5219,16 @@ function handleSuccess(){
   const feverMult=(gSubMode==='math'&&streakCount>=8)?2:1;   // FEVER (streak 8+): double points
   let pts=Math.round(basePts*comboMult*bossBonus*exprMult*feverMult);
   if(typeof skillOvercharge!=='undefined' && skillOvercharge){ pts*=3; skillOvercharge=false; if(typeof skFlash==='function') skFlash('⚡ ×3!','#ffd84a'); if(typeof triggerSparks==='function') triggerSparks(24,true); }   // OVERCHARGE skill
-  let goldEarned=Math.round((2+comboMult)*bossBonus*exprMult);   // gold trimmed — it's a soft consumable currency, kept scarcer
+  let goldEarned=Math.max(1,Math.round((2+comboMult)*bossBonus*exprMult*0.45));   // gold is SCARCE — it's the skill currency now; earned slowly, spent on FREEZE/PURGE/etc.
   if(exprBonus>0) setTimeout(()=>showGoldPop('⚡ '+(opCount)+'-OP CHAIN! +'+Math.round((exprMult-1)*100)+'%'),200);
   // GOD MODE: huge bonus + chance for gem
-  if(comboMult>=3){ goldEarned+=8; if(Math.random()<0.12){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); } }
+  if(comboMult>=3){ goldEarned+=4; if(Math.random()<0.12){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); } }
   // active god mode = triple everything
-  if(godModeActive){ pScore+=pts*2; pXP+=pts*2; goldEarned+=10; }
+  if(godModeActive){ pScore+=pts*2; pXP+=pts*2; goldEarned+=5; }
   // Boss solve: guaranteed gem
   if(isBoss && Math.random()<0.22){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); }
-  pScore+=pts; pGold+=goldEarned; pXP+=pts; solvedCount++; pTotalSolved++;
-  if(typeof gainSkillCharge==='function'){ gainSkillCharge(); renderSkillBar(); }   // solving fills the skill charge pool
+  pScore+=pts; gainGold(goldEarned); pXP+=pts; solvedCount++; pTotalSolved++;
+  if(typeof renderSkillBar==='function'){ renderSkillBar(); }   // refresh skill affordability as gold changes
   streakCount++;
   // per-level tracking for stars + objectives
   if(comboMult>levelMaxComboMult) levelMaxComboMult=comboMult;
@@ -5359,17 +5407,17 @@ function finishLevelUp(wasBoss){
   // ── OBJECTIVE bonus (normal levels only) ──
   let objLine='';
   if(!wasBoss && levelObjective){
-    if(evalObjective()){ pGold+=25; pGems+=1; objLine=' • 🎯 Goal! +25🪙 +1💎'; }
+    if(evalObjective()){ gainGold(12); pGems+=1; objLine=' • 🎯 Goal! +12🪙 +1💎'; }
     else objLine=' • 🎯 Goal missed';
   }
   let title,sub,gold;
   if(wasBoss){
     title=mini?'💀 MINI-BOSS DOWN!':'👑 BOSS DEFEATED!';
-    gold=mini?(pLevel*6):(pLevel*12);
+    gold=mini?(pLevel*3):(pLevel*6);
     sub='🏆 +🪙 '+gold+(mini?' +1💎':' +2💎');
-    pGold+=gold; pGems+=mini?1:2; unlockAchievement('boss_slayer');
+    gainGold(gold); pGems+=mini?1:2; unlockAchievement('boss_slayer');
   } else {
-    gold=pLevel*4; title='⚡ LEVEL '+pLevel+'! ⚡'; sub='🪙 +'+gold+objLine; pGold+=gold;
+    gold=pLevel*2; title='⚡ LEVEL '+pLevel+'! ⚡'; sub='🪙 +'+gold+objLine; gainGold(gold);
   }
   // present the level/boss modal (bosses play the 2s death sequence first)
   const present=()=>{
@@ -5733,7 +5781,7 @@ function endTimeBoss(){
   if(typeof stopBossZaps==='function') stopBossZaps();
   // reward: big time + score
   timer=Math.min(timer+10, TA_MAX);
-  pScore+=200; pGold+=50; pGems+=1;
+  pScore+=200; gainGold(50); pGems+=1;
   showGoldPop('👑 BOSS DOWN! +10s');
   // play the SYSTEM FAILURE death, then clear boss state
   if(typeof bossDeathSequence==='function'){
@@ -6348,7 +6396,7 @@ function startTraining(isReplay){
 
   const alreadyTrained=!!localStorage_get('numa_trained');   // replays don't re-grant the welcome bonus
   function grantBonus(){
-    if(!alreadyTrained){ try{ pGold+=200; pGems+=5; if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet(); }catch(e){} }
+    if(!alreadyTrained){ try{ gainGold(200); pGems+=5; if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet(); }catch(e){} }
     try{ localStorage_set('numa_trained','1'); localStorage_set('numa_tut','1'); }catch(e){}
   }
   let finished=false, graduated=false;
@@ -6411,7 +6459,7 @@ function runSurpriseRound(onDone){
   initAudio(); if(typeof sfxGod==='function') sfxGod(); if(typeof haptic==='function') haptic([20,30,20]);
   const close=(win)=>{
     if(!surpriseActive) return; surpriseActive=false;
-    if(win){ const g=40+pLevel*4, gem=Math.random()<0.35?1:0; pGold+=g; if(gem)pGems+=gem;
+    if(win){ const g=40+pLevel*4, gem=Math.random()<0.35?1:0; gainGold(g); if(gem)pGems+=gem;
       showSrResult(ov,true,'+'+g+' 🪙'+(gem?' +1 💎':'')); if(typeof fireConfetti==='function') fireConfetti(40); if(typeof sfxGold==='function') sfxGold(); }
     else { showSrResult(ov,false,'No reward — keep going!'); }
     setTimeout(()=>{ ov.classList.add('sr-out'); setTimeout(()=>{ ov.remove(); updateHUD(); onDone&&onDone(); },300); }, win?900:700);
@@ -6433,8 +6481,10 @@ function srShuffle(a){ return a.sort(()=>Math.random()-.5); }
 function srMissing(body,sub,close){
   const a=wrnd(2,9), b=wrnd(2,9), c=a+b;
   sub.textContent='Find the missing number';
-  const opts=srShuffle([b, b+wrnd(1,3), Math.max(1,b-wrnd(1,3)), b+wrnd(2,5)].filter((v,i,arr)=>arr.indexOf(v)===i).slice(0,4));
-  if(!opts.includes(b)) opts[0]=b;
+  // build decoys one at a time, rejecting collisions — guarantees exactly 4 DISTINCT options every time
+  // (the old formula-based set could collapse to 3 when two decoy formulas landed on the same value)
+  const opts=[b]; let guard=0;
+  while(opts.length<4 && guard++<200){ const d=Math.max(1,b+(Math.random()<.5?-1:1)*wrnd(1,5)); if(!opts.includes(d)) opts.push(d); }
   body.innerHTML='<div class="sr-eq">'+a+' + <span class="sr-blank">?</span> = '+c+'</div><div class="sr-opts">'+srChips(srShuffle(opts))+'</div>';
   body.querySelectorAll('.sr-chip').forEach(btn=>btn.onpointerdown=ev=>{ev.preventDefault();
     if(parseInt(btn.dataset.v)===b){ btn.classList.add('ok'); initAudio(); if(typeof popSound==='function')popSound(3); close(true); }
@@ -6443,10 +6493,23 @@ function srMissing(body,sub,close){
 }
 /* 🎯 MAKE THE TARGET — tap two numbers that add to the target */
 function srTarget(body,sub,close){
-  const x=wrnd(3,9), y=wrnd(3,9), target=x+y;
+  let x=wrnd(3,9), y=wrnd(3,9); while(y===x) y=wrnd(3,9);   // keep the pair itself two DIFFERENT numbers, not a same-digit duo
+  const target=x+y;
   sub.textContent='Tap TWO numbers that make '+target;
-  const pool=srShuffle([x,y,wrnd(2,9),wrnd(2,9),wrnd(2,9)]);
-  body.innerHTML='<div class="sr-eq">= '+target+'</div><div class="sr-opts" id="sr-pool">'+srChips(pool)+'</div>';
+  // build the pool one filler at a time, rejecting any value that (a) duplicates a tile already in the
+  // pool or (b) would pair with an existing tile to ALSO sum to target — so there's exactly ONE valid
+  // pair and no repeated numbers. (The old version picked 3 fillers independently, so ~80% of the time
+  // a duplicate number appeared and ~65% of the time a second accidental valid pair existed — the
+  // player genuinely couldn't tell which pair was "the" answer.)
+  const pool=[x,y]; let guard=0;
+  while(pool.length<5 && guard++<200){
+    const d=wrnd(2,9);
+    if(pool.includes(d)) continue;
+    if(pool.some(p=>p+d===target)) continue;
+    pool.push(d);
+  }
+  const shuffled=srShuffle(pool);
+  body.innerHTML='<div class="sr-eq">= '+target+'</div><div class="sr-opts" id="sr-pool">'+srChips(shuffled)+'</div>';
   let picked=[];
   body.querySelectorAll('.sr-chip').forEach(btn=>btn.onpointerdown=ev=>{ev.preventDefault();
     if(btn.classList.contains('sel')||btn.disabled) return;
@@ -6974,6 +7037,19 @@ function useHint(){
     return;
   }
 
+  // BUILD wave ("MAKE N" — sum tiles to a target): the falling-tile hint doesn't apply here.
+  // Instead, glow a tile that's part of a valid way to finish (subset that sums to what's left).
+  if(typeof buildActive!=='undefined' && buildActive){
+    const remaining=buildTarget-buildSum;
+    const avail=buildTiles.filter(t=>!t.used && t.el);
+    let pick=null, n=avail.length;
+    for(let mask=1; mask<(1<<n) && !pick; mask++){ let s=0,first=-1; for(let i=0;i<n;i++){ if(mask&(1<<i)){ s+=avail[i].val; if(first<0)first=i; } } if(s===remaining) pick=avail[first]; }
+    if(!pick) pick=avail.find(t=>t.val<=remaining)||avail[0];
+    if(pick && pick.el){ pick.el.classList.add('hint-highlight'); setTimeout(()=>{ if(pick.el) pick.el.classList.remove('hint-highlight'); },2000); beep(520,.1,'sine',.15); setTimeout(()=>beep(780,.12,'sine',.12),70); h.textContent='💡 Tap the glowing tile!'; }
+    else { pHints++; updateHintUI(); h.textContent='Keep building!'; }
+    restore(); return;
+  }
+
   // MATH (wave core): a hint SHATTERS one decoy tile — fewer options, clearer answer
   const decoys=fallers.filter(t=>!t.correct && !t.dead && t.val!=='BONUS');
   if(!decoys.length){ pHints++; updateHintUI(); h.textContent='No decoys to destroy!'; restore(); return; }
@@ -7230,6 +7306,14 @@ function updateHUD(){
     if(solvedCount>(_lastBarSolved||0)){ tr.classList.remove('bump'); void tr.offsetWidth; tr.classList.add('bump'); }
     _lastBarSolved=solvedCount;
   })();
+  // FINAL STRETCH warning — Knight Rider-style scanner beam on the tile board frame's left+right
+  // edges as a level nears completion: yellow with 2 solves left, red+faster with 1 left.
+  (function(){ const bf=document.getElementById('board-frame'); if(!bf) return;
+    if(isBoss || gMode==='time' || gMode==='pulse'){ bf.classList.remove('edge-warn','edge-crit'); return; }
+    const remaining=needed-solvedCount;
+    bf.classList.toggle('edge-warn', remaining===2);
+    bf.classList.toggle('edge-crit', remaining===1);
+  })();
   if(typeof renderSkillBar==='function') renderSkillBar();   // keep the player skill bar in sync
   document.getElementById('g-score').textContent=pScore;
   document.getElementById('m-gold').textContent=pGold;
@@ -7335,6 +7419,27 @@ function buyRemoveAds(){
   iapStub('Remove Ads $1.99'); // verified grant → pNoAds=true; localStorage_set('numa_noads','1'); pGems+=30; saveWallet(); renderMarket();
 }
 
+/* ═══ NUMA PLUS — the single real-money offer: an auto-renewable MONTHLY subscription ═══
+   $1.99/month. Stub routes through iapStub; billing (StoreKit auto-renewable / Play Billing
+   subscription) must call _grantPlusMonth() on the INITIAL purchase AND on EVERY renewal —
+   each call pays out the SAME bundle (5000 gold + 10 gems + no ads), so it's worth resubscribing
+   every month. Gems are spent by the player however they like (themes, refills, hints — see the
+   "Spend Gems" market section) rather than the sub auto-granting a fixed cosmetic. */
+const PLUS_MONTHLY_GOLD=5000, PLUS_MONTHLY_GEMS=10;
+function _grantPlusMonth(){
+  pNoAds=true; localStorage_set('numa_noads','1');
+  gainGold(PLUS_MONTHLY_GOLD); pGems+=PLUS_MONTHLY_GEMS;
+  if(typeof saveWallet==='function') saveWallet();
+  if(typeof updateHUD==='function') updateHUD();
+  if(typeof renderMarket==='function') renderMarket();
+  initAudio(); if(typeof sfxGold==='function') sfxGold(); if(typeof fireConfetti==='function') fireConfetti(40);
+  showBuyToast('⭐ Numa Plus! No ads · +'+PLUS_MONTHLY_GOLD+'🪙 · +'+PLUS_MONTHLY_GEMS+'💎');
+}
+function buyValuePack(){
+  if(pNoAds){ showBuyToast('⭐ Numa Plus already active — thank you!'); return; }
+  iapStub('Numa Plus — $1.99/month'); // on verified subscription → _grantPlusMonth();
+}
+
 /* DEAL OF THE DAY — same deal all day, rotates daily, once-per-day, live countdown */
 const DAILY_DEALS=[
   {icon:'💡',title:'Hint Hoard ×10',desc:'10 hints in one go',old:'🪙140',price:'🪙55',cur:'gold',cost:55,grant:()=>{pHints+=10; if(typeof updateHintUI==='function') updateHintUI();}},
@@ -7407,9 +7512,12 @@ function renderMarket(){
   injectStoreCSS();
   const mg=document.getElementById('mkt-gold'); if(mg) mg.textContent=pGold;
   const mge=document.getElementById('mkt-gems'); if(mge) mge.textContent=pGems;
-  const sp=document.getElementById('starter-pack'); if(sp) sp.style.display=starterOwned?'none':'';
-  const ra=document.getElementById('remove-ads'); if(ra && pNoAds){ const rp=ra.querySelector('.mkt-price'); if(rp) rp.textContent='✅ Owned'; ra.style.opacity='.55'; ra.style.pointerEvents='none'; }
-  renderDailyDeal();
+  const vp=document.getElementById('value-pack');
+  if(vp){
+    const vpp=vp.querySelector('.sp-price');
+    if(pNoAds){ if(vpp) vpp.textContent='⭐ Active'; vp.style.opacity='.7'; vp.style.pointerEvents='none'; }
+    else { if(vpp) vpp.innerHTML='$1.99<span style="font-size:9px;opacity:.85;">/mo</span>'; vp.style.opacity=''; vp.style.pointerEvents=''; }
+  }
   renderMarketThemes();
 }
 function continueWithGem(){
@@ -7592,7 +7700,7 @@ function claimQuest(i){
   const q=todayQuests[i]; if(!q||questClaimed.includes(i)) return;
   if((questProgress[q.type]||0)<q.goal) return;
   questClaimed.push(i);
-  if(q.reward.gold) pGold+=q.reward.gold;
+  if(q.reward.gold) gainGold(q.reward.gold);
   if(q.reward.gem) pGems+=q.reward.gem;
   saveQuests(); updateHUD();
   initAudio(); if(typeof sfxGold==='function')sfxGold(); if(typeof haptic==='function')haptic([20,30]); fireConfetti(30);
@@ -7724,6 +7832,13 @@ function buyRefillGem(){   // instant full = premium (gems / IAP)
   pGems-=REFILL_GEMS; pLives=MAX_LIVES; updateHUD();
   initAudio(); sfxLevelUp(); haptic([20,30]); fireConfetti(30);
   showBuyToast('💖 Hearts refilled!');
+}
+const HINTS_GEM_COST=3, HINTS_GEM_QTY=5;
+function buyHintsGem(){   // a second gem sink besides themes/refill — "ne alınacak theme hariç"
+  if(pGems<HINTS_GEM_COST){ showBuyToast('💎 Not enough gems — get more in the shop!'); return; }
+  pGems-=HINTS_GEM_COST; pHints+=HINTS_GEM_QTY; updateHUD(); if(typeof updateHintUI==='function') updateHintUI();
+  initAudio(); sfxGold(); haptic(20); fireConfetti(15);
+  showBuyToast('💡 +'+HINTS_GEM_QTY+' Hints!');
 }
 function watchAdForLife(){
   if(pLives>=MAX_LIVES){ showBuyToast('❤️ Hearts already full!'); return; }
@@ -7916,7 +8031,7 @@ function resetProgress(){
     localStorage_set('numa_lastlogin',today);
     localStorage_set('numa_streak',String(dailyStreak));
     // login reward
-    pGold+=20*dailyStreak;
+    gainGold(10*dailyStreak);
   }
   bestScore=parseInt(localStorage_get('numa_best')||'0');
   if(typeof saveWallet==='function') saveWallet();
@@ -8147,7 +8262,7 @@ function chainWin(){
   const xpWin=300+pLevel*30;
   const gemsWin=3+Math.floor(pLevel/10);
   const lifeWin=(pLives<MAX_LIVES)?1:0; // bonus heart if not full!
-  pGold+=goldWin; pXP+=xpWin; pScore+=xpWin; pGems+=gemsWin;
+  gainGold(goldWin); pXP+=xpWin; pScore+=xpWin; pGems+=gemsWin;
   // NOTE: pLives is incremented later via the flying-heart animation
   initAudio(); sfxGod(); haptic([40,30,40,30,60]);
   const calc=document.getElementById('chain-calc');
@@ -8301,7 +8416,7 @@ function endChainChallenge(won){
   o.classList.remove('active');
   updateHUD();
   // the level was cleared via combo-chain → still grant its objective bonus
-  if(levelObjective && evalObjective()){ pGold+=25; pGems+=1; showGoldPop('🎯 Goal! +25🪙 +1💎'); }
+  if(levelObjective && evalObjective()){ gainGold(12); pGems+=1; showGoldPop('🎯 Goal! +12🪙 +1💎'); }
   // after chain: if a boss/level-up was pending (god mode hit on level-complete), handle it
   if(pendingBoss){
     showBossModal();
