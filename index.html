@@ -2651,6 +2651,13 @@ function showScreen(id,navEl){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   if(navEl)navEl.classList.add('active');
   if(id==='home' && typeof updateHomeUI==='function') updateHomeUI();
+  // deferred login ask (login moved BEHIND gameplay): guests who reached L4+ get ONE prompt
+  // when they land back home; the hard wall stays at GUEST_CAP. Never during splash.
+  if(id==='home' && typeof isGuest!=='undefined' && isGuest && typeof pLevel!=='undefined' && pLevel>=4
+     && !localStorage_get('numa_login_prompt') && typeof splashDismissed!=='undefined' && splashDismissed){
+    localStorage_set('numa_login_prompt','1');
+    setTimeout(()=>{ if(typeof showLogin==='function') showLogin(); },600);
+  }
   if(id==='map' && typeof renderWorldMap==='function') renderWorldMap();
   if(id==='badges')renderBadges();
   if(id==='market'){ if(typeof renderMarket==='function') renderMarket(); }
@@ -3380,6 +3387,7 @@ function clearDuel(){ if(typeof stopDuelShuffle==='function') stopDuelShuffle();
 function spawnDuel(){
   if(!gActive||!isBoss||gSubMode!=='math') return;
   clearDuel();
+  if(typeof clearWaveMath==='function') clearWaveMath(false);   // empties fallers[] too — removing only the DOM left ghost tiles falling invisibly (heart drain + equation desync)
   const board=document.getElementById('g-board');
   if(board) board.querySelectorAll('.wtile,.btile').forEach(t=>t.remove());   // safety: wipe any stray falling/build tiles so they never bleed behind the orbs
   genWaveEq(); renderWaveEq();
@@ -3844,7 +3852,9 @@ function genWaveEq(){
   let guard=0;
   // more options as you level up (4 early → up to 8) so the answer isn't instantly obvious
   const optionCount = Math.max(3, Math.min(4 + Math.floor(lvl/2), 8));
-  const decoyRange = isBoss ? 3 : Math.max(4, optionCount);   // boss: decoys cluster TIGHT around the answer — must compute, can't just spot the odd number
+  // decoys cluster TIGHT around the answer → you must COMPUTE, not spot the odd number.
+  // boss: always ±3; normal: eases in — wide before L5, ±3 from L5 up (spot-the-number ends there)
+  const decoyRange = (isBoss || lvl>=5) ? 3 : Math.max(4, optionCount);
   while(dset.size<optionCount && guard++<120){ const d=ans+(Math.random()<.5?-1:1)*wrnd(1,decoyRange); if(d>0 && d!==ans) dset.add(d); }
   let _e=1; while(dset.size<optionCount){ if(ans+_e>0) dset.add(ans+_e); _e++; }
   waveEq={a,b,op,ans,answers:[...dset].sort(()=>Math.random()-.5)};
@@ -3929,6 +3939,7 @@ function startWaveWatchdog(){
   clearInterval(waveWatchdog);
   waveWatchdog=setInterval(()=>{
     if(buildActive || cwActive || chainActive) return;   // BUILD/CHAIN/god-chain are self-timed — no falling loop to heal
+    if(isBoss) return;   // boss math = DUEL (self-respawning). The 430ms clearDuel→spawnDuel gap has duelActive=false — the watchdog used to sneak a falling wave in there, desyncing the equation from the orbs + leaking ghost fallers that ate hearts
     if(gActive && gSubMode==='math' && !duelActive && document.getElementById('game-screen') && getComputedStyle(document.getElementById('game-screen')).display!=='none'){
       if(!lastFrame || (performance.now()-lastFrame)>300){   // loop stalled → kick it
         if(loopRaf) cancelAnimationFrame(loopRaf);
@@ -4045,6 +4056,7 @@ function showWrongTaunt(x,y){
 }
 /* the correct tile crossed the danger line → lose a heart */
 function missCorrectWave(){
+  if(typeof duelActive!=='undefined' && duelActive){ clearWaveMath(false); return; }   // ghost faller during a boss duel — never a real miss, never costs a heart
   loseHeartSound(); if(typeof haptic==='function') haptic([60,40,80]);
   if(typeof consumeShield==='function'&&consumeShield()){ } else { pLives--; levelLivesLost++; levelTimedOut=true; }
   streakCount=0; comboMult=1; lastComboTier=0; updateCombo(); updateWaveCombo(false);
@@ -4116,6 +4128,53 @@ function injectBuildCSS(){
   @keyframes buildPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.6);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}100%{opacity:0;transform:translate(-50%,-64%) scale(1);}}`;
   document.head.appendChild(s);
 }
+/* ═══ WAVE-TYPE INTROS — one-time teach card the first time a wave grammar appears.
+   Persistent card + button (never flash-and-vanish text); the wave's pressure clock
+   does NOT start until the player dismisses it. ═══ */
+const WAVE_INTROS={
+  build:{ic:'🎯',name:'BUILD WAVE',lines:['Tap tiles that ADD UP to the target.','Hit it EXACTLY — overshoot resets your picks.']},
+  chain:{ic:'⚡',name:'CHAIN WAVE',lines:['Tap number → sign → number…','Chain the tiles to hit the target EXACTLY.']}
+};
+function needsWaveIntro(kind){ return !localStorage_get('numa_wintro_'+kind); }
+function injectIntroCSS(){
+  if(document.getElementById('wintro-css')) return;
+  const s=document.createElement('style'); s.id='wintro-css';
+  s.textContent=`
+  #wintro{position:absolute;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;background:rgba(4,6,14,.72);backdrop-filter:blur(3px);animation:wiIn .3s ease;}
+  @keyframes wiIn{from{opacity:0;}to{opacity:1;}}
+  .wi-card{display:flex;flex-direction:column;align-items:center;gap:9px;padding:22px 26px;max-width:290px;text-align:center;border-radius:20px;
+    background:linear-gradient(165deg,#1b1533,#0d0a1c);border:1px solid rgba(140,110,255,.45);box-shadow:0 18px 50px rgba(0,0,0,.6),0 0 30px rgba(120,90,255,.25);}
+  .wi-new{font-family:Rajdhani,sans-serif;font-weight:800;font-size:10.5px;letter-spacing:3px;color:#7ee0ff;}
+  .wi-ic{font-size:38px;animation:wiBob 1.6s ease-in-out infinite;}
+  @keyframes wiBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+  .wi-name{font-family:Bungee,sans-serif;font-size:19px;letter-spacing:1px;color:#ffd84a;text-shadow:0 0 16px rgba(255,216,74,.5);}
+  .wi-line{font-family:Rajdhani,sans-serif;font-weight:700;font-size:14.5px;color:#cdd6f0;line-height:1.35;}
+  .wi-btn{margin-top:8px;font-family:Bungee,sans-serif;font-size:14px;letter-spacing:1px;color:#2a1a00;border:none;cursor:pointer;border-radius:14px;padding:11px 26px;
+    background:linear-gradient(180deg,#ffe08a,#f0a020);box-shadow:0 5px 16px rgba(255,170,30,.45),inset 0 1px 0 rgba(255,255,255,.5);animation:wiPulse 1.3s ease-in-out infinite;}
+  @keyframes wiPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}`;
+  document.head.appendChild(s);
+}
+function showWaveIntro(kind,onStart){
+  injectIntroCSS();
+  const board=document.getElementById('g-board');
+  const d=WAVE_INTROS[kind];
+  if(!board||!d){ onStart(); return; }
+  clearWaveIntro();
+  const ov=document.createElement('div'); ov.id='wintro';
+  ov.innerHTML='<div class="wi-card"><div class="wi-new">NEW WAVE TYPE</div><div class="wi-ic">'+d.ic+'</div><div class="wi-name">'+d.name+'</div>'
+    +d.lines.map(l=>'<div class="wi-line">'+l+'</div>').join('')
+    +'<button class="wi-btn">GOT IT · START</button></div>';
+  ov.onpointerdown=ev=>{ev.preventDefault();ev.stopPropagation();};   // shield the tiles underneath
+  ov.querySelector('.wi-btn').onpointerdown=ev=>{
+    ev.preventDefault(); ev.stopPropagation();
+    localStorage_set('numa_wintro_'+kind,'1');
+    ov.remove(); initAudio(); beep(660,.08,'triangle',.12); if(typeof haptic==='function') haptic(15);
+    onStart();
+  };
+  board.appendChild(ov);
+}
+function clearWaveIntro(){ const ov=document.getElementById('wintro'); if(ov) ov.remove(); }
+
 function spawnBuildWave(){
   injectBuildCSS();
   clearBuild(false);
@@ -4148,9 +4207,13 @@ function spawnBuildWave(){
   initAudio(); beep(523,.09,'triangle',.13); setTimeout(()=>beep(784,.12,'triangle',.12),90);
   if(typeof haptic==='function') haptic([10,20,30]);
   const dur=Math.max(5000, 9000-effLevel()*250);   // pressure clock — tighter as levels climb
-  const bt=document.getElementById('btimer');
-  if(bt){ bt.style.transition='none'; bt.style.width='100%'; void bt.offsetWidth; bt.style.transition='width '+dur+'ms linear'; bt.style.width='0%'; }
-  buildTimeout=setTimeout(buildMiss,dur);
+  const startClock=()=>{
+    if(!buildActive) return;   // wave got cleared while the intro card was up
+    const bt=document.getElementById('btimer');
+    if(bt){ bt.style.transition='none'; bt.style.width='100%'; void bt.offsetWidth; bt.style.transition='width '+dur+'ms linear'; bt.style.width='0%'; }
+    buildTimeout=setTimeout(buildMiss,dur);
+  };
+  if(needsWaveIntro('build')) showWaveIntro('build',startClock); else startClock();
   gActive=true;
 }
 function tapBuildTile(t){
@@ -4213,6 +4276,7 @@ function buildMiss(){
 function clearBuild(fade){
   buildActive=false;
   if(buildTimeout){ clearTimeout(buildTimeout); buildTimeout=null; }
+  if(typeof clearWaveIntro==='function') clearWaveIntro();
   const wrap=document.querySelector('.build-wrap');
   if(wrap){ if(fade){ wrap.style.transition='opacity .25s'; wrap.style.opacity='0'; setTimeout(()=>{ if(wrap.parentNode) wrap.remove(); },260); } else wrap.remove(); }
   buildTiles=[]; buildSum=0;
@@ -4229,7 +4293,7 @@ function shouldChainWave(){
   if(solvedCount>=needed-1) return false;          // final wave keeps its own drama
   if(solvedCount-_lastChainAt<2) return false;     // never back-to-back
   if(typeof _lastBuildAt!=='undefined' && solvedCount-_lastBuildAt<1) return false;
-  return Math.random()<0.35;
+  return Math.random()<0.45;   // flagship wave — raised from 0.35 (chain IS the game's identity)
 }
 function _divisors(n){ const d=[]; for(let i=2;i<=12 && i<n;i++){ if(n%i===0) d.push(i); } return d; }
 function genChainSet(){
@@ -4270,7 +4334,7 @@ function injectChainCSS(){
   .chain-expr .cx-empty{font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:#8fa0c0;letter-spacing:1px;}
   .chain-grid{display:flex;flex-wrap:wrap;gap:11px;justify-content:center;align-content:center;flex:1;max-width:340px;}
   .ctile{width:66px;height:66px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:Bungee,sans-serif;font-size:26px;color:#fff;cursor:pointer;user-select:none;
-    box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12);transform:scale(0);animation:btileIn .32s cubic-bezier(.2,1.6,.4,1) forwards;transition:transform .12s,box-shadow .2s,border-color .2s,color .2s,filter .2s;}
+    box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12);animation:btileIn .32s cubic-bezier(.2,1.6,.4,1) both;transition:transform .12s,box-shadow .2s,border-color .2s,color .2s,filter .2s;}
   .ctile:active{transform:scale(.9);}
   .ctile.cnum{background:linear-gradient(160deg,#16335c,#0c1e3a);border:2px solid rgba(80,170,255,.5);}
   .ctile.cop{background:linear-gradient(160deg,#3a1f55,#21102f);border:2px solid rgba(190,120,255,.6);font-size:30px;color:#e9c8ff;}
@@ -4283,11 +4347,15 @@ function injectChainCSS(){
   .chain-clear:active{transform:scale(.94);}
   .chain-timer{flex:1;height:6px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden;}
   .chain-timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff5e8a,#ff2d55);box-shadow:0 0 10px rgba(255,45,85,.7);}
-  .chain-pop{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-family:Bungee,sans-serif;font-size:23px;color:#ff5e8a;z-index:30;text-shadow:0 0 16px rgba(255,45,85,.7);pointer-events:none;animation:buildPop .85s ease forwards;}`;
+  .chain-pop{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-family:Bungee,sans-serif;font-size:23px;color:#ff5e8a;z-index:30;text-shadow:0 0 16px rgba(255,45,85,.7);pointer-events:none;animation:buildPop .85s ease forwards;}
+  /* explicit from{} so the pop-in works even though .ctile no longer starts at scale(0) —
+     tile visibility must never depend on a keyframe defined in another wave's stylesheet */
+  @keyframes btileIn{from{transform:scale(0);}to{transform:scale(1);}}`;
   document.head.appendChild(s);
 }
 function _sh(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i];a[i]=a[j];a[j]=t; } return a; }
 function spawnChainWave(){
+  injectBuildCSS();   // .ctile borrows btileIn/btilePop/buildPop keyframes from build-css — without it tiles stay at scale(0) (invisible board)
   injectChainCSS();
   if(typeof clearBuild==='function') clearBuild(false); clearChain(false);
   const set=genChainSet();
@@ -4314,8 +4382,12 @@ function spawnChainWave(){
   const cc=document.getElementById('cclear'); if(cc) cc.onpointerdown=ev=>{ev.preventDefault();ev.stopPropagation();chainClear();};
   initAudio(); beep(523,.09,'triangle',.13); setTimeout(()=>beep(784,.12,'triangle',.12),90); if(typeof haptic==='function') haptic([10,20,30]);
   const dur=Math.max(7000, 12000-effLevel()*300);
-  const ct=document.getElementById('ctimer'); if(ct){ ct.style.transition='none'; ct.style.width='100%'; void ct.offsetWidth; ct.style.transition='width '+dur+'ms linear'; ct.style.width='0%'; }
-  chainTimeout=setTimeout(chainMiss,dur);
+  const startClock=()=>{
+    if(!cwActive) return;   // wave got cleared while the intro card was up
+    const ct=document.getElementById('ctimer'); if(ct){ ct.style.transition='none'; ct.style.width='100%'; void ct.offsetWidth; ct.style.transition='width '+dur+'ms linear'; ct.style.width='0%'; }
+    chainTimeout=setTimeout(chainMiss,dur);
+  };
+  if(needsWaveIntro('chain')) showWaveIntro('chain',startClock); else startClock();
   const cv=document.getElementById('chainfx'); if(cv){ const br=board.getBoundingClientRect(); cv.width=br.width; cv.height=br.height; }
   gActive=true;
 }
@@ -4373,6 +4445,17 @@ function chainSolve(){
   const steps=cwSeq.length;
   cwTiles.forEach(t=>{ if(t.used){ t.el.classList.remove('cpick'); t.el.classList.add('csolved'); } });
   const board=document.getElementById('g-board');
+  // ⚡ FLAGSHIP PAYOFF: the finished chain fires a lightning strike from the last tile
+  // up into the "= N" target panel (chain waves ARE the god-mode fantasy in miniature)
+  const cv=document.getElementById('chainfx');
+  if(cv && board && _chainPrevEl && typeof drawEnergyBolt==='function'){
+    const ctx=cv.getContext('2d'), br=board.getBoundingClientRect(), a=_chainPrevEl.getBoundingClientRect();
+    const x1=a.left-br.left+a.width/2, y1=a.top-br.top+a.height/2;
+    drawEnergyBolt(ctx,x1,y1,br.width/2,-10);
+    drawEnergyBolt(ctx,x1,y1,br.width/2,-10);
+    const tv=document.getElementById('g-target');
+    if(tv&&tv.animate) tv.animate([{filter:'brightness(1)'},{filter:'brightness(2.3)'},{filter:'brightness(1)'}],{duration:420,easing:'ease-out'});
+  }
   if(board){ if(typeof waveBurst==='function') waveBurst(board.clientWidth/2, board.clientHeight*0.5, '#ffd84a');
     if(typeof flyScore==='function') flyScore(board.clientWidth/2-12, board.clientHeight*0.42, '+'+Math.round(18*comboMult*((streakCount>=8)?2:1))); }
   if(typeof impact==='function') impact('huge');
@@ -4398,8 +4481,13 @@ function chainMiss(){
 }
 function clearChain(fade){
   cwActive=false; if(chainTimeout){ clearTimeout(chainTimeout); chainTimeout=null; }
+  if(typeof clearWaveIntro==='function') clearWaveIntro();
   const wrap=document.querySelector('.chain-wrap');
   if(wrap){ if(fade){ wrap.style.transition='opacity .25s'; wrap.style.opacity='0'; setTimeout(()=>{ if(wrap.parentNode) wrap.remove(); },260); } else wrap.remove(); }
+  // remove the fx canvas too — it used to linger behind the NEXT (falling) wave with stale bolts;
+  // slow fade on solve lets the payoff strike shine first
+  const cvx=document.getElementById('chainfx');
+  if(cvx){ if(fade){ cvx.style.transition='opacity .5s .25s'; cvx.style.opacity='0'; setTimeout(()=>{ if(cvx.parentNode) cvx.remove(); },800); } else cvx.remove(); }
   cwTiles=[]; cwSeq=[]; chainVal=null; chainExpect='num'; chainPendingOp=null; _chainPrevEl=null;
 }
 
@@ -5491,7 +5579,8 @@ function setupBoss(){
     if(typeof BOSS_A==='undefined'||!BOSS_A) console.warn('[boss] BOSS_A missing — assets.js did not load; reload the page');
     let rk=persona.rig||(gSubMode==='word'?'w':'c');
     if(!BOSS_RIGS[rk]||!BOSS_A[BOSS_RIGS[rk].parts[0].k]) rk=(gSubMode==='word'?'w':'c');   // art missing → safe fallback
-    buildBossRig(rk);
+    if(!BOSS_A[BOSS_RIGS[rk].parts[0].k]){ console.warn('[boss] rig art missing even after fallback (deploy assets.js/bosses2.js?) — keeping SVG robot'); destroyBossRig(); }
+    else buildBossRig(rk);
   }catch(e){ console.warn('[boss] rig build failed, using fallback', e); destroyBossRig(); }
 }
 
@@ -8675,11 +8764,11 @@ function dismissSplash(){
   const sp=document.getElementById('splash');
   sp.classList.add('hiding');
   setTimeout(()=>{ if(sp) sp.style.display='none'; }, 600);
-  // route: already signed in → straight to game; otherwise show login
-  if(isAuthed()){ applyAuthProfile();
-    if(!localStorage_get('numa_trained')) setTimeout(()=>startTraining(false),650);
-  }
-  else { setTimeout(showLogin, 350); }
+  // route: brand-new players start as SILENT GUEST — no login wall before tasting the game.
+  // Login is asked later: once at L4+ on returning home (showScreen), hard wall at GUEST_CAP.
+  if(!isAuthed()){ authMethod='guest'; isGuest=true; localStorage_set('numa_auth','guest'); }
+  applyAuthProfile();
+  if(!localStorage_get('numa_trained')) setTimeout(()=>startTraining(false),650);
 }
 
 /* ═══ AUTH / LOGIN ═══ */
