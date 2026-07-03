@@ -13,6 +13,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NUMA BLAST">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;600;700&family=Press+Start+2P&family=Bungee&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -403,13 +405,21 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .tp-math .timer-lbl{font-size:10px!important;min-width:28px;}
 .tp-math .score-chip{font-size:11px!important;padding:2px 9px;background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);}
 /* wave answer tile */
-.wtile{position:absolute;width:62px;height:62px;border-radius:15px;cursor:pointer;z-index:9;left:0;top:0;
+/* CANDY TILES — bigger touch target (74px, was 62 — hard to tap on phones) + glossy 3D look styled after numa_icon.png */
+.wtile{position:absolute;width:74px;height:74px;border-radius:19px;cursor:pointer;z-index:9;left:0;top:0;
   display:flex;align-items:center;justify-content:center;will-change:transform;
-  font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;color:#ffe9c2;
-  background:linear-gradient(160deg,#4a3a78 0%,#2c2050 55%,#1c1438 100%);
-  border:1.5px solid #7a5ec2;border-top-color:#a98ae8;
-  box-shadow:0 5px 14px rgba(0,0,0,.55),inset 0 1.5px 0 rgba(255,255,255,.22);
-  text-shadow:0 2px 4px rgba(0,0,0,.6);}
+  font-family:'Bungee',sans-serif;font-size:29px;font-weight:400;color:#fff;
+  background:linear-gradient(160deg,#4a7df6 0%,#2b56c9 55%,#1a3a96 100%);
+  border:2px solid rgba(255,255,255,.26);border-top-color:rgba(255,255,255,.5);
+  box-shadow:0 7px 16px rgba(0,0,0,.55),0 0 14px rgba(70,130,255,.22),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -7px 12px rgba(0,0,0,.3);
+  text-shadow:0 3px 5px rgba(0,0,0,.55);overflow:hidden;}
+.wtile::before{content:'';position:absolute;left:8%;top:5%;width:58%;height:34%;border-radius:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0));pointer-events:none;}
+.wtile.wv1{background:linear-gradient(160deg,#9b59ec,#6c30c9 55%,#4a1c96);}
+.wtile.wv2{background:linear-gradient(160deg,#f05545,#c62828 55%,#8e1c1c);}
+.wtile.wv3{background:linear-gradient(160deg,#66bb4a,#3d8b40 55%,#26602a);}
+.wtile.wv4{background:linear-gradient(160deg,#ffb74a,#f59e0b 55%,#b06e00);}
+.wtile.wv5{background:linear-gradient(160deg,#ec5f9b,#c2185b 55%,#8c1043);}
 /* level-1 learning hint: very subtle pulse on the correct tile */
 .wtile.wtile-answer{border-color:#5ec8ff;border-top-color:#bdf0ff;
   box-shadow:0 5px 14px rgba(0,0,0,.55),0 0 18px rgba(0,212,255,.5),0 0 38px rgba(0,212,255,.22),inset 0 1.5px 0 rgba(255,255,255,.32);
@@ -1668,6 +1678,19 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .lg-guest{background:rgba(255,255,255,.05);color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.14);}
 .lg-guest-note{text-align:center;font-size:11px;color:rgba(255,255,255,.4);margin-top:9px;line-height:1.5;}
 .lg-guest-note b{color:#ffd24a;font-weight:700;}
+/* BIG sign-up bonus badge (guest wall) */
+.gw-bonus{position:relative;margin:10px auto 14px;padding:14px 22px 12px;width:fit-content;border-radius:20px;
+  background:linear-gradient(165deg,rgba(80,56,10,.95),rgba(46,30,6,.95));border:2px solid rgba(255,201,74,.75);
+  box-shadow:0 0 28px rgba(255,190,60,.45),inset 0 1px 0 rgba(255,255,255,.25);animation:gwbPulse 1.5s ease-in-out infinite;}
+@keyframes gwbPulse{0%,100%{transform:scale(1);box-shadow:0 0 22px rgba(255,190,60,.35),inset 0 1px 0 rgba(255,255,255,.25);}
+  50%{transform:scale(1.05);box-shadow:0 0 40px rgba(255,190,60,.65),inset 0 1px 0 rgba(255,255,255,.25);}}
+.gw-bonus .gwb-gift{font-size:30px;vertical-align:middle;margin-right:6px;}
+.gw-bonus .gwb-amt{font-family:'Bungee',sans-serif;font-size:34px;vertical-align:middle;letter-spacing:1px;
+  background:linear-gradient(180deg,#fff3c4 10%,#ffc94a 55%,#f08a1a 90%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(90,40,0,.8)) drop-shadow(0 0 14px rgba(255,190,60,.5));}
+.gw-bonus .gwb-coin{font-size:26px;vertical-align:middle;margin-left:6px;}
+.gw-bonus .gwb-lbl{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:10.5px;letter-spacing:3px;color:#ffd97a;margin-top:3px;}
 .lg-legal{text-align:center;font-size:9.5px;color:rgba(255,255,255,.28);margin-top:22px;line-height:1.6;}
 /* register form panel */
 .lg-form{width:100%;display:none;flex-direction:column;gap:11px;animation:loginIn .35s ease;}
@@ -1740,7 +1763,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Play as Guest
         </button>
-        <div class="lg-guest-note">Guest mode is free to play up to <b>Level 10</b>.<br>Create an account to keep going & save progress.</div>
+        <div class="lg-guest-note">Guest mode is free to play up to <b>Level 10</b> — no pressure!<br>Create an account to keep going & save progress<br>🎁 First sign-up bonus: <b>+2,500 gold</b></div>
       </div>
 
       <!-- register form -->
@@ -2169,10 +2192,10 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
           <canvas id="hint-canvas" style="position:absolute;inset:0;z-index:12;pointer-events:none;border-radius:18px;"></canvas>
           <div class="streak-fire" id="streak-fire"></div>
         </div>
+        <!-- PLAYER SKILL DOCK — inside board-frame (survives g-board innerHTML swaps) docked over
+             the dead band BELOW the danger line, so it can never cover a live tile -->
+        <div id="skill-bar"></div>
       </div>
-
-      <!-- PLAYER SKILL BAR (active abilities, unlock by level) -->
-      <div id="skill-bar"></div>
 
       <!-- TRAY + ACTIONS -->
       <div class="tray-section" style="position:relative;">
@@ -2230,8 +2253,10 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
     <div class="modal-box" style="text-align:center;">
       <span class="modal-icon">⚡</span>
       <div class="modal-title">Level 10 Reached!</div>
-      <div class="modal-sub">You've hit the end of <b style="color:#ffd24a">Guest mode</b>. Create a free account to unlock Level 11+, save your progress, gold &amp; gems, and climb the leaderboard.</div>
-      <button class="modal-btn lg-register" style="background:linear-gradient(135deg,var(--acc),#0077b6);color:#fff;" onclick="guestWallRegister()">⚡ Create Free Account</button>
+      <!-- BIG unmissable sign-up bonus (user: "2.500 gold bonus büyük yap belli et") -->
+      <div class="gw-bonus"><span class="gwb-gift">🎁</span><span class="gwb-amt">+2,500</span><span class="gwb-coin">🪙</span><div class="gwb-lbl">SIGN-UP BONUS</div></div>
+      <div class="modal-sub">You've hit the end of <b style="color:#ffd24a">Guest mode</b>. Create a free account to claim your <b style="color:#ffd24a">2,500 gold</b>, unlock Level 11+, save your progress and climb the leaderboard.</div>
+      <button class="modal-btn lg-register" style="background:linear-gradient(135deg,var(--acc),#0077b6);color:#fff;" onclick="guestWallRegister()">🎁 Create Account · Claim 2,500 🪙</button>
       <button class="modal-btn" style="background:rgba(255,255,255,0.06);color:var(--txt);" onclick="hideModal('guestWallModal');goHomeFromGameOver&&goHomeFromGameOver();">🏠 Back to Home</button>
     </div>
   </div>
@@ -2398,6 +2423,7 @@ function applyProgressiveUI(){
 function beginLevel(isBossLevel){
   levelTimedOut=false; levelMaxComboMult=1; levelUsedMult=false; levelObjDone=false; levelLivesLost=0; levelHintsUsed=0; levelMaxStreak=0;
   levelPerfectWaves=0;
+  window._buildWavesThisLevel=0; window._chainWavesThisLevel=0;   // per-level special-wave caps
   if(!isBossLevel && gMode!=='time') showFeatureUnlock(pLevel);
   applyProgressiveUI();
   if(isBossLevel || gMode==='time'){ levelObjective=null; updateObjChip(); return; }
@@ -2651,9 +2677,9 @@ function showScreen(id,navEl){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   if(navEl)navEl.classList.add('active');
   if(id==='home' && typeof updateHomeUI==='function') updateHomeUI();
-  // deferred login ask (login moved BEHIND gameplay): guests who reached L4+ get ONE prompt
+  // deferred login ask (login moved BEHIND gameplay): guests who reached L3 get ONE prompt
   // when they land back home; the hard wall stays at GUEST_CAP. Never during splash.
-  if(id==='home' && typeof isGuest!=='undefined' && isGuest && typeof pLevel!=='undefined' && pLevel>=4
+  if(id==='home' && typeof isGuest!=='undefined' && isGuest && typeof pLevel!=='undefined' && pLevel>=3
      && !localStorage_get('numa_login_prompt') && typeof splashDismissed!=='undefined' && splashDismissed){
     localStorage_set('numa_login_prompt','1');
     setTimeout(()=>{ if(typeof showLogin==='function') showLogin(); },600);
@@ -3882,8 +3908,8 @@ function waveFallSpeed(){
   // yellow→red level-bar warning) — "telaş" as the level is about to complete.
   if(!isBoss && gMode!=='time'){
     const remaining=levelNeed()-solvedCount;
-    if(remaining===2) v*=1.15;
-    else if(remaining<=1) v*=1.32;
+    if(remaining===2) v*=1.08;        // softened (was 1.15/1.32 — the sudden jump read as lag/stutter, not tension)
+    else if(remaining<=1) v*=1.16;
   }
   // soften the adaptive difficulty so a win-streak can't compound into a speed spike (esp. during a long boss)
   const softMod=1+(difficultyMod-1)*0.5;
@@ -3906,11 +3932,11 @@ function spawnWaveMath(){
   waveEq.answers.forEach((val,i)=>{
     const el=document.createElement('div');
     const isCorrect=val===waveEq.ans;
-    el.className='wtile'+(isCorrect && featUnlocked('answerGlow')?' wtile-answer':'');
+    el.className='wtile wv'+wrnd(0,5)+(isCorrect && featUnlocked('answerGlow')?' wtile-answer':'');   // random candy colour per tile (icon style)
     el.textContent=val;
     const slot=slots[i], col=slot%cols, row=Math.floor(slot/cols);
-    const x=8+col*laneW+(laneW-62)/2+wrnd(-5,5);
-    const y=-70 - row*100 - col*26;   // cascade: stagger rows + columns so it isn't a solid wall
+    const x=8+col*laneW+(laneW-74)/2+wrnd(-4,4);
+    const y=-84 - row*108 - col*26;   // cascade: stagger rows + columns so it isn't a solid wall
     const t={el,x,y,v:waveFallSpeed()*(1+(Math.random()*.14-.07)),val:String(val),correct:isCorrect,dead:false,trailT:0,lane:col};
     el.style.transform='translate3d('+x+'px,'+y+'px,0)';
     const grab=ev=>{ev.preventDefault();ev.stopPropagation();tapWaveTile(t);};
@@ -3925,6 +3951,7 @@ function spawnWaveMath(){
   const bonusChance=(gMode==='time')?0.13:0.07;
   if(Math.random()<bonusChance) spawnBonus();
   waveActive=true; slowmoUsed=false; waveTime=0;
+  if(typeof renderSkillBar==='function') renderSkillBar();   // falling wave → dock visible again
   const hb=document.getElementById('hint-btn'); if(hb) hb.classList.remove('nudge');
   // P3 FINAL WAVE: dramatic entrance on the level's last solve (normal levels only)
   if(!isBoss && gMode!=='time' && solvedCount===levelNeed()-1){
@@ -3938,6 +3965,16 @@ let waveWatchdog=null;
 function startWaveWatchdog(){
   clearInterval(waveWatchdog);
   waveWatchdog=setInterval(()=>{
+    if(document.getElementById('wintro')) return;        // wave-intro card up — the board is intentionally paused
+    const gs=document.getElementById('game-screen');
+    const gameVisible=gActive && gs && getComputedStyle(gs).display!=='none';
+    // UNIVERSAL SELF-HEAL ("sonuç var oyun yok" insurance): a wave flag is up but its
+    // interactive elements are gone → rebuild that wave. Covers every wave grammar.
+    if(gameVisible){
+      if(typeof duelActive!=='undefined' && duelActive && isBoss && !document.querySelector('.duel-orb')){ try{ spawnDuel(); }catch(e){} return; }
+      if(cwActive && !document.querySelector('.ctile')){ try{ spawnChainWave(); }catch(e){} return; }
+      if(buildActive && !document.querySelector('.btile')){ try{ spawnBuildWave(); }catch(e){} return; }
+    }
     if(buildActive || cwActive || chainActive) return;   // BUILD/CHAIN/god-chain are self-timed — no falling loop to heal
     if(isBoss) return;   // boss math = DUEL (self-respawning). The 430ms clearDuel→spawnDuel gap has duelActive=false — the watchdog used to sneak a falling wave in there, desyncing the equation from the orbs + leaking ghost fallers that ate hearts
     if(gActive && gSubMode==='math' && !duelActive && document.getElementById('game-screen') && getComputedStyle(document.getElementById('game-screen')).display!=='none'){
@@ -4082,6 +4119,7 @@ function shouldBuildWave(){
   if(solvedCount<=0) return false;               // first wave of a level stays familiar
   if(solvedCount>=needed-1) return false;        // final wave keeps its own drama
   if(solvedCount-_lastBuildAt<2) return false;   // never back-to-back
+  if((window._buildWavesThisLevel||0)>=1) return false;   // MAX 1 build wave per level (user: special waves felt like "mini games every level")
   return Math.random()<0.4;
 }
 function genBuildSet(){
@@ -4181,6 +4219,7 @@ function spawnBuildWave(){
   const set=genBuildSet();
   buildTarget=set.target; buildSum=0; buildTiles=[]; buildActive=true; waveActive=false; waveTime=0;
   _lastBuildAt=solvedCount;
+  window._buildWavesThisLevel=(window._buildWavesThisLevel||0)+1;
   targetVal=set.target; primarySolution=[]; guaranteedSeq=[];
   // top panel shows the GOAL (persistent — this distinct UI IS the "rule changed" signal, no flashing banner)
   const tv=document.getElementById('g-target');
@@ -4215,6 +4254,7 @@ function spawnBuildWave(){
   };
   if(needsWaveIntro('build')) showWaveIntro('build',startClock); else startClock();
   gActive=true;
+  if(typeof renderSkillBar==='function') renderSkillBar();   // hide the dock — build UI owns the bottom band
 }
 function tapBuildTile(t){
   if(!gActive || !buildActive || t.used) return;
@@ -4293,6 +4333,7 @@ function shouldChainWave(){
   if(solvedCount>=needed-1) return false;          // final wave keeps its own drama
   if(solvedCount-_lastChainAt<2) return false;     // never back-to-back
   if(typeof _lastBuildAt!=='undefined' && solvedCount-_lastBuildAt<1) return false;
+  if((window._chainWavesThisLevel||0)>=2) return false;   // MAX 2 chain waves per level — flagship, but falling stays the backbone
   return Math.random()<0.45;   // flagship wave — raised from 0.35 (chain IS the game's identity)
 }
 function _divisors(n){ const d=[]; for(let i=2;i<=12 && i<n;i++){ if(n%i===0) d.push(i); } return d; }
@@ -4361,6 +4402,7 @@ function spawnChainWave(){
   const set=genChainSet();
   cwTarget=set.target; chainVal=null; chainExpect='num'; chainPendingOp=null; cwSeq=[]; cwTiles=[]; _chainPrevEl=null;
   cwActive=true; waveActive=false; waveTime=0; _lastChainAt=solvedCount;
+  window._chainWavesThisLevel=(window._chainWavesThisLevel||0)+1;
   targetVal=set.target; primarySolution=[]; guaranteedSeq=[];
   const tv=document.getElementById('g-target');
   if(tv){ tv.style.display=''; tv.className='tp-val'; tv.innerHTML='<span class="eq-display chain-eq">= <b>'+set.target+'</b></span>';
@@ -4390,6 +4432,7 @@ function spawnChainWave(){
   if(needsWaveIntro('chain')) showWaveIntro('chain',startClock); else startClock();
   const cv=document.getElementById('chainfx'); if(cv){ const br=board.getBoundingClientRect(); cv.width=br.width; cv.height=br.height; }
   gActive=true;
+  if(typeof renderSkillBar==='function') renderSkillBar();   // hide the dock — chain UI owns the bottom band
 }
 function chainBolt(el){
   const cv=document.getElementById('chainfx'), board=document.getElementById('g-board');
@@ -4494,33 +4537,44 @@ function clearChain(fade){
 /* ═══════════ ⭐ PLAYER SKILLS — active abilities unlocked by level, spent from a shared CHARGE pool that fills as you solve ═══════════ */
 const SKILL_MAX_CHARGE=3, SKILL_SOLVES_PER_CHARGE=4;
 let skillCharges=1, _skillSolveCnt=0, skillShield=false, skillOvercharge=false, _skillTsToken=0;
+/* 3 skills only (user call): FREEZE + SLOW = clutch moments, SHIELD = insurance.
+   PURGE/OVERCHARGE removed — purge solved the wave FOR you (too easy), fewer buttons read better. */
 const SKILL_DEFS=[
-  {id:'freeze',ic:'❄️',name:'FREEZE', lvl:3,  col:'#7adfff', cost:30},
-  {id:'purge', ic:'💣',name:'PURGE',  lvl:5,  col:'#ff8a3c', cost:45},
-  {id:'slowmo',ic:'🐌',name:'SLOW-MO',lvl:7,  col:'#a7f0ff', cost:35},
-  {id:'over',  ic:'⚡',name:'CHARGE', lvl:10, col:'#ffd84a', cost:60},
-  {id:'shield',ic:'🛡️',name:'SHIELD', lvl:13, col:'#43e0a0', cost:50}
+  {id:'freeze',ic:'❄️',name:'FREEZE', lvl:2, col:'#7adfff', cost:30},
+  {id:'slowmo',ic:'🐌',name:'SLOW',   lvl:4, col:'#a7f0ff', cost:25},
+  {id:'shield',ic:'🛡️',name:'SHIELD', lvl:7, col:'#43e0a0', cost:50}
 ];
 function skillsUnlocked(){ return SKILL_DEFS.filter(s=>pLevel>=s.lvl); }
-function skillBarVisible(){ return gActive && !isBoss && skillsUnlocked().length>0; }   // skills available in EVERY mode (math/word/combo/time/pulse), not just math
+// visible in every falling-wave mode; hidden in boss (duel arena) and BUILD/CHAIN (their UI owns
+// the board's bottom band, and freeze/slow don't affect their setTimeout clocks anyway)
+function skillBarVisible(){ return gActive && !isBoss && !(typeof buildActive!=='undefined'&&buildActive) && !(typeof cwActive!=='undefined'&&cwActive); }
 function injectSkillCSS(){
   if(document.getElementById('skill-css')) return;
   const s=document.createElement('style'); s.id='skill-css';
   s.textContent=`
-  #skill-bar{display:none;align-items:center;gap:6px;justify-content:center;padding:4px 0 2px;flex-wrap:wrap;z-index:6;position:relative;}
+  /* FLOATING SKILL DOCK — round buttons pinned to the board's left edge. The old inline bar
+     sat in the flex column and got CRUSHED to 0px height on real phones ("skil yok" reports). */
+  #skill-bar{display:none;position:absolute;left:50%;bottom:9px;transform:translateX(-50%);z-index:14;
+    flex-direction:row;gap:14px;pointer-events:auto;}
   .boss-active #skill-bar,.in-game.boss-active #skill-bar{display:none!important;}
-  .sk-charge{display:flex;align-items:center;gap:3px;font-size:11px;color:#ffd84a;font-family:Rajdhani,sans-serif;font-weight:800;}
-  .sk-charge i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.14);transition:background .2s,box-shadow .2s;}
-  .sk-charge i.on{background:#ffd84a;box-shadow:0 0 7px rgba(255,216,74,.8);}
-  .sk-btn{display:flex;align-items:center;gap:4px;padding:5px 9px 5px 7px;border-radius:13px;cursor:pointer;
-    background:linear-gradient(160deg,rgba(40,30,62,.85),rgba(20,14,32,.9));border:1px solid rgba(255,255,255,.1);
-    font-family:Rajdhani,sans-serif;font-weight:800;font-size:10px;letter-spacing:.5px;color:#9a8fc0;transition:transform .1s,filter .2s,border-color .2s,opacity .2s;opacity:.5;}
-  .sk-btn .sk-ic{font-size:16px;filter:grayscale(.5);}
-  .sk-btn .sk-cost{font-size:9px;font-weight:800;color:#ffd84a;margin-left:1px;letter-spacing:0;}
-  .sk-btn.ready{opacity:1;color:#eaf2ff;border-color:rgba(120,200,255,.4);}
+  .sk-charge{display:none;}
+  .sk-btn{position:relative;width:52px;height:52px;border-radius:50%;cursor:pointer;padding:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 32% 26%,rgba(72,60,116,.96),rgba(17,13,32,.97) 72%);
+    border:2px solid var(--skc,rgba(255,255,255,.22));
+    box-shadow:0 6px 14px rgba(0,0,0,.55),0 0 14px -5px var(--skc,transparent),inset 0 1px 0 rgba(255,255,255,.16);
+    font-family:Rajdhani,sans-serif;font-weight:800;color:#9a8fc0;transition:transform .1s,filter .2s,opacity .2s;opacity:.55;}
+  .sk-btn .sk-ic{font-size:20px;line-height:1;filter:grayscale(.6);}
+  .sk-btn .sk-cost{font-size:10px;font-weight:800;color:#ffd84a;line-height:1.1;letter-spacing:0;margin-top:1px;}
+  .sk-btn .sk-cost::before{content:'🪙';font-size:8px;margin-right:1px;}
+  .sk-btn .sk-lv{font-size:9px;color:#8f86ad;line-height:1.1;letter-spacing:.5px;margin-top:1px;}
+  .sk-btn.ready{opacity:1;color:#eaf2ff;}
   .sk-btn.ready .sk-ic{filter:none;}
-  .sk-btn.ready:active{transform:scale(.9);}
-  .sk-btn.active{border-color:#43e0a0;color:#43e0a0;box-shadow:0 0 12px rgba(67,224,160,.45);animation:skActive 1s ease-in-out infinite;}
+  .sk-btn.ready:active{transform:scale(.88);}
+  .sk-btn.active{border-color:#43e0a0;color:#43e0a0;box-shadow:0 0 14px rgba(67,224,160,.5);animation:skActive 1s ease-in-out infinite;}
+  .sk-btn.sk-locked{opacity:.34;}
+  .sk-btn.sk-locked .sk-ic{filter:grayscale(1) brightness(.65);}
+  .sk-btn.sk-locked::after{content:'🔒';position:absolute;top:-3px;right:-3px;font-size:12px;}
   @keyframes skActive{0%,100%{filter:brightness(1);}50%{filter:brightness(1.4);}}
   .sk-flash{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font-family:Bungee,sans-serif;font-size:30px;z-index:9990;pointer-events:none;text-shadow:0 0 22px currentColor;animation:skFlashA 1s ease forwards;}
   @keyframes skFlashA{0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}22%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}80%{opacity:1;}100%{opacity:0;transform:translate(-50%,-66%) scale(1);}}
@@ -4534,11 +4588,12 @@ function renderSkillBar(){
   const bar=document.getElementById('skill-bar'); if(!bar) return;
   if(!skillBarVisible()){ bar.style.display='none'; return; }
   bar.style.display='flex';
-  const un=skillsUnlocked();
-  bar.innerHTML=un.map(s=>{
-    const armed=(s.id==='shield'&&skillShield)||(s.id==='over'&&skillOvercharge);
+  bar.innerHTML=SKILL_DEFS.map(s=>{
+    const locked=pLevel<s.lvl;
+    const armed=(s.id==='shield'&&skillShield);
     const afford=pGold>=s.cost;
-    return '<button class="sk-btn'+((afford||armed)?' ready':'')+(armed?' active':'')+'" data-sk="'+s.id+'" onclick="useSkill(\''+s.id+'\')"><span class="sk-ic">'+s.ic+'</span><span class="sk-nm">'+s.name+'</span><span class="sk-cost">🪙'+s.cost+'</span></button>';
+    if(locked) return '<button class="sk-btn sk-locked" data-sk="'+s.id+'" onclick="useSkill(\''+s.id+'\')"><span class="sk-ic">'+s.ic+'</span><span class="sk-lv">LV '+s.lvl+'</span></button>';
+    return '<button class="sk-btn'+((afford||armed)?' ready':'')+(armed?' active':'')+'" style="--skc:'+s.col+'" data-sk="'+s.id+'" onclick="useSkill(\''+s.id+'\')"><span class="sk-ic">'+s.ic+'</span><span class="sk-cost">'+s.cost+'</span></button>';
   }).join('');
 }
 function gainSkillCharge(){ _skillSolveCnt++; if(_skillSolveCnt>=SKILL_SOLVES_PER_CHARGE){ _skillSolveCnt=0; if(skillCharges<SKILL_MAX_CHARGE){ skillCharges++; renderSkillBar(); } } }
@@ -4547,7 +4602,8 @@ function showSkillToast(msg){ const ph=document.getElementById('phone'); if(!ph)
 function _skillRestoreTs(token,val){ const t=token; setTimeout(()=>{ if(_skillTsToken===t) timescale=1; }, val); }
 function useSkill(id){
   if(!skillBarVisible()) return;
-  const def=SKILL_DEFS.find(s=>s.id===id); if(!def || pLevel<def.lvl) return;
+  const def=SKILL_DEFS.find(s=>s.id===id); if(!def) return;
+  if(pLevel<def.lvl){ showSkillToast('🔒 '+def.name+' unlocks at Level '+def.lvl); if(typeof haptic==='function')haptic([20,20]); return; }
   if((id==='shield'&&skillShield)||(id==='over'&&skillOvercharge)) return;   // already armed
   if(pGold<def.cost){ showSkillToast('Need 🪙'+def.cost+' — earn gold by solving!'); if(typeof haptic==='function')haptic([30,30]); return; }
   // PURGE only makes sense when there are decoy fallers — don't charge gold for a no-op (word/pulse)
@@ -4690,9 +4746,8 @@ function clearParry(){
 function startFinalWave(){
   finalWaveOn=true;
   document.getElementById('phone').classList.add('final-wave');
-  // slow-mo entrance beat (released unless a real slow-mo is running)
-  if(timescale===1) timescale=0.45;
-  setTimeout(()=>{ if(finalWaveOn && timescale===0.45 && slowmoTimer<=0) timescale=1; },800);
+  // (the old 800ms 0.45× slow-mo entrance beat is GONE — mid-level timescale dips read as
+  //  LAG/stutter on device ("sona doğru lag gibi"), not as drama; gold edges + heartbeat carry it)
   heartbeatSnd(); setTimeout(heartbeatSnd,450);
   if(typeof haptic==='function') haptic([30,40,60]);
   // drama = persistent gold board edges (.final-wave) + slow-mo + heartbeat — NO flashing center text
@@ -5038,7 +5093,7 @@ function gameLoop(){
   const bh=board.clientHeight;
   // board hidden / not laid out yet (mid-transition): skip danger checks, retry next frame
   if(!bh){ loopRaf=requestAnimationFrame(gameLoop); return; }
-  const DANGER_Y=bh-72;            // danger line (tile is 62px tall)
+  const DANGER_Y=bh-84;            // danger line (tile is 74px tall)
 
   // hint nudge: stuck on this wave for 4s+
   if(waveActive){
@@ -5062,7 +5117,7 @@ function gameLoop(){
       if(near && !slowmoUsed) startSlowmo();
     }
     // combo trails
-    if(streakCount>=3 && t.correct!==undefined){ t.trailT=(t.trailT||0)-dt; if(t.trailT<=0){ waveTrail(t.x+27,t.y+8); t.trailT=.11; } }
+    if(streakCount>=3 && t.correct!==undefined){ t.trailT=(t.trailT||0)-dt; if(t.trailT<=0){ waveTrail(t.x+33,t.y+8); t.trailT=.11; } }
     if(t.y>DANGER_Y){
       if(t.correct){ missCorrectWave(); break; }
       else if(t.val==='BONUS'){ t.el.remove(); fallers.splice(i,1); }
@@ -6509,8 +6564,10 @@ function startTraining(isReplay){
 
 function continueGame(){
   document.getElementById('levelModal').style.display='none';
-  // SURPRISE ROUND — sometimes drop a random mini-mode before the next level (variety / "what's next?")
-  if(gMode!=='time' && !pendingBoss && pLevel>=2 && Math.random()<0.5){
+  // SURPRISE ROUND — a RARE treat before the next level. 50% felt like a routine chore
+  // (user: "çok çıkıyor, random olmalı arada heyecan için") → 22% + never within 3 levels of the last one.
+  if(gMode!=='time' && !pendingBoss && pLevel>=2 && Math.random()<0.22 && (pLevel-(window._lastSurpriseLvl||-9))>=3){
+    window._lastSurpriseLvl=pLevel;
     runSurpriseRound(_continueLevel); return;
   }
   _continueLevel();
@@ -8936,6 +8993,7 @@ function _applyFbUser(u, provider){
   } else {
     // splash still up (or login not yet shown) — just refresh the profile; dismissSplash will route to game
     if(typeof applyAuthProfile==='function') applyAuthProfile();
+    if(typeof grantSignupGift==='function') grantSignupGift();   // redirect sign-ins land here, not finishLogin
   }
 }
 // when the page returns from a REDIRECT sign-in (mobile path), finish the login.
@@ -8990,8 +9048,22 @@ function loginGuest(){
   if(!localStorage_get('numa_name')){ playerName='Guest'; localStorage_set('numa_name','Guest'); }
   finishLogin('👋 Playing as Guest — up to Level 10.');
 }
+// 🎁 first REAL sign-up (google/apple/email — not guest) is rewarded once with 2,500 gold
+function grantSignupGift(){
+  try{
+    if(localStorage_get('numa_signup_gift')) return;
+    if(!authMethod || authMethod==='guest') return;
+    localStorage_set('numa_signup_gift','1');
+    gainGold(2500);
+    if(typeof saveWallet==='function') saveWallet();
+    if(typeof updateHUD==='function') updateHUD();
+    if(typeof fireConfetti==='function') fireConfetti(80);
+    setTimeout(()=>{ if(typeof showBuyToast==='function') showBuyToast('🎁 Welcome Gift: +2,500 🪙'); },600);
+  }catch(e){}
+}
 function finishLogin(msg){
   applyAuthProfile();
+  grantSignupGift();
   hideLogin();
   if(typeof haptic==='function') haptic([20,15,30]);
   // NEW PLAYERS → guided Training Mode (teaches + hooks). Returning/trained users skip it.
