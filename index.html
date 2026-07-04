@@ -1268,7 +1268,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .boss-active .g-hud{display:none!important;}
 .boss-active .tp-top{display:none!important;}
 .boss-active #lvl-obj{display:none!important;}
-.boss-active #g-score{display:none!important;}
+/* score chip STAYS visible in boss fights (user: "skorda yok") — points still accrue there */
+.boss-active #g-score{font-size:12px!important;padding:2px 10px;background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.14)!important;}
 .boss-active .target-panel{background:transparent!important;border:none!important;box-shadow:none!important;backdrop-filter:none!important;padding:4px 0 0!important;}
 .boss-active .tp-bottom{justify-content:center;}
 
@@ -2423,7 +2424,7 @@ function applyProgressiveUI(){
 function beginLevel(isBossLevel){
   levelTimedOut=false; levelMaxComboMult=1; levelUsedMult=false; levelObjDone=false; levelLivesLost=0; levelHintsUsed=0; levelMaxStreak=0;
   levelPerfectWaves=0;
-  window._buildWavesThisLevel=0; window._chainWavesThisLevel=0;   // per-level special-wave caps
+  window._buildWavesThisLevel=0; window._chainWavesThisLevel=0; window._lastSpecialAt=-9;   // per-level special-wave caps + combined gap
   if(!isBossLevel && gMode!=='time') showFeatureUnlock(pLevel);
   applyProgressiveUI();
   if(isBossLevel || gMode==='time'){ levelObjective=null; updateObjChip(); return; }
@@ -2705,7 +2706,7 @@ const WORLDS=[
 ];
 function worldOf(level){ return Math.min(Math.floor((level-1)/10), WORLDS.length-1); }
 // solves needed to fill the level bar — grows with level (cap 24) so it fills SLOWER as you climb
-function levelNeed(){ return Math.min(5+pLevel,24); }
+function levelNeed(){ return Math.min(6+pLevel,26); }   // +1-2 solves per level (user: "lvl süreleri az arttır")
 let _lastBarSolved=0;
 /* per-world painted backdrop — EXTERNAL files (world1=lava,2=forest,3=desert,4=ice,5=space) keep index.html small */
 function worldBg(w){ return 'world'+(Math.max(0,Math.min(w,4))+1)+'.jpg'; }
@@ -4118,7 +4119,7 @@ function shouldBuildWave(){
   if(pLevel<2) return false;                     // L1 teaches the base loop first
   if(solvedCount<=0) return false;               // first wave of a level stays familiar
   if(solvedCount>=needed-1) return false;        // final wave keeps its own drama
-  if(solvedCount-_lastBuildAt<2) return false;   // never back-to-back
+  if(solvedCount-(window._lastSpecialAt??-9)<3) return false;   // COMBINED gap: ≥3 normal solves after ANY special wave (chain OR build) — kills "peşpeşe mini oyun"
   if((window._buildWavesThisLevel||0)>=1) return false;   // MAX 1 build wave per level (user: special waves felt like "mini games every level")
   return Math.random()<0.4;
 }
@@ -4219,6 +4220,7 @@ function spawnBuildWave(){
   const set=genBuildSet();
   buildTarget=set.target; buildSum=0; buildTiles=[]; buildActive=true; waveActive=false; waveTime=0;
   _lastBuildAt=solvedCount;
+  window._lastSpecialAt=solvedCount;
   window._buildWavesThisLevel=(window._buildWavesThisLevel||0)+1;
   targetVal=set.target; primarySolution=[]; guaranteedSeq=[];
   // top panel shows the GOAL (persistent — this distinct UI IS the "rule changed" signal, no flashing banner)
@@ -4331,9 +4333,8 @@ function shouldChainWave(){
   if(pLevel<3) return false;                       // unlocks after L3 (learn base loop + build first)
   if(solvedCount<=0) return false;
   if(solvedCount>=needed-1) return false;          // final wave keeps its own drama
-  if(solvedCount-_lastChainAt<2) return false;     // never back-to-back
-  if(typeof _lastBuildAt!=='undefined' && solvedCount-_lastBuildAt<1) return false;
-  if((window._chainWavesThisLevel||0)>=2) return false;   // MAX 2 chain waves per level — flagship, but falling stays the backbone
+  if(solvedCount-(window._lastSpecialAt??-9)<3) return false;   // COMBINED gap: ≥3 normal solves after ANY special wave (chain OR build) — kills "peşpeşe mini oyun"
+  if((window._chainWavesThisLevel||0)>=(levelNeed()>=12?2:1)) return false;   // 1/level early, 2/level on long levels — flagship, but falling stays the backbone
   return Math.random()<0.45;   // flagship wave — raised from 0.35 (chain IS the game's identity)
 }
 function _divisors(n){ const d=[]; for(let i=2;i<=12 && i<n;i++){ if(n%i===0) d.push(i); } return d; }
@@ -4402,6 +4403,7 @@ function spawnChainWave(){
   const set=genChainSet();
   cwTarget=set.target; chainVal=null; chainExpect='num'; chainPendingOp=null; cwSeq=[]; cwTiles=[]; _chainPrevEl=null;
   cwActive=true; waveActive=false; waveTime=0; _lastChainAt=solvedCount;
+  window._lastSpecialAt=solvedCount;
   window._chainWavesThisLevel=(window._chainWavesThisLevel||0)+1;
   targetVal=set.target; primarySolution=[]; guaranteedSeq=[];
   const tv=document.getElementById('g-target');
