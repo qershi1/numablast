@@ -1677,6 +1677,14 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .lg-register{background:linear-gradient(135deg,var(--acc),#0077b6);color:#fff;
   box-shadow:0 6px 22px rgba(0,212,255,.35);}
 .lg-guest{background:rgba(255,255,255,.05);color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.14);}
+/* HERO guest button — the primary action, styled like the big PLAY button (user: "play tuşu gibi belli et") */
+.lg-guest-hero{font-family:'Bungee',sans-serif;font-size:16px;letter-spacing:1.5px;color:#3a2200;justify-content:center;
+  background:linear-gradient(180deg,#ffe08a,#ffc94a 55%,#f08a1a);border:none;border-radius:16px;padding:16px 18px;
+  box-shadow:0 8px 26px rgba(255,170,30,.5),inset 0 2px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(160,80,0,.35);
+  animation:lgHeroPulse 1.5s ease-in-out infinite;}
+.lg-guest-hero:active{transform:scale(.96);}
+@keyframes lgHeroPulse{0%,100%{transform:scale(1);box-shadow:0 8px 22px rgba(255,170,30,.4),inset 0 2px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(160,80,0,.35);}
+  50%{transform:scale(1.035);box-shadow:0 10px 34px rgba(255,170,30,.65),inset 0 2px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(160,80,0,.35);}}
 .lg-guest-note{text-align:center;font-size:11px;color:rgba(255,255,255,.4);margin-top:9px;line-height:1.5;}
 .lg-guest-note b{color:#ffd24a;font-weight:700;}
 /* BIG sign-up bonus badge (guest wall) */
@@ -1743,10 +1751,13 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         <span class="lg-numa">NUMA</span>
         <span class="lg-blast">BLAST</span>
       </div>
-      <div class="lg-tag">SIGN IN TO PLAY</div>
+      <div class="lg-tag">READY TO PLAY?</div>
 
-      <!-- main provider buttons -->
+      <!-- main provider buttons — GUEST first as the hero action (play-first flow) -->
       <div class="lg-btns" id="lg-main">
+        <button class="lg-btn lg-guest-hero" onclick="loginGuest()">▶&nbsp; PLAY AS GUEST</button>
+        <div class="lg-guest-note" style="margin-top:2px;">Free up to <b>Level 10</b> — no sign-up needed</div>
+        <div class="lg-or">OR SAVE YOUR PROGRESS</div>
         <button class="lg-btn lg-google" onclick="loginWith('google')">
           <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45 24c0-1.6-.1-2.8-.4-4H24v7.6h12c-.3 2-1.6 5-4.6 7l7 5.4C42.7 42.6 45 33.9 45 24z"/><path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-7-5.4c-2 1.3-4.5 2.2-7.5 2.2-5.7 0-10.6-3.9-12.3-9.1l-7.3 5.6C7.9 41 15.3 46 24 46z"/><path fill="#FBBC05" d="M11.7 28.4c-.5-1.3-.7-2.7-.7-4.4s.3-3.1.7-4.4l-7.3-5.6C2.9 16.9 2 20.3 2 24s.9 7.1 2.4 10l7.3-5.6z"/><path fill="#EA4335" d="M24 10.7c3.2 0 5.4 1.4 6.6 2.5l5.9-5.8C32.9 4 27.9 2 24 2 15.3 2 7.9 7 4.4 14l7.3 5.6C13.4 14.6 18.3 10.7 24 10.7z"/></svg>
           Continue with Google
@@ -1760,11 +1771,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
           Create Account
         </button>
-        <button class="lg-btn lg-guest" onclick="loginGuest()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Play as Guest
-        </button>
-        <div class="lg-guest-note">Guest mode is free to play up to <b>Level 10</b> — no pressure!<br>Create an account to keep going & save progress<br>🎁 First sign-up bonus: <b>+2,500 gold</b></div>
+        <div class="lg-guest-note">🎁 First sign-up bonus: <b>+2,500 gold</b> · saves progress &amp; leaderboard</div>
       </div>
 
       <!-- register form -->
@@ -2228,10 +2235,19 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
           <div id="go-level" style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--acc);">1</div>
         </div>
         <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--bdr);border-radius:14px;padding:12px 8px;">
-          <div style="font-size:10px;color:var(--mut);font-weight:700;letter-spacing:1px;">🪙 GOLD</div>
-          <div id="go-gold" style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--gold);">0</div>
+          <div style="font-size:10px;color:var(--mut);font-weight:700;letter-spacing:1px;">🔥 BEST COMBO</div>
+          <div id="go-combo" style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#ff9a3c;">×1</div>
         </div>
       </div>
+      <!-- NUMA IQ badge (fun in-game rating, positive tiers) + random motivator -->
+      <div id="go-iq" style="display:flex;align-items:center;justify-content:center;gap:9px;margin:0 0 10px;padding:9px 14px;border-radius:14px;
+        background:rgba(255,255,255,.04);border:1px solid var(--go-iqc,rgba(255,255,255,.14));box-shadow:0 0 18px -6px var(--go-iqc,transparent);">
+        <span id="go-iq-em" style="font-size:19px;">🟢</span>
+        <span style="font-family:'Rajdhani',sans-serif;font-weight:800;font-size:11px;letter-spacing:2px;color:var(--mut);">NUMA&nbsp;IQ</span>
+        <span id="go-iq-n" style="font-family:'Bungee',sans-serif;font-size:21px;color:var(--go-iqc,#fff);">100</span>
+        <span id="go-iq-t" style="font-family:'Syne',sans-serif;font-weight:800;font-size:12.5px;color:var(--go-iqc,#fff);letter-spacing:.5px;">NOT BAD</span>
+      </div>
+      <div id="go-msg" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;color:var(--txt);opacity:.85;line-height:1.45;margin:0 4px 16px;"></div>
       <button class="modal-btn btn-gold" onclick="continueWithGem()">💎 Continue — 3 Gems</button>
       <button class="modal-btn" style="background:rgba(16,185,129,0.15);color:#10b981;" onclick="continueWithAd()">📺 Continue — Watch Ad (Free)</button>
       <button class="modal-btn btn-primary" onclick="restartGame()">🔄 Play Again</button>
@@ -2346,6 +2362,18 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 
 <script src="assets.js"></script>
 <script src="bosses2.js"></script>
+<script>
+/* resilience: a truncated/failed assets.js download leaves BOSS_A undefined (whole-script parse
+   failure) → boss art silently falls back to placeholders (the "⏳ instead of boss" report).
+   One cache-busted retry of both asset packs heals it without a manual refresh. */
+(function(){
+  if(typeof BOSS_A!=='undefined') return;
+  console.warn('[assets] BOSS_A missing after initial load — retrying asset packs');
+  var s=document.createElement('script'); s.src='assets.js?r='+Date.now();
+  s.onload=function(){ var b=document.createElement('script'); b.src='bosses2.js?r='+Date.now(); document.head.appendChild(b); };
+  document.head.appendChild(s);
+})();
+</script>
 <script>
 /* ── STATE ── */
 let gActive=false,gMode='',gSubMode='';
@@ -2706,7 +2734,7 @@ const WORLDS=[
 ];
 function worldOf(level){ return Math.min(Math.floor((level-1)/10), WORLDS.length-1); }
 // solves needed to fill the level bar — grows with level (cap 24) so it fills SLOWER as you climb
-function levelNeed(){ return Math.min(6+pLevel,26); }   // +1-2 solves per level (user: "lvl süreleri az arttır")
+function levelNeed(){ return Math.min(8+pLevel,28); }   // lengthened twice on request — L1=9, L10=18, cap 28
 let _lastBarSolved=0;
 /* per-world painted backdrop — EXTERNAL files (world1=lava,2=forest,3=desert,4=ice,5=space) keep index.html small */
 function worldBg(w){ return 'world'+(Math.max(0,Math.min(w,4))+1)+'.jpg'; }
@@ -2860,6 +2888,7 @@ function startGame(mode){
   timer=(mode==='time')?TA_START:60;
   taWave=1;
   pScore=0; solvedCount=0;
+  window._runMaxStreak=0;   // fresh combo record for the game-over card
   pLives=3; // fresh lives each run (arcade style)
   if(typeof hideBoss==='function') hideBoss();
   document.getElementById('phone').classList.remove('boss-active','pulse-nav'); // ensure boss focus chrome is restored
@@ -4119,9 +4148,10 @@ function shouldBuildWave(){
   if(pLevel<2) return false;                     // L1 teaches the base loop first
   if(solvedCount<=0) return false;               // first wave of a level stays familiar
   if(solvedCount>=needed-1) return false;        // final wave keeps its own drama
-  if(solvedCount-(window._lastSpecialAt??-9)<3) return false;   // COMBINED gap: ≥3 normal solves after ANY special wave (chain OR build) — kills "peşpeşe mini oyun"
-  if((window._buildWavesThisLevel||0)>=1) return false;   // MAX 1 build wave per level (user: special waves felt like "mini games every level")
-  return Math.random()<0.4;
+  if(solvedCount<3) return false;                               // never in the first 3 solves
+  if(solvedCount-(window._lastSpecialAt??-9)<4) return false;   // COMBINED gap: ≥4 normal solves after ANY special wave
+  if((window._buildWavesThisLevel||0)>=1) return false;         // HARD CAP 1/level ("arada çerez")
+  return Math.random()<0.30;
 }
 function genBuildSet(){
   const lvl=effLevel();
@@ -4333,9 +4363,10 @@ function shouldChainWave(){
   if(pLevel<3) return false;                       // unlocks after L3 (learn base loop + build first)
   if(solvedCount<=0) return false;
   if(solvedCount>=needed-1) return false;          // final wave keeps its own drama
-  if(solvedCount-(window._lastSpecialAt??-9)<3) return false;   // COMBINED gap: ≥3 normal solves after ANY special wave (chain OR build) — kills "peşpeşe mini oyun"
-  if((window._chainWavesThisLevel||0)>=(levelNeed()>=12?2:1)) return false;   // 1/level early, 2/level on long levels — flagship, but falling stays the backbone
-  return Math.random()<0.45;   // flagship wave — raised from 0.35 (chain IS the game's identity)
+  if(solvedCount<3) return false;                               // never in the first 3 solves — the level opens with its base rhythm
+  if(solvedCount-(window._lastSpecialAt??-9)<4) return false;   // COMBINED gap: ≥4 normal solves after ANY special wave
+  if((window._chainWavesThisLevel||0)>=1) return false;         // HARD CAP 1/level — special waves are a garnish ("arada çerez"), not the meal
+  return Math.random()<0.30;
 }
 function _divisors(n){ const d=[]; for(let i=2;i<=12 && i<n;i++){ if(n%i===0) d.push(i); } return d; }
 function genChainSet(){
@@ -6568,7 +6599,7 @@ function continueGame(){
   document.getElementById('levelModal').style.display='none';
   // SURPRISE ROUND — a RARE treat before the next level. 50% felt like a routine chore
   // (user: "çok çıkıyor, random olmalı arada heyecan için") → 22% + never within 3 levels of the last one.
-  if(gMode!=='time' && !pendingBoss && pLevel>=2 && Math.random()<0.22 && (pLevel-(window._lastSurpriseLvl||-9))>=3){
+  if(gMode!=='time' && !pendingBoss && pLevel>=2 && Math.random()<0.15 && (pLevel-(window._lastSurpriseLvl||-9))>=4){
     window._lastSurpriseLvl=pLevel;
     runSurpriseRound(_continueLevel); return;
   }
@@ -6734,6 +6765,7 @@ function comboTier(s){
   return {level:0,mult:1,name:'',color:'#10b981'};
 }
 function updateCombo(){
+  if(streakCount>(window._runMaxStreak||0)) window._runMaxStreak=streakCount;   // run-wide best combo (game-over card)
   const badge=document.getElementById('combo-badge');
   if(!badge)return;
   if(!featUnlocked('combo')){ badge.classList.remove('show'); return; }
@@ -8107,7 +8139,32 @@ function showGameOver(){
   if(gMode){ const lbMode=(gMode==='time')?'time':gMode; setModeBest(lbMode,pScore); }
   document.getElementById('go-score').textContent=pScore;
   document.getElementById('go-level').textContent=pLevel;
-  document.getElementById('go-gold').textContent=pGold;
+  const runMax=window._runMaxStreak||0;
+  const gc=document.getElementById('go-combo'); if(gc) gc.textContent='×'+Math.max(1,comboTier(runMax).mult);
+  // ── NUMA IQ — playful in-game rating, always positive framing ──
+  const niq=Math.round(Math.min(158, 84 + Math.min(pLevel*1.6,28) + Math.min(runMax*2.2,24) + Math.min(pScore/380,22)));
+  const tier = niq<105 ? {em:'🟢',t:'WARM-UP LAP',c:'#43e0a0'}
+             : niq<120 ? {em:'🟡',t:'NOT BAD',c:'#ffd84a'}
+             : niq<138 ? {em:'🟠',t:'SHARP MIND',c:'#ff9a3c'}
+             :           {em:'🔴',t:'NUMA MASTER',c:'#ff5a7a'};
+  const iqBox=document.getElementById('go-iq');
+  if(iqBox){ iqBox.style.setProperty('--go-iqc',tier.c);
+    document.getElementById('go-iq-em').textContent=tier.em;
+    document.getElementById('go-iq-n').textContent=niq;
+    document.getElementById('go-iq-t').textContent=tier.t; }
+  // ── random motivator (+1% roast easter egg — rare enough to be screenshot material, not an insult) ──
+  const GO_MSGS=[
+    '🤔 Not this time. Run it back!',
+    "🧠 Brain's warmed up — now the REAL score.",
+    '⚡ SO close. The next run breaks it.',
+    '😎 Dropped the combo — but the potential is loud.',
+    '🔥 An 8-streak is out there waiting for you.',
+    '🚂 Missed the last train — the next one is yours.'
+  ];
+  const msg=document.getElementById('go-msg');
+  if(msg) msg.textContent = (Math.random()<0.01)
+    ? '📉 IQ status: buffering… 😂 Screenshot this and send it to a friend.'
+    : GO_MSGS[Math.floor(Math.random()*GO_MSGS.length)];
   totalGamesPlayed++;
   showModal('energyModal');
 }
@@ -8824,7 +8881,13 @@ function dismissSplash(){
   sp.classList.add('hiding');
   setTimeout(()=>{ if(sp) sp.style.display='none'; }, 600);
   // route: brand-new players start as SILENT GUEST — no login wall before tasting the game.
-  // Login is asked later: once at L4+ on returning home (showScreen), hard wall at GUEST_CAP.
+  // Login is asked later: once at L3 on returning home (showScreen), hard wall at GUEST_CAP.
+  // Exception: right after a deliberate SIGN-OUT we show the login screen (account switch intent).
+  if(!isAuthed() && localStorage_get('numa_show_login')){
+    try{ localStorage.removeItem('numa_show_login'); }catch(e){}
+    setTimeout(showLogin, 350);
+    return;
+  }
   if(!isAuthed()){ authMethod='guest'; isGuest=true; localStorage_set('numa_auth','guest'); }
   applyAuthProfile();
   if(!localStorage_get('numa_trained')) setTimeout(()=>startTraining(false),650);
@@ -8900,6 +8963,7 @@ function submitSignIn(){
       localStorage_set('numa_auth','email'); localStorage_set('numa_email',email);
       if(u&&u.displayName){ playerName=u.displayName; localStorage_set('numa_name',playerName); }
       err.textContent=''; sfxLevelUp&&sfxLevelUp();
+      if(u&&u.uid&&restoreProfileSnapshot(u.uid)){ location.reload(); return; }   // returning account → bring its parked progress back
       finishLogin('⚡ Welcome back!');
     }).catch(e=>{ err.textContent=fbErr(e); console.warn('[firebase] signin', e); });
     return;
@@ -8955,6 +9019,7 @@ function loginWith(provider){
       else if(!localStorage_get('numa_name')){ playerName=(provider==='google'?'Google Player':'Apple Player'); localStorage_set('numa_name',playerName); }
       if(u&&u.email) localStorage_set('numa_email',u.email);
       if(err) err.textContent='';
+      if(u&&u.uid&&restoreProfileSnapshot(u.uid)){ location.reload(); return; }   // returning account → bring its parked progress back
       finishLogin('⚡ Signed in! Welcome.');
     }).catch(e=>{
       const code=(e&&e.code)||'';
@@ -8988,6 +9053,7 @@ function _applyFbUser(u, provider){
   localStorage_set('numa_auth',provider);
   if(u.displayName){ playerName=u.displayName; localStorage_set('numa_name',playerName); }
   if(u.email) localStorage_set('numa_email',u.email);
+  if(u.uid&&restoreProfileSnapshot(u.uid)){ location.reload(); return; }   // returning account (redirect path) → restore parked progress
   const lg=document.getElementById('login');
   const loginShowing = lg && (lg.classList.contains('show') || (lg.style.display!=='none' && getComputedStyle(lg).display!=='none'));
   if(splashDismissed && loginShowing){
@@ -9086,9 +9152,29 @@ function applyAuthProfile(){
     lbl.textContent=m[authMethod]||'Not signed in';
   }
 }
+/* ── PER-ACCOUNT LOCAL PROFILES — sign-out must not leak progress (gold/level/titles) into the next
+   session ("lvl ve goldlar aynı başlıyor"). On sign-out the whole progress snapshot is parked under
+   the account's tag and the live keys are wiped (fresh guest defaults); signing back into the same
+   account restores the snapshot. Device-level keys (tutorial flags, gift flag, lang…) stay put. ── */
+const _PROF_EXCLUDE=/^numa_(auth$|name$|email$|show_login|pending_auth|prof_|tut$|trained$|wintro_|login_prompt|signup_gift|deal_date|site_lang)/;
+function _profKeys(){ const ks=[]; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('numa_')===0&&!_PROF_EXCLUDE.test(k)) ks.push(k); } }catch(e){} return ks; }
+function _profTag(){ try{ if(window.fbAuth&&window.fbAuth.currentUser) return window.fbAuth.currentUser.uid; }catch(e){} return localStorage_get('numa_email')||('local_'+(authMethod||'x')); }
+function saveProfileSnapshot(tag){ try{ const o={}; _profKeys().forEach(k=>{o[k]=localStorage.getItem(k);}); localStorage.setItem('numa_prof_'+tag, JSON.stringify(o)); }catch(e){} }
+function wipeLocalProfile(){ try{ _profKeys().forEach(k=>localStorage.removeItem(k)); }catch(e){} }
+function restoreProfileSnapshot(tag){
+  try{ const s=localStorage.getItem('numa_prof_'+tag); if(!s) return false;
+    wipeLocalProfile(); const o=JSON.parse(s); for(const k in o) localStorage.setItem(k,o[k]); return true;
+  }catch(e){ return false; }
+}
 function logout(){
+  // park this account's progress FIRST (tag needs identity + fbAuth still intact), then hard-reset the live profile
+  try{ saveProfileSnapshot(_profTag()); }catch(e){}
+  wipeLocalProfile();
   authMethod=''; isGuest=false;
-  try{ localStorage.removeItem('numa_auth'); }catch(e){}
+  // clear the WHOLE profile identity — leaving numa_name made the next (silent-guest) session
+  // still show the old account name, which read as "sign out didn't work"
+  try{ localStorage.removeItem('numa_auth'); localStorage.removeItem('numa_name'); localStorage.removeItem('numa_email');
+       localStorage.setItem('numa_show_login','1'); }catch(e){}   // deliberate sign-out → next load shows the login screen (account switch), not silent guest
   const doReload=()=>location.reload();
   // MUST await signOut before reloading — reloading immediately raced Firebase's async signOut,
   // so the new page load's onAuthStateChanged could still see the OLD session and silently
