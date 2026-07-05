@@ -1236,6 +1236,19 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .in-game .bottom-nav{display:none!important;}
 .in-game .screens{height:calc(100% - env(safe-area-inset-bottom));}
 .in-game #boss-back{display:flex;}            /* quit always reachable in-game */
+.in-game .g-hud{padding-left:44px;}           /* clear the corner back button */
+.boss-active .g-prof,.boss-active .g-gold-chip{display:none!important;}   /* boss = clean arena */
+.g-prof{display:flex;align-items:center;gap:6px;}
+.g-prof-av{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;overflow:hidden;
+  background:radial-gradient(circle at 35% 30%,#5a3aa8,#2a1858);border:1px solid rgba(255,255,255,.18);flex-shrink:0;}
+.g-prof-av img{width:100%;height:100%;object-fit:cover;}
+.g-prof-txt{display:flex;flex-direction:column;line-height:1.05;}
+.g-prof-txt b{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#efe8fa;letter-spacing:.3px;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.g-prof-txt i{font-family:'Rajdhani',sans-serif;font-style:normal;font-weight:700;font-size:9px;letter-spacing:1px;color:#9a8fbf;}
+.g-gold-chip{display:flex;align-items:center;gap:5px;padding:3px 10px 3px 7px;border-radius:14px;
+  background:linear-gradient(180deg,rgba(255,201,74,.16),rgba(255,201,74,.05));border:1px solid rgba(255,201,74,.35);}
+.g-gold-chip b{font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#ffd97a;}
+.g-gold-chip .coin{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe080,#d89010 75%);box-shadow:0 0 6px rgba(255,190,60,.5);flex-shrink:0;}
 /* vignette mood */
 #vignette{position:absolute;inset:0;pointer-events:none;z-index:9;border-radius:inherit;opacity:0;transition:opacity .7s;
   background:radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(0,0,0,.55) 100%);}
@@ -1724,6 +1737,75 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 <div class="phone" id="phone">
 
   <!-- ═══ PREMIUM SPLASH (inside phone → clipped by 44px radius) ═══ -->
+  <!-- ═══ PRELOADER — empty black screen, an energy core slowly charges while lightning bolts strike it
+       with white flashes and spark explosions, then hands off to splash ═══ -->
+  <style>
+    /* ABSOLUTE (not fixed) so it fills the PHONE frame only — fixed made the lightning spill into the
+       black desktop margins outside the phone mockup ("ekranın dışında parlıyor") */
+    #preloader{position:absolute;inset:0;z-index:100001;background:#000;overflow:hidden;transition:opacity .5s ease;border-radius:inherit;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;}
+    #preloader.done{opacity:0;pointer-events:none;}
+    #pl-fx{position:absolute;inset:0;z-index:1;}
+    #pl-flash{position:absolute;inset:0;z-index:2;background:#dff6ff;opacity:0;pointer-events:none;}
+    #pl-pct{position:relative;z-index:3;font-family:'Bungee','Arial Black',sans-serif;font-size:60px;letter-spacing:2px;
+      color:#eaffff;text-shadow:0 0 26px rgba(63,216,255,.9),0 0 60px rgba(63,216,255,.5);}
+    #pl-label{position:relative;z-index:3;font-family:-apple-system,'Rajdhani',Arial,sans-serif;font-weight:800;font-size:14px;
+      letter-spacing:8px;color:#7fd8ff;margin-top:-14px;}
+    #pl-barwrap{position:relative;z-index:3;width:74vw;max-width:340px;height:16px;border-radius:10px;
+      background:rgba(255,255,255,.08);border:1px solid rgba(63,216,255,.4);overflow:hidden;box-shadow:0 0 24px rgba(63,216,255,.3);}
+    #pl-bar{height:100%;width:0%;border-radius:10px;background:linear-gradient(90deg,#2a7ae0,#3fd8ff 55%,#eaffff);
+      box-shadow:0 0 22px rgba(63,216,255,1);transition:width .45s cubic-bezier(.3,1,.5,1);}
+  </style>
+  <div id="preloader" onclick="(function(){var p=document.getElementById('preloader');if(p&&p.parentNode)p.parentNode.removeChild(p);})()">
+    <canvas id="pl-fx"></canvas>
+    <div id="pl-flash"></div>
+    <div id="pl-pct">0%</div>
+    <div id="pl-label">LOADING</div>
+    <div id="pl-barwrap"><div id="pl-bar"></div></div>
+  </div>
+  <script>
+  /* FAILSAFE — even if the animation script below throws, the preloader is force-removed after 6s
+     so the player can NEVER get stuck on a black screen. Runs in its own isolated tag. */
+  setTimeout(function(){ try{ var p=document.getElementById('preloader'); if(p&&p.parentNode) p.parentNode.removeChild(p); }catch(e){} }, 6000);
+  </script>
+  <script>
+  (function(){
+    var pl=document.getElementById('preloader'), cv=document.getElementById('pl-fx'), ctx=cv.getContext('2d');
+    var flash=document.getElementById('pl-flash'), bar=document.getElementById('pl-bar'), pct=document.getElementById('pl-pct');
+    var W,H, bolts=[], p=0, done=false;
+    // size to the CANVAS's own box (the phone screen), not the whole window → lightning stays inside the frame
+    function size(){ W=cv.width=cv.clientWidth||cv.offsetWidth||390; H=cv.height=cv.clientHeight||cv.offsetHeight||780; }
+    addEventListener('resize',size); size();
+    function strike(){   // full-height jagged bolt across a random x — pure lightning, no core
+      var x0=W*(.12+Math.random()*.76), x1=x0+(Math.random()*180-90), seg=11, pts=[{x:x0,y:-20}];
+      for(var i=1;i<=seg;i++) pts.push({x:x0+(x1-x0)*(i/seg)+(Math.random()*80-40), y:(H+40)*(i/seg)-20});
+      bolts.push({pts:pts,life:1});
+      flash.style.opacity=0.42; setTimeout(function(){flash.style.opacity=0;},80);
+    }
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      for(var i=bolts.length-1;i>=0;i--){ var b=bolts[i]; b.life-=.05; if(b.life<=0){bolts.splice(i,1);continue;}
+        ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowColor='rgba(63,216,255,.9)';ctx.shadowBlur=20;
+        ctx.strokeStyle='rgba(63,216,255,'+(b.life*.45)+')';ctx.lineWidth=8;bp(b.pts);
+        ctx.strokeStyle='rgba(215,248,255,'+(b.life*.95)+')';ctx.lineWidth=2.6;bp(b.pts);ctx.restore(); }
+      if(!done||bolts.length) requestAnimationFrame(draw);
+    }
+    function bp(pp){ ctx.beginPath();ctx.moveTo(pp[0].x,pp[0].y);for(var i=1;i<pp.length;i++)ctx.lineTo(pp[i].x,pp[i].y);ctx.stroke(); }
+    requestAnimationFrame(draw);
+    strike();
+    var strikeIv=setInterval(function(){ if(!done) strike(); },430);
+    var tick=setInterval(function(){
+      p+=2+Math.random()*4; if(p>=100)p=100;
+      bar.style.width=p+'%'; pct.textContent=Math.floor(p)+'%';
+      if(p>=100){ clearInterval(tick); document.getElementById('pl-label').textContent='READY';
+        for(var b=0;b<5;b++) setTimeout(strike,b*80);
+        setTimeout(function(){ done=true; clearInterval(strikeIv); pl.classList.add('done');
+          setTimeout(function(){ if(pl&&pl.parentNode) pl.parentNode.removeChild(pl); },600); },520);
+      }
+    },170);
+  })();
+  </script>
+
   <div id="splash" onclick="dismissSplash()">
     <canvas id="splash-bg"></canvas>
     <canvas id="splash-arc"></canvas>
@@ -1785,7 +1867,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         <button class="lg-back" onclick="hideRegister()">← Back</button>
       </div>
 
-      <div class="lg-legal">By continuing you agree to our Terms & Privacy Policy.</div>
+      <div class="lg-legal">By continuing you agree to our <a href="terms.html" target="_blank" style="color:#8fd0ff;">Terms</a> &amp; <a href="privacy.html" target="_blank" style="color:#8fd0ff;">Privacy Policy</a>.</div>
     </div>
   </div>
 
@@ -2116,10 +2198,16 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
       <!-- HUD - compact, no duplicate rank/level -->
       <div class="g-hud">
         <div class="g-mode-info">
+          <!-- in-game mini profile: avatar + title/level so the player always sees who they are -->
+          <div class="g-prof" id="g-prof">
+            <span class="g-prof-av" id="g-prof-av">🦸</span>
+            <span class="g-prof-txt"><b id="g-prof-title">Rookie</b><i id="g-prof-lv">LV 1</i></span>
+          </div>
           <span class="g-mode-pill" id="g-mode-pill">⚡ MATH</span>
           <span class="g-progress" id="g-progress">0/6</span>
         </div>
         <div class="g-right">
+          <div class="g-gold-chip" id="g-gold-chip"><span class="coin"></span><b id="g-gold-n">0</b></div>
           <div class="combo-badge" id="combo-badge">x2</div>
           <div class="g-lives" id="g-lives"></div>
         </div>
@@ -2240,8 +2328,19 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         </div>
       </div>
       <!-- NUMA IQ badge (fun in-game rating, positive tiers) + random motivator -->
-      <div id="go-iq" style="display:flex;align-items:center;justify-content:center;gap:9px;margin:0 0 10px;padding:9px 14px;border-radius:14px;
-        background:rgba(255,255,255,.04);border:1px solid var(--go-iqc,rgba(255,255,255,.14));box-shadow:0 0 18px -6px var(--go-iqc,transparent);">
+      <style>
+        /* NUMA IQ badge — a beam of light circles the border (tier-coloured), + electric glow pulse */
+        #go-iq{position:relative;z-index:0;overflow:hidden;}
+        #go-iq::before{content:'';position:absolute;inset:-60%;z-index:-2;
+          background:conic-gradient(transparent 0deg, var(--go-iqc,#fff) 42deg, #fff 60deg, transparent 96deg);
+          animation:iqBeam 2s linear infinite;}
+        #go-iq::after{content:'';position:absolute;inset:2px;z-index:-1;border-radius:12px;
+          background:linear-gradient(180deg,#191327,#100c1c);}
+        @keyframes iqBeam{to{transform:rotate(1turn);}}
+        @keyframes iqBreathe{0%,100%{box-shadow:0 0 16px -4px var(--go-iqc,transparent);}50%{box-shadow:0 0 30px 0 var(--go-iqc,transparent);}}
+      </style>
+      <div id="go-iq" style="display:flex;align-items:center;justify-content:center;gap:9px;margin:0 0 10px;padding:11px 16px;border-radius:14px;
+        animation:iqBreathe 2s ease-in-out infinite;">
         <span id="go-iq-em" style="font-size:19px;">🟢</span>
         <span style="font-family:'Rajdhani',sans-serif;font-weight:800;font-size:11px;letter-spacing:2px;color:var(--mut);">NUMA&nbsp;IQ</span>
         <span id="go-iq-n" style="font-family:'Bungee',sans-serif;font-size:21px;color:var(--go-iqc,#fff);">100</span>
@@ -7522,6 +7621,13 @@ function updateHUD(){
   const mgems=document.getElementById('m-gems');if(mgems)mgems.textContent=pGems;
   document.getElementById('menu-lv').textContent='LV '+pLevel;
   (function(){ const mr=document.getElementById('menu-rank'); if(mr){ const t=TITLES.find(x=>x.id===equippedTitleId)||TITLES[0]; mr.textContent=(t.ic?t.ic+' ':'')+t.name; mr.className='rank-fx ttx tfx-'+(t.fx||'plain'); mr.style.setProperty('--tc',t.col||'#9fb3c8'); } })();
+  // in-game mini profile (avatar + title + level + gold)
+  (function(){ const t=TITLES.find(x=>x.id===equippedTitleId)||TITLES[0];
+    const av=document.getElementById('g-prof-av'); if(av) av.innerHTML=(typeof playerAvatar!=='undefined'&&playerAvatar.startsWith('data:'))?('<img src="'+playerAvatar+'">'):(typeof playerAvatar!=='undefined'?playerAvatar:'🦸');
+    const tt=document.getElementById('g-prof-title'); if(tt){ tt.textContent=(t.ic?t.ic+' ':'')+t.name; tt.style.color=t.col||'#efe8fa'; }
+    const lv=document.getElementById('g-prof-lv'); if(lv) lv.textContent='LV '+pLevel;
+    const gn=document.getElementById('g-gold-n'); if(gn) gn.textContent=pGold;
+  })();
   const xpPct=Math.min((pXP%(pLevel*100))/(pLevel*100)*100,100);
   const ar=document.getElementById('avatar-ring'); if(ar) ar.style.setProperty('--xp',(xpPct*3.6).toFixed(0)+'deg');   // XP progress ring around the avatar
   const tn=document.getElementById('topbar-name'); if(tn) tn.textContent=(typeof playerName!=='undefined'?playerName:'Player');
