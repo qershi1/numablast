@@ -3581,6 +3581,23 @@ function bossHideNumbers(){   // ❓ CIPHER LOCK — flips every answer orb to "
   if(typeof haptic==='function') haptic([20,30,20]);
   setTimeout(()=>{ duelOrbs.forEach(o=>{ if(o.el && o.el.dataset.real!==undefined){ o.el.textContent=o.el.dataset.real; o.el.classList.remove('orb-hidden'); delete o.el.dataset.real; } }); }, 1700);
 }
+function bossShellGame(){   // 👁 SHELL GAME — correct orb flashes gold, then all mask to "?" and shuffle; TRACK it (user design)
+  if(!duelActive || !duelOrbs.length || !isBoss) return;
+  const set=duelOrbs.slice();
+  const correct=set.find(o=>o.correct); if(!correct||!correct.el){ return; }
+  injectBossShowCSS();
+  announceBossAttack('SHELL GAME', '#c084fc', '👁 TRACK THE RIGHT ONE');
+  correct.el.classList.add('orb-reveal');                       // 1) memorize beat
+  initAudio(); beep(880,.12,'triangle',.14); if(typeof haptic==='function') haptic(20);
+  setTimeout(()=>{
+    if(!duelActive) return;
+    if(correct.el) correct.el.classList.remove('orb-reveal');
+    set.forEach(o=>{ if(o.el&&o.el.isConnected){ o.el.dataset.sg=o.el.textContent; o.el.textContent='?'; o.el.classList.add('orb-hidden'); } });
+    let n=0; const iv=setInterval(()=>{ if(!duelActive){clearInterval(iv);return;} if(typeof shuffleDuelOrbs==='function') shuffleDuelOrbs(); if(++n>=5) clearInterval(iv); },300);   // 2) the mix
+    beep(240,.1,'square',.1); if(typeof haptic==='function') haptic([20,30,20,30]);
+    setTimeout(()=>{ set.forEach(o=>{ if(o.el&&o.el.dataset.sg!==undefined){ o.el.textContent=o.el.dataset.sg; delete o.el.dataset.sg; o.el.classList.remove('orb-hidden'); } }); },5200);   // 3) fairness reveal
+  },1100);
+}
 /* ═══════════ BOSS SHOW SYSTEM — alive, growing, attacking, explosive ═══════════ */
 let duelShuffleInt=null;
 function injectBossShowCSS(){
@@ -3593,6 +3610,8 @@ function injectBossShowCSS(){
   .boss-char.boss-p3 #brig-scale{transform:translateX(-50%) scale(.74)!important;}
   .boss-char.boss-crit #brig-scale{transform:translateX(-50%) scale(.80)!important;}
   .duel-orb{transition:left .5s cubic-bezier(.4,0,.2,1),top .5s cubic-bezier(.4,0,.2,1),transform .12s,filter .15s;}
+  .duel-orb.orb-reveal{box-shadow:0 0 0 3px #ffd84a inset,0 0 26px rgba(255,216,74,.85)!important;animation:orbReveal .55s ease-in-out infinite alternate;}
+  @keyframes orbReveal{from{transform:translate(-50%,-50%) scale(1);}to{transform:translate(-50%,-50%) scale(1.14);filter:brightness(1.5);}}
   .duel-orb.orb-zapped{animation:orbZap .5s ease;}
   @keyframes orbZap{0%,100%{filter:brightness(1);}30%{filter:brightness(2.6) saturate(0);}55%{filter:brightness(.4);}}
   .duel-orb.orb-fake{box-shadow:0 0 0 2px rgba(255,59,106,.85) inset, 0 0 14px rgba(255,59,106,.4);}
@@ -3792,7 +3811,7 @@ let _bossPersona=null;
 const BOSS_PERSONAS=[
   { key:'void',  name:'VOID CALCULATOR', accent:'#8b5cf6', eye:'#c4b5fd', taunt:'You are nothing.',
     periodMul:1.12, shield:false, rig:'v',
-    math:[bossFog, bossHideNumbers, bossStun],
+    math:[bossFog, bossHideNumbers, bossShellGame, bossStun],
     word:[bossFog, bossStun, wraithHintDevour] },
   { key:'wraith',name:'WORD WRAITH',     accent:'#5af08a', eye:'#7af0a0', taunt:'Your mind is mine.',
     periodMul:0.60, shield:true, rig:'w',
@@ -3800,7 +3819,7 @@ const BOSS_PERSONAS=[
     word:[wraithLetterStorm, wraithChainLock, wraithHintDevour, bossFog, bossStun] },
   { key:'chrono',name:'CHRONO DEVOURER', accent:'#ffaa2a', eye:'#ffd24a', taunt:'Your seconds are mine.',
     periodMul:0.84, shield:false, rig:'c',
-    math:[chronoDevourOrb, bossVortexShuffle, bossGearStormDuel, bossStun, bossLightningStrike, bossFakeOrb],
+    math:[chronoDevourOrb, bossVortexShuffle, bossShellGame, bossGearStormDuel, bossStun, bossLightningStrike, bossFakeOrb],
     word:[wraithChainLock, bossFog, bossStun, wraithHintDevour] },
   { key:'amalgam',name:'THE AMALGAM',    accent:'#ff5a3c', eye:'#ff8a5c', taunt:'We are many.',
     periodMul:0.72, shield:false, rig:'a',
@@ -3808,7 +3827,7 @@ const BOSS_PERSONAS=[
     word:[wraithHintDevour, wraithChainLock, bossFog, bossStun] },
   { key:'null',  name:'NULL KING',       accent:'#ffd86a', eye:'#ffd86a', taunt:'Bow to zero.',
     periodMul:0.55, shield:true, rig:'n',
-    math:[bossVortexShuffle, bossFakeOrb, bossHideNumbers, bossLightningStrike, chronoDevourOrb, bossGearStormDuel, bossFluxShuffle, bossFog, bossStun],
+    math:[bossVortexShuffle, bossFakeOrb, bossHideNumbers, bossShellGame, bossLightningStrike, chronoDevourOrb, bossGearStormDuel, bossFluxShuffle, bossFog, bossStun],
     word:[wraithLetterStorm, wraithChainLock, wraithHintDevour, bossFog, bossStun] }
 ];
 function bossPersona(){ return BOSS_PERSONAS[(typeof worldOf==='function')?worldOf(pLevel):0] || BOSS_PERSONAS[0]; }
@@ -3816,7 +3835,7 @@ function bossPersona(){ return BOSS_PERSONAS[(typeof worldOf==='function')?world
 const SKILL_FX=new Map([
   [bossFog,{c:'#9b5cff',ic:'🌫️'}],[bossHideNumbers,{c:'#ff6ad5',ic:'❓'}],[bossVortexShuffle,{c:'#b06bff',ic:'🌀'}],
   [bossFakeOrb,{c:'#ff3b6a',ic:'🎭'}],[bossLightningStrike,{c:'#6ad0ff',ic:'⚡'}],[bossStun,{c:'#ffd84a',ic:'😵'}],
-  [bossGearStormDuel,{c:'#d9c08a',ic:'⚙️'}],[chronoDevourOrb,{c:'#b06bff',ic:'🌀'}],[bossFluxShuffle,{c:'#a855f7',ic:'🌌'}],
+  [bossGearStormDuel,{c:'#d9c08a',ic:'⚙️'}],[chronoDevourOrb,{c:'#b06bff',ic:'🌀'}],[bossFluxShuffle,{c:'#a855f7',ic:'🌌'}],[bossShellGame,{c:'#c084fc',ic:'👁'}],
   [chronoGearStorm,{c:'#ffb02a',ic:'⚙️'}],[chronoTimeSteal,{c:'#7c3aed',ic:'🔀'}],[bossZap,{c:'#6ad0ff',ic:'⚡'}],
   [wraithLetterStorm,{c:'#5af08a',ic:'👻'}],[wraithChainLock,{c:'#5af08a',ic:'⛓'}],[wraithHintDevour,{c:'#5af08a',ic:'👅'}]
 ]);
