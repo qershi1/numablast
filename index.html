@@ -109,7 +109,15 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .mode-card::after{content:'';position:absolute;left:0;bottom:0;height:3px;width:100%;
   background:linear-gradient(90deg,var(--c),transparent 75%);opacity:.6;}
 .mode-card:active{transform:scale(.96);}
-.mode-card.math{--c:#00d4ff;} .mode-card.word{--c:#a855f7;} .mode-card.combo{--c:#3b82f6;} .mode-card.time{--c:#f43f5e;}
+.mode-card.math{--c:#00d4ff;} .mode-card.word{--c:#a855f7;} .mode-card.combo{--c:#3b82f6;} .mode-card.time{--c:#f43f5e;} .mode-card.pulse{--c:#ff4dd2;}
+/* rotating light beam around each menu card in its accent colour (like the NUMA IQ badge) */
+.mode-card{isolation:isolate;}
+.mode-card::before{content:'';position:absolute;inset:-45%;z-index:-2;pointer-events:none;
+  background:conic-gradient(transparent 0deg, var(--c) 30deg, #fff 44deg, var(--c) 58deg, transparent 88deg);
+  animation:cardBeam 3.4s linear infinite;opacity:.85;}
+.mode-card::after{content:'';position:absolute;inset:1.5px;z-index:-1;border-radius:20px;background:inherit;pointer-events:none;}
+.mode-card.sel::before{animation-duration:2.2s;opacity:1;}   /* selected card spins brighter/faster */
+@keyframes cardBeam{to{transform:rotate(1turn);}}
 .mode-card:hover{border-color:var(--c);box-shadow:0 16px 36px -10px var(--c), inset 0 1px 0 rgba(255,255,255,.08);}
 .card-glow{display:none;}
 .card-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--txt);margin-bottom:3px;letter-spacing:-.4px;white-space:nowrap;}
@@ -181,7 +189,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 @keyframes hqClaimP{0%,100%{transform:scale(1);}50%{transform:scale(1.07);}}
 .hd-check{font-size:11px;font-weight:800;color:var(--grn);flex-shrink:0;white-space:nowrap;}
 /* world-map entry */
-.home-world{display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:16px;cursor:pointer;position:relative;overflow:hidden;margin-bottom:11px;
+.home-world{display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:16px;cursor:pointer;position:relative;overflow:hidden;margin-bottom:11px;flex-shrink:0;
   background:linear-gradient(120deg,rgba(40,20,52,.9),rgba(20,12,32,.94));
   border:1px solid rgba(168,107,255,.4);box-shadow:0 6px 18px -6px rgba(120,60,200,.5),inset 0 1px 0 rgba(255,255,255,.06);
   transition:transform .15s,border-color .25s;}
@@ -705,6 +713,12 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 /* board-frame wraps #g-board purely so these edge lights have a stable paint layer — #g-board's
    OWN innerHTML gets replaced wholesale by BUILD/CHAIN waves, which would wipe a child/pseudo here. */
 .board-frame{position:relative;flex:1;display:flex;min-height:0;}
+#pet-buddy{position:absolute;left:8px;bottom:8px;width:48px;height:48px;z-index:13;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;animation:pbBob 2.4s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(0,0,0,.55));}
+#pet-buddy img{width:100%;height:100%;object-fit:contain;}
+#pet-buddy .pb-em{font-size:32px;}
+@keyframes pbBob{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-6px) rotate(3deg);}}
+#pet-buddy.pb-hop{animation:pbHop .5s ease;}
+@keyframes pbHop{0%{transform:translateY(0) scale(1);}35%{transform:translateY(-16px) scale(1.18);}100%{transform:translateY(0) scale(1);}}
 /* FINAL STRETCH — KNIGHT RIDER style scanner beam sweeping up↕down the LEFT+RIGHT edges as a level
    nears completion: yellow (2 solves left), red+faster (last one). Two layers per edge: a dim
    constant edge tint (so the danger zone reads even mid-sweep) + a bright hot-core beam that bounces
@@ -1540,7 +1554,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .sp-gift{font-size:34px;flex-shrink:0;filter:drop-shadow(0 4px 10px rgba(245,158,11,.6));animation:lgBoltFloat 2.6s ease-in-out infinite;}
 .sp-body{flex:1;min-width:0;position:relative;z-index:2;}
 .sp-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;}
-.sp-desc{font-size:10.5px;color:#ffe9c2;font-weight:600;margin-top:1px;}
+.sp-desc{font-size:12px;line-height:1.4;color:#ffeecf;font-weight:600;margin-top:3px;}
 .sp-buy{flex-shrink:0;position:relative;z-index:2;text-align:center;}
 .sp-old{font-size:9px;color:rgba(255,255,255,.5);text-decoration:line-through;}
 .sp-price{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(135deg,#10b981,#059669);
@@ -1957,6 +1971,11 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         <div class="hw-stars"><span>⭐</span><span id="hw-starct">0</span></div>
         <span class="hw-go">›</span>
       </div>
+      <div id="home-pets" class="home-world" onclick="openPets()" style="margin-top:8px;">
+        <div class="hw-badge">🐾</div>
+        <div class="hw-text"><b>PETS</b><span id="hw-petsub">Collect &amp; equip a perk</span></div>
+        <span class="hw-go">›</span>
+      </div>
 
       <div class="sec-lbl">SELECT YOUR MODE</div>
       <div class="cards-grid">
@@ -2033,16 +2052,26 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
           <div class="gem-chip"><span class="coin-badge">💎</span><span id="mkt-gems">10</span></div>
         </div>
       </div>
-      <!-- NUMA PLUS — the single real-money offer: a MONTHLY membership. Same bundle pays out
-           every renewal (not just the first month), so it's worth resubscribing. -->
+      <!-- THE single real-money offer: one Value Pack, buy as many as you want. Keep it simple until
+           the game proves out; add more SKUs later. -->
       <div class="starter-pack" id="value-pack" onclick="buyValuePack()">
-        <div class="sp-flag">⭐ MEMBERSHIP · MONTHLY</div>
-        <div class="sp-gift">💎</div>
+        <div class="sp-flag">⭐ BEST VALUE · REMOVES ADS</div>
+        <div class="sp-gift">🪙</div>
         <div class="sp-body">
-          <div class="sp-title">Numa Plus</div>
-          <div class="sp-desc">No ads + 5000 🪙 + 10 💎 every month</div>
+          <div class="sp-title">Value Pack</div>
+          <div class="sp-desc"><b>2,500 🪙 &nbsp;+&nbsp; 15 💎</b> &nbsp;·&nbsp; <b style="color:#7ee0a0;">No Ads</b><br>Buy as many as you like</div>
         </div>
-        <div class="sp-buy"><div class="sp-price">$1.99<span style="font-size:9px;opacity:.85;">/mo</span></div></div>
+        <div class="sp-buy"><div class="sp-price">$1.99</div></div>
+      </div>
+      <!-- optional supporter tier: exclusive Founder title (never buyable with gems) -->
+      <div class="starter-pack" id="founder-pack" onclick="buyFounderPack()" style="border-color:rgba(255,216,74,.55);background:linear-gradient(135deg,rgba(255,201,74,.16),rgba(217,119,6,.06));">
+        <div class="sp-flag">💛 IF YOU LIKE IT · SUPPORT US</div>
+        <div class="sp-gift">⭐</div>
+        <div class="sp-body">
+          <div class="sp-title">Founder Pack</div>
+          <div class="sp-desc"><b style="color:#ffd84a;">⭐ Exclusive Founder title</b><br>6,000 🪙 &nbsp;+&nbsp; 45 💎 &nbsp;·&nbsp; No Ads</div>
+        </div>
+        <div class="sp-buy"><div class="sp-price">$4.99</div></div>
       </div>
       <div class="sec-lbl">💎 Spend Gems</div>
       <div class="mkt-item" onclick="buyRefillGem()">
@@ -2097,14 +2126,34 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
     <div id="leaderboard-screen" class="fadein" style="display:none;flex:1;flex-direction:column;overflow-y:auto;scrollbar-width:none;gap:8px;">
       <div class="brand-row"><div><div class="brand-name">🏆 <span>Ranks</span></div><div class="brand-tag">⚔️ Leaderboards by Mode</div></div></div>
       <!-- mode tabs -->
-      <div id="lb-tabs" style="display:flex;gap:6px;margin-bottom:6px;">
-        <div class="lb-tab active" data-mode="math" onclick="switchLbTab('math',this)">🔢 Math</div>
+      <div id="lb-tabs" style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+        <div class="lb-tab active" data-mode="league" onclick="switchLbTab('league',this)">🛡️ League</div>
+        <div class="lb-tab" data-mode="math" onclick="switchLbTab('math',this)">🔢 Math</div>
         <div class="lb-tab" data-mode="word" onclick="switchLbTab('word',this)">🔤 Word</div>
         <div class="lb-tab" data-mode="combo" onclick="switchLbTab('combo',this)">🌀 Combo</div>
         <div class="lb-tab" data-mode="time" onclick="switchLbTab('time',this)">⏱️ Time</div>
       </div>
-      <div class="sec-lbl" id="lb-mode-label">🔢 Math Blast — Top Players</div>
+      <div class="sec-lbl" id="lb-mode-label" style="display:none;">🔢 Math Blast — Top Players</div>
       <div id="lb-list"></div>
+      <style>
+        .lg-head{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;margin-bottom:10px;
+          background:linear-gradient(135deg,color-mix(in srgb,var(--lgc) 22%,transparent),rgba(255,255,255,.02));border:1px solid color-mix(in srgb,var(--lgc) 55%,transparent);}
+        .lg-em{font-size:34px;filter:drop-shadow(0 0 12px var(--lgc));}
+        .lg-nm{font-family:'Bungee',sans-serif;font-size:16px;color:#fff;letter-spacing:.5px;}
+        .lg-sub{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10.5px;color:var(--mut);letter-spacing:.5px;margin-top:2px;}
+        .lg-myrank{font-family:'Bungee',sans-serif;font-size:18px;color:var(--lgc);flex-shrink:0;}
+        .lg-zonehint{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:10px;letter-spacing:.5px;text-align:center;margin-bottom:8px;opacity:.85;}
+        .lg-rows{display:flex;flex-direction:column;gap:4px;}
+        .lg-row{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);}
+        .lg-row.promote{border-left:3px solid #43e0a0;}
+        .lg-row.relegate{border-left:3px solid #ff5a7a;}
+        .lg-row.you{background:linear-gradient(90deg,rgba(138,92,255,.22),rgba(138,92,255,.05));border-color:rgba(138,92,255,.5);}
+        .lg-rk{width:22px;text-align:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:var(--mut);}
+        .lg-av{font-size:18px;width:24px;text-align:center;}
+        .lg-pn{flex:1;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#fff;}
+        .lg-pts{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:13px;color:var(--gold);}
+      </style>
+      <div id="league-view" style="display:none;"></div>
     </div>
 
     <!-- DAILY QUESTS -->
@@ -2118,6 +2167,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
       </div>
       <div class="sec-lbl">🎯 Today's Quests</div>
       <div id="quest-list"></div>
+      <div class="sec-lbl" style="margin-top:6px;">🗓️ Weekly Challenges <span id="weekly-reset" style="float:right;font-size:9px;color:var(--mut);font-weight:600;"></span></div>
+      <div id="weekly-list"></div>
     </div>
 
     <!-- SETTINGS -->
@@ -2291,6 +2342,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         <!-- PLAYER SKILL DOCK — inside board-frame (survives g-board innerHTML swaps) docked over
              the dead band BELOW the danger line, so it can never cover a live tile -->
         <div id="skill-bar"></div>
+        <!-- equipped PET companion — tiny mini-boss that floats in the corner (juice; hidden in boss) -->
+        <div id="pet-buddy" style="display:none;"></div>
       </div>
 
       <!-- TRAY + ACTIONS -->
@@ -2449,6 +2502,78 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
     </div>
   </div>
 
+  <style>
+    /* daily login calendar */
+    #dl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:6px 0 16px;}
+    .dl-cell{position:relative;border-radius:12px;padding:9px 4px 8px;text-align:center;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);}
+    .dl-cell .dl-d{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:8.5px;letter-spacing:1px;color:var(--mut);}
+    .dl-cell .dl-r{font-size:12px;font-weight:700;color:#fff;margin-top:3px;line-height:1.25;}
+    .dl-past{opacity:.42;}
+    .dl-past .dl-chk{position:absolute;top:3px;right:5px;color:#43e0a0;font-size:11px;}
+    .dl-today{border-color:var(--gold);background:linear-gradient(180deg,rgba(255,201,74,.18),rgba(255,201,74,.04));box-shadow:0 0 18px rgba(255,201,74,.35);animation:dlPulse 1.4s ease-in-out infinite;}
+    @keyframes dlPulse{50%{box-shadow:0 0 28px rgba(255,201,74,.6);}}
+    .dl-pet{border-color:rgba(168,92,255,.6);background:linear-gradient(180deg,rgba(168,92,255,.2),rgba(168,92,255,.05));}
+    .dl-pet .dl-r{font-size:16px;}
+    /* pets grid */
+    #pets-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 4px;max-height:60vh;overflow-y:auto;}
+    .pet-card{border-radius:16px;padding:14px 12px;text-align:center;border:1px solid var(--pc,rgba(255,255,255,.12));
+      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));position:relative;}
+    .pet-card.locked{opacity:.5;filter:grayscale(.6);}
+    .pet-card.eq{box-shadow:0 0 20px -4px var(--pc);border-width:2px;}
+    .pet-em{font-size:38px;line-height:1;margin-bottom:6px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5));}
+    .pet-nm{font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#fff;}
+    .pet-rare{font-size:8px;background:var(--gold);color:#3a2200;padding:1px 5px;border-radius:6px;letter-spacing:1px;vertical-align:middle;}
+    .pet-perk{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:12px;color:var(--pc);letter-spacing:.5px;margin:4px 0 5px;}
+    .pet-desc{font-size:10.5px;color:var(--mut);line-height:1.4;min-height:29px;}
+    .pet-btn{margin-top:8px;width:100%;border:none;border-radius:10px;padding:8px;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;cursor:pointer;
+      color:#161022;background:linear-gradient(180deg,#fff,#cfc6e6);letter-spacing:.5px;}
+    .pet-card.eq .pet-btn{background:linear-gradient(180deg,#7dffc0,#43e0a0);}
+  </style>
+  <div class="modal-overlay" id="dailyLoginModal">
+    <div class="modal-box" style="text-align:center;max-width:340px;">
+      <div style="font-size:34px;">🗓️</div>
+      <div class="modal-title">Daily Login</div>
+      <div class="modal-sub" style="margin-bottom:4px;">Come back every day — miss one and the streak resets!</div>
+      <div id="dl-grid"></div>
+      <button class="modal-btn btn-gold" id="dl-claim">CLAIM</button>
+    </div>
+  </div>
+  <div class="modal-overlay" id="petsModal">
+    <div class="modal-box" style="max-width:360px;">
+      <div style="text-align:center;"><div style="font-size:30px;">🐾</div><div class="modal-title">Your Pets</div>
+      <div class="modal-sub" style="margin-bottom:4px;">Equip one. Collect all 5 from Day-10 login rewards.</div></div>
+      <div id="pets-grid"></div>
+      <button class="modal-btn" style="background:rgba(255,255,255,.06);color:var(--txt);" onclick="hideModal('petsModal')">Close</button>
+    </div>
+  </div>
+
+  <style>
+    #leaguePromoModal .lp-badge{width:118px;height:118px;margin:2px auto 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:58px;position:relative;
+      background:radial-gradient(circle at 40% 34%, rgba(255,255,255,.55), var(--lpc,#ffd84a) 72%);
+      box-shadow:0 0 44px -4px var(--lpc,#ffd84a), inset 0 3px 12px rgba(255,255,255,.5), inset 0 -8px 16px rgba(0,0,0,.35);
+      border:3px solid rgba(255,255,255,.6);}
+    #leaguePromoModal .lp-badge.lp-up{animation:lpPop .6s cubic-bezier(.2,1.7,.4,1);}
+    #leaguePromoModal .lp-badge.lp-down{animation:lpDrop .5s ease;filter:grayscale(.3);}
+    #leaguePromoModal .lp-badge.lp-hold{animation:lpPop .5s ease;}
+    @keyframes lpPop{0%{transform:scale(0) rotate(-40deg);}100%{transform:scale(1) rotate(0);}}
+    @keyframes lpDrop{0%{transform:translateY(-30px) scale(.6);opacity:0;}100%{transform:none;opacity:1;}}
+    #leaguePromoModal .lp-badge::after{content:'';position:absolute;inset:-9px;border-radius:50%;border:2px solid var(--lpc,#ffd84a);opacity:.6;animation:lpRing 1.7s ease-out infinite;}
+    @keyframes lpRing{0%{transform:scale(1);opacity:.6;}100%{transform:scale(1.4);opacity:0;}}
+    #leaguePromoModal .lp-title{font-family:'Bungee',sans-serif;font-size:24px;color:#fff;letter-spacing:1px;}
+    #leaguePromoModal .lp-rank{font-family:'Bungee',sans-serif;font-size:19px;margin:2px 0 8px;}
+    #leaguePromoModal #lp-reward{color:var(--gold);font-weight:800;font-size:13px;margin:4px 0 2px;}
+  </style>
+  <div class="modal-overlay" id="leaguePromoModal">
+    <div class="modal-box" style="text-align:center;max-width:320px;">
+      <div class="lp-badge" id="lp-badge">🥉</div>
+      <div class="lp-title" id="lp-title">PROMOTED!</div>
+      <div class="lp-rank" id="lp-rank">Bronze 2</div>
+      <div class="modal-sub" id="lp-sub"></div>
+      <div id="lp-reward" style="display:none;">🏆 Top 3 finish! +500 🪙 +5 💎</div>
+      <button class="modal-btn btn-gold" onclick="closeLeaguePromo()">AWESOME!</button>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
     <div class="nav-btn active" id="nav-home" onclick="showScreen('home',this)"><span class="nav-emoji">🏠</span><span>Home</span></div>
@@ -2478,7 +2603,105 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 let gActive=false,gMode='',gSubMode='';
 let pGold=500,pLives=3,pLevel=1,pScore=0,pXP=0,pHints=5;
 // every gold FAUCET routes through here (kept as a single choke point for any future perk/multiplier)
-function gainGold(n){ pGold+=Math.round(n); return n; }
+function gainGold(n){ pGold+=Math.round(n*petMul('gold')); return n; }   // Chrono pet: +10% gold
+
+/* ═══════════ 🐾 PETS + 🗓 DAILY LOGIN CALENDAR ═══════════
+   Each pet = a tamed realm boss with a passive perk. Own many, equip ONE. Day-10 login grants a pet. */
+// each pet IS a mini version of a realm boss — sp = the boss sprite key in BOSS_A (falls back to emoji)
+const PETS=[
+  {id:'void',   name:'Void Whelp',    em:'🐲', sp:'vT',  col:'#a855f7', perk:'+1 Heart',        desc:'Mini Void Calculator. Start every run with an extra life.'},
+  {id:'chrono', name:'Chrono Cub',    em:'🦊', sp:'cT',  col:'#ff9a3c', perk:'+10% Gold',       desc:'Mini Chrono Devourer. Earn 10% more gold.'},
+  {id:'wraith', name:'Wraith Sprite', em:'👻', sp:'wT',  col:'#43e0a0', perk:'-15% Skill Cost', desc:'Mini Word Wraith. All skills 15% cheaper.'},
+  {id:'amalgam',name:'Amalgam Pup',   em:'🐙', sp:'aHR', col:'#ff5a5a', perk:'+5% Score',       desc:'Mini Amalgam. Every solve scores 5% higher.'},
+  {id:'null',   name:'Null Kit',      em:'👑', sp:'nHd', col:'#ffd84a', perk:'Answer Reveal',   desc:'Mini Null King. Reveals the correct tile once per level.', rare:true}
+];
+function petSprite(p){ try{ return (p&&p.sp&&typeof BOSS_A!=='undefined'&&BOSS_A[p.sp])?BOSS_A[p.sp]:null; }catch(e){ return null; } }
+// in-game floating companion (the equipped pet as a tiny mini-boss)
+function updatePetBuddy(){
+  var el=document.getElementById('pet-buddy'); if(!el) return;
+  var id=_eqPet();
+  if(!id || (typeof isBoss!=='undefined'&&isBoss)){ el.style.display='none'; return; }   // hidden in boss (busy arena)
+  var p=petDef(id), sprite=petSprite(p);
+  el.innerHTML = sprite ? '<img src="'+sprite+'" alt="">' : '<span class="pb-em">'+(p?p.em:'🐾')+'</span>';
+  el.style.display='block';
+}
+function petBuddyReact(){ var el=document.getElementById('pet-buddy'); if(!el||el.style.display==='none') return; el.classList.remove('pb-hop'); void el.offsetWidth; el.classList.add('pb-hop'); }
+let ownedPets=(function(){ try{ return JSON.parse(localStorage_get('numa_pets')||'[]'); }catch(e){ return []; } })();
+let equippedPet=localStorage_get('numa_pet')||'';
+function petDef(id){ return PETS.find(function(p){return p.id===id;}); }
+function hasPet(id){ return ownedPets.indexOf(id)>=0; }
+function _eqPet(){ return (equippedPet&&hasPet(equippedPet))?equippedPet:''; }
+function equipPet(id){ if(!hasPet(id))return; equippedPet=(equippedPet===id)?'':id; localStorage_set('numa_pet',equippedPet); if(typeof renderPets==='function')renderPets(); if(typeof updateHUD==='function')updateHUD(); if(typeof sfxClick==='function')sfxClick(); }
+function grantPet(id){ if(hasPet(id))return false; ownedPets.push(id); localStorage_set('numa_pets',JSON.stringify(ownedPets)); if(!equippedPet){equippedPet=id;localStorage_set('numa_pet',id);} return true; }
+/* passive helpers — called from gameplay hooks */
+function petMul(kind){ var p=_eqPet(); if(kind==='gold'&&p==='chrono')return 1.10; if(kind==='score'&&p==='amalgam')return 1.05; return 1; }
+function petHeartBonus(){ return _eqPet()==='void'?1:0; }
+function petSkillCost(c){ return _eqPet()==='wraith'?Math.max(1,Math.round(c*0.85)):c; }
+function petHasReveal(){ return _eqPet()==='null'; }
+
+/* ── DAILY LOGIN CALENDAR ── */
+const LOGIN_REWARDS=[
+  {g:200},{g:300},{g:400,gem:1},{g:600},{g:800,gem:2},{g:1000},{chest:true},{g:1200},{gem:3},{pet:true}
+];
+function _loginDayNum(){ return Math.floor(Date.now()/86400000); }
+function checkDailyLogin(){
+  if(window._loginChecked) return; window._loginChecked=true;
+  var last=parseInt(localStorage_get('numa_login_day')||'0');
+  var streak=parseInt(localStorage_get('numa_login_streak')||'0');
+  var today=_loginDayNum();
+  if(last===today) return;                 // already claimed today
+  if(last===today-1) streak+=1; else streak=1;
+  if(streak>10) streak=1;                  // loop back after day 10
+  window._pendingLoginDay=streak;
+  setTimeout(function(){ showDailyLoginModal(streak); }, 500);
+}
+function loginRewardText(r){ var a=[]; if(r.g)a.push('🪙'+r.g); if(r.gem)a.push('💎'+r.gem); if(r.chest)a.push('🎁'); if(r.pet)a.push('🐾'); return a.join(' '); }
+function showDailyLoginModal(streak){
+  var grid=document.getElementById('dl-grid'); if(!grid){ claimDailyLogin(); return; }
+  grid.innerHTML='';
+  LOGIN_REWARDS.forEach(function(r,i){
+    var day=i+1, state=day<streak?'past':day===streak?'today':'future';
+    var cell=document.createElement('div'); cell.className='dl-cell dl-'+state+(r.pet?' dl-pet':'');
+    cell.innerHTML='<div class="dl-d">DAY '+day+'</div><div class="dl-r">'+loginRewardText(r)+'</div>'+(state==='past'?'<div class="dl-chk">✓</div>':'');
+    grid.appendChild(cell);
+  });
+  var btn=document.getElementById('dl-claim'); if(btn){ btn.textContent='CLAIM DAY '+streak; btn.onclick=claimDailyLogin; }
+  showModal('dailyLoginModal');
+}
+function claimDailyLogin(){
+  var streak=window._pendingLoginDay||1, r=LOGIN_REWARDS[streak-1]||{g:100}, msg=[];
+  if(r.g){ gainGold(r.g); msg.push('🪙'+r.g); }
+  if(r.gem){ pGems+=r.gem; msg.push('💎'+r.gem); }
+  if(r.chest){ var cg=300+Math.floor(Math.random()*500); gainGold(cg); msg.push('🎁 '+cg+'🪙'); if(Math.random()<0.5){ pGems+=2; msg.push('💎2'); } }
+  if(r.pet){ var un=PETS.filter(function(p){return !hasPet(p.id);}); if(un.length){ var pick=un[Math.floor(Math.random()*un.length)]; grantPet(pick.id); msg.push('🐾 '+pick.name+'!'); } else { gainGold(2500); msg.push('🪙2500'); } }
+  localStorage_set('numa_login_day',String(_loginDayNum()));
+  localStorage_set('numa_login_streak',String(streak));
+  if(typeof fireConfetti==='function')fireConfetti(streak>=7?110:70);
+  if(typeof sfxLevelUp==='function')sfxLevelUp();
+  if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet();
+  hideModal('dailyLoginModal');
+  if(typeof showBuyToast==='function') showBuyToast('Day '+streak+': '+msg.join(' · '));
+}
+/* ── PETS collection screen ── */
+function openPets(){ renderPets(); showModal('petsModal'); }
+function renderPets(){
+  var grid=document.getElementById('pets-grid'); if(!grid) return;
+  grid.innerHTML='';
+  PETS.forEach(function(p){
+    var owned=hasPet(p.id), eq=(_eqPet()===p.id);
+    var card=document.createElement('div'); card.className='pet-card'+(owned?'':' locked')+(eq?' eq':'');
+    card.style.setProperty('--pc',p.col);
+    var sprite=petSprite(p);
+    var emblem = (owned && sprite) ? '<img src="'+sprite+'" alt="" style="height:52px;width:auto;max-width:100%;object-fit:contain;filter:drop-shadow(0 3px 8px rgba(0,0,0,.5));">' : (owned?p.em:'🔒');
+    card.innerHTML='<div class="pet-em">'+emblem+'</div>'
+      +'<div class="pet-nm">'+(owned?p.name:'???')+(p.rare?' <span class="pet-rare">RARE</span>':'')+'</div>'
+      +'<div class="pet-perk">'+p.perk+'</div>'
+      +'<div class="pet-desc">'+(owned?p.desc:'Win from the Day-10 login reward.')+'</div>'
+      +(owned?'<button class="pet-btn">'+(eq?'✓ EQUIPPED':'EQUIP')+'</button>':'');
+    if(owned){ card.querySelector('.pet-btn').onclick=function(){ equipPet(p.id); }; }
+    grid.appendChild(card);
+  });
+}
 let difficultyMod=1.0; // adaptive: <1 easier, >1 harder
 let pendingBoss=false;
 let bossKind='big';            // 'mini' (every 5 lvls) | 'big' (every 10)
@@ -2646,7 +2869,8 @@ const TITLES=[
   {id:'perfect',    name:'Perfectionist',   hint:'Earn 3★ on a level', ic:'💎', col:'#f0abfc', fx:'shine'},
   {id:'unstoppable',name:'Unstoppable',     hint:'Reach a ×5 combo',   ic:'🚀', col:'#7dd3fc', fx:'shine'},
   {id:'godmode',    name:'God of Numa',     hint:'Trigger GOD MODE',   ic:'🔥', col:'#ff7a1f', fx:'fire'},
-  {id:'legend',     name:'Numa Legend',     hint:'Reach Level 20',     ic:'👑', col:'#ffe6a0', fx:'holo'}
+  {id:'legend',     name:'Numa Legend',     hint:'Reach Level 20',     ic:'👑', col:'#ffe6a0', fx:'holo'},
+  {id:'founder',    name:'Founder',         hint:'Supported us early ♥ (Founder Pack)', ic:'⭐', col:'#ffd84a', fx:'holo', founder:true}
 ];
 let unlockedTitles=['rookie'], equippedTitleId='rookie';
 function titleName(id){ const t=TITLES.find(x=>x.id===id); return t?t.name:'Rookie'; }
@@ -2805,6 +3029,14 @@ function showScreen(id,navEl){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   if(navEl)navEl.classList.add('active');
   if(id==='home' && typeof updateHomeUI==='function') updateHomeUI();
+  if(id==='home' && typeof checkDailyLogin==='function' && typeof splashDismissed!=='undefined' && splashDismissed) checkDailyLogin();
+  // league promotion celebration (resolved on week rollover) — show after daily modal, if any
+  if(id==='home' && typeof loadLeague==='function' && typeof splashDismissed!=='undefined' && splashDismissed){
+    try{ loadLeague(); if(window._leaguePromo){ var _pr=window._leaguePromo; window._leaguePromo=null;
+      var _dm=document.getElementById('dailyLoginModal'); var _delay=(_dm&&getComputedStyle(_dm).display!=='none')?0:1100;
+      if(_delay===0){ window._leaguePromo=_pr; } else { setTimeout(function(){ if(typeof showLeaguePromo==='function') showLeaguePromo(_pr); },_delay); }
+    } }catch(e){}
+  }
   // deferred login ask (login moved BEHIND gameplay): guests who reached L3 get ONE prompt
   // when they land back home; the hard wall stays at GUEST_CAP. Never during splash.
   if(id==='home' && typeof isGuest!=='undefined' && isGuest && typeof pLevel!=='undefined' && pLevel>=3
@@ -2815,7 +3047,7 @@ function showScreen(id,navEl){
   if(id==='map' && typeof renderWorldMap==='function') renderWorldMap();
   if(id==='badges')renderBadges();
   if(id==='market'){ if(typeof renderMarket==='function') renderMarket(); }
-  if(id==='leaderboard')renderLeaderboard();
+  if(id==='leaderboard'){ const lg=document.querySelector('.lb-tab[data-mode="league"]'); if(lg&&typeof switchLbTab==='function'){ switchLbTab('league',lg); } else renderLeaderboard(); }
   if(id==='daily')renderDaily();
   if(id==='settings')renderSettings();
   updateHUD();
@@ -2988,7 +3220,7 @@ function startGame(mode){
   taWave=1;
   pScore=0; solvedCount=0;
   window._runMaxStreak=0;   // fresh combo record for the game-over card
-  pLives=3; // fresh lives each run (arcade style)
+  pLives=3+(typeof petHeartBonus==='function'?petHeartBonus():0); // fresh lives each run (+ Void pet)
   if(typeof hideBoss==='function') hideBoss();
   document.getElementById('phone').classList.remove('boss-active','pulse-nav'); // ensure boss focus chrome is restored
   fallers=[]; tray=[]; selectedLetters=[]; streakCount=0; comboMult=1; isBoss=false; lastSpawn=0; lastComboTier=0; godUsedThisLevel=false;
@@ -4049,7 +4281,7 @@ function waveFallSpeed(){
   // curve now climbs ~3× slower per level. sl maps L1→1, L7→3, L20→~7.3, so what used to hit by L7
   // arrives near L20. L1 start is unchanged; intra-level accel softened 1.038→1.028 too.
   const sl=1+(effLevel()-1)/3;
-  let v=Math.min((70+sl*3.5)*Math.pow(1.026,solvedCount),198);  // px/sec — softened ~12% so tiles linger a touch longer (more read time)
+  let v=Math.min((77+sl*3.9)*Math.pow(1.027,solvedCount),215);  // px/sec — base bumped ~10% (user "az hızlansın"), cap raised 198→215
   if(gMode==='time') v*=1.2;
   if(isBoss) v*=1.03;   // boss barely faster (was ×1.1 — felt too fast once solves stacked)
   // FINAL STRETCH RUSH: the last couple solves of a level speed up for tension (matches the
@@ -4080,7 +4312,7 @@ function spawnWaveMath(){
   waveEq.answers.forEach((val,i)=>{
     const el=document.createElement('div');
     const isCorrect=val===waveEq.ans;
-    el.className='wtile wv'+wrnd(0,5)+(isCorrect && featUnlocked('answerGlow')?' wtile-answer':'');   // random candy colour per tile (icon style)
+    el.className='wtile wv'+wrnd(0,5)+((isCorrect && (featUnlocked('answerGlow')||(typeof petHasReveal==='function'&&petHasReveal()&&solvedCount===0)))?' wtile-answer':'');   // candy colour + Null pet reveal (first wave)
     el.textContent=val;
     const slot=slots[i], col=slot%cols, row=Math.floor(slot/cols);
     const x=8+col*laneW+(laneW-74)/2+wrnd(-4,4);
@@ -4742,9 +4974,9 @@ function renderSkillBar(){
   bar.innerHTML=SKILL_DEFS.map(s=>{
     const locked=pLevel<s.lvl;
     const armed=(s.id==='shield'&&skillShield);
-    const afford=pGold>=s.cost;
+    const afford=pGold>=petSkillCost(s.cost);
     if(locked) return '<button class="sk-btn sk-locked" data-sk="'+s.id+'" onclick="useSkill(\''+s.id+'\')"><span class="sk-ic">'+s.ic+'</span><span class="sk-lv">LV '+s.lvl+'</span></button>';
-    return '<button class="sk-btn'+((afford||armed)?' ready':'')+(armed?' active':'')+'" style="--skc:'+s.col+'" data-sk="'+s.id+'" onclick="useSkill(\''+s.id+'\')"><span class="sk-ic">'+s.ic+'</span><span class="sk-cost">'+s.cost+'</span></button>';
+    return '<button class="sk-btn'+((afford||armed)?' ready':'')+(armed?' active':'')+'" style="--skc:'+s.col+'" data-sk="'+s.id+'" onclick="useSkill(\''+s.id+'\')"><span class="sk-ic">'+s.ic+'</span><span class="sk-cost">'+petSkillCost(s.cost)+'</span></button>';
   }).join('');
 }
 function gainSkillCharge(){ _skillSolveCnt++; if(_skillSolveCnt>=SKILL_SOLVES_PER_CHARGE){ _skillSolveCnt=0; if(skillCharges<SKILL_MAX_CHARGE){ skillCharges++; renderSkillBar(); } } }
@@ -4756,10 +4988,10 @@ function useSkill(id){
   const def=SKILL_DEFS.find(s=>s.id===id); if(!def) return;
   if(pLevel<def.lvl){ showSkillToast('🔒 '+def.name+' unlocks at Level '+def.lvl); if(typeof haptic==='function')haptic([20,20]); return; }
   if((id==='shield'&&skillShield)||(id==='over'&&skillOvercharge)) return;   // already armed
-  if(pGold<def.cost){ showSkillToast('Need 🪙'+def.cost+' — earn gold by solving!'); if(typeof haptic==='function')haptic([30,30]); return; }
+  if(pGold<petSkillCost(def.cost)){ showSkillToast('Need 🪙'+petSkillCost(def.cost)+' — earn gold by solving!'); if(typeof haptic==='function')haptic([30,30]); return; }
   // PURGE only makes sense when there are decoy fallers — don't charge gold for a no-op (word/pulse)
   if(id==='purge'){ const anyDecoy=(typeof fallers!=='undefined' && fallers.some(f=>!f.correct && f.val!=='BONUS' && !f.dead && f.el)); if(!anyDecoy){ showSkillToast('💣 Nothing to purge here!'); if(typeof haptic==='function')haptic([30,30]); return; } }
-  pGold-=def.cost; if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet();
+  pGold-=petSkillCost(def.cost); if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet();
   initAudio(); if(typeof haptic==='function')haptic(20);
   if(id==='freeze'){ _skillTsToken++; timescale=0.05; skFlash('❄️ FREEZE',def.col); beep(880,.12,'sine',.13); _skillRestoreTs(_skillTsToken,2000); }
   else if(id==='slowmo'){ _skillTsToken++; timescale=0.42; skFlash('🐌 SLOW-MO',def.col); beep(520,.2,'sine',.12); _skillRestoreTs(_skillTsToken,3500); }
@@ -5041,6 +5273,7 @@ function onPulseBossDefeat(){
   if(typeof finishLevelUp==='function') finishLevelUp(true);
 }
 function setTarget(){
+  if(typeof updatePetBuddy==='function') updatePetBuddy();   // refresh pet companion (shows/hides per boss)
   if(gMode==='pulse'){ setupPulseTarget(); return; }   // PULSE memory-wheel mode has its own loop
   if(loopRaf){cancelAnimationFrame(loopRaf);loopRaf=null;}
   if(typeof stopHintEnergy==='function') stopHintEnergy();
@@ -5514,7 +5747,7 @@ function handleSuccess(){
   const exprBonus=Math.max(0,opCount-1);              // extra ops beyond the first
   const exprMult=1+0.6*exprBonus;                     // +60% per extra operation
   const feverMult=(gSubMode==='math'&&streakCount>=8)?2:1;   // FEVER (streak 8+): double points
-  let pts=Math.round(basePts*comboMult*bossBonus*exprMult*feverMult);
+  let pts=Math.round(basePts*comboMult*bossBonus*exprMult*feverMult*(typeof petMul==='function'?petMul('score'):1));
   if(typeof skillOvercharge!=='undefined' && skillOvercharge){ pts*=3; skillOvercharge=false; if(typeof skFlash==='function') skFlash('⚡ ×3!','#ffd84a'); if(typeof triggerSparks==='function') triggerSparks(24,true); }   // OVERCHARGE skill
   let goldEarned=Math.max(1,Math.round((2+comboMult)*bossBonus*exprMult*0.45));   // gold is SCARCE — it's the skill currency now; earned slowly, spent on FREEZE/PURGE/etc.
   if(exprBonus>0) setTimeout(()=>showGoldPop('⚡ '+(opCount)+'-OP CHAIN! +'+Math.round((exprMult-1)*100)+'%'),200);
@@ -5525,6 +5758,7 @@ function handleSuccess(){
   // Boss solve: guaranteed gem
   if(isBoss && Math.random()<0.22){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); }
   pScore+=pts; gainGold(goldEarned); pXP+=pts; solvedCount++; pTotalSolved++;
+  if(typeof petBuddyReact==='function') petBuddyReact();   // pet hops on each solve
   if(typeof renderSkillBar==='function'){ renderSkillBar(); }   // refresh skill affordability as gold changes
   streakCount++;
   // per-level tracking for stars + objectives
@@ -6923,6 +7157,7 @@ function showComboBurst(t){
 function enterGodModeState(){
   if(godModeActive)return;
   godModeActive=true;
+  if(typeof thunderSound==='function') thunderSound(1.3);   // 🌩 god-mode lightning crack
   unlockTitle('godmode');
   const phone=document.getElementById('phone');
   phone.classList.add('god-mode-active');
@@ -7743,9 +7978,22 @@ function _grantPlusMonth(){
   initAudio(); if(typeof sfxGold==='function') sfxGold(); if(typeof fireConfetti==='function') fireConfetti(40);
   showBuyToast('⭐ Numa Plus! No ads · +'+PLUS_MONTHLY_GOLD+'🪙 · +'+PLUS_MONTHLY_GEMS+'💎');
 }
-function buyValuePack(){
-  if(pNoAds){ showBuyToast('⭐ Numa Plus already active — thank you!'); return; }
-  iapStub('Numa Plus — $1.99/month'); // on verified subscription → _grantPlusMonth();
+// IAPs — on verified billing (Capacitor/StoreKit) the purchase callback calls the matching grant fn.
+function buyValuePack(){ iapStub('Value Pack — $1.99'); }
+function grantValuePack(){   // call ONLY from a verified purchase callback
+  gainGold(2500); pGems+=15; pNoAds=true; localStorage_set('numa_noads','1');
+  if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet();
+  if(typeof fireConfetti==='function')fireConfetti(90); if(typeof sfxLevelUp==='function')sfxLevelUp();
+  showBuyToast('⭐ Value Pack: +2,500 🪙 +15 💎 · Ads removed!');
+}
+function buyFounderPack(){ iapStub('Founder Pack — $4.99'); }
+function grantFounderPack(){   // call ONLY from a verified purchase callback — grants the EXCLUSIVE Founder title
+  gainGold(6000); pGems+=45; pNoAds=true; localStorage_set('numa_noads','1');
+  if(typeof unlockTitle==='function') unlockTitle('founder');
+  equippedTitleId='founder'; localStorage_set('numa_title','founder');   // auto-equip the badge of honor
+  if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet();
+  if(typeof fireConfetti==='function')fireConfetti(140); if(typeof sfxLevelUp==='function')sfxLevelUp();
+  showBuyToast('💛 Founder Pack: ⭐ Founder title + 6,000🪙 + 30💎 · Ads removed!');
 }
 
 /* DEAL OF THE DAY — same deal all day, rotates daily, once-per-day, live countdown */
@@ -7820,12 +8068,9 @@ function renderMarket(){
   injectStoreCSS();
   const mg=document.getElementById('mkt-gold'); if(mg) mg.textContent=pGold;
   const mge=document.getElementById('mkt-gems'); if(mge) mge.textContent=pGems;
+  // Value Pack is a REPEATABLE gold+gem pack — always buyable at a flat $1.99 (no "/mo", never disabled)
   const vp=document.getElementById('value-pack');
-  if(vp){
-    const vpp=vp.querySelector('.sp-price');
-    if(pNoAds){ if(vpp) vpp.textContent='⭐ Active'; vp.style.opacity='.7'; vp.style.pointerEvents='none'; }
-    else { if(vpp) vpp.innerHTML='$1.99<span style="font-size:9px;opacity:.85;">/mo</span>'; vp.style.opacity=''; vp.style.pointerEvents=''; }
-  }
+  if(vp){ const vpp=vp.querySelector('.sp-price'); if(vpp) vpp.textContent='$1.99'; vp.style.opacity=''; vp.style.pointerEvents=''; }
   renderMarketThemes();
 }
 function continueWithGem(){
@@ -7850,6 +8095,22 @@ function resumeFromGameOver(){
 /* ═══ SOUND ENGINE ═══ */
 let audioCtx=null, soundOn=true;
 function initAudio(){ if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}} }
+/* THUNDER — synthesized lightning crack→rumble (noise burst + lowpass sweep + sub rumble). No audio file. */
+function thunderSound(power){
+  if(!soundOn) return; initAudio(); if(!audioCtx) return;
+  try{
+    var t=audioCtx.currentTime, dur=(power||1)*0.85;
+    var buf=audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate*dur), audioCtx.sampleRate), d=buf.getChannelData(0);
+    for(var i=0;i<d.length;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.7); }   // decaying white noise
+    var src=audioCtx.createBufferSource(); src.buffer=buf;
+    var lp=audioCtx.createBiquadFilter(); lp.type='lowpass';
+    lp.frequency.setValueAtTime(5400,t); lp.frequency.exponentialRampToValueAtTime(300,t+dur);   // crack → rumble
+    var g=audioCtx.createGain();
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.5*(power||1),t+0.012); g.gain.exponentialRampToValueAtTime(0.0004,t+dur);
+    src.connect(lp); lp.connect(g); g.connect(audioCtx.destination); src.start(t); src.stop(t+dur);
+    beep(58,0.5,'sine',0.42); setTimeout(function(){beep(40,0.5,'sine',0.3);},55);   // sub rumble under it
+  }catch(e){}
+}
 function beep(freq,dur,type,vol){
   if(!soundOn||!audioCtx)return;
   try{
@@ -7887,14 +8148,96 @@ function setModeBest(mode,score){
   if(score>modeBest(mode)){ localStorage_set('numa_best_'+mode,String(score)); if(typeof submitScore==='function') submitScore(mode,score); }
 }
 function switchLbTab(mode,el){
-  currentLbMode=mode;
   document.querySelectorAll('.lb-tab').forEach(t=>t.classList.remove('active'));
   if(el) el.classList.add('active');
+  initAudio(); sfxClick();
+  const lv=document.getElementById('league-view'), ll=document.getElementById('lb-list'), lbl=document.getElementById('lb-mode-label');
+  if(mode==='league'){ if(lv)lv.style.display='block'; if(ll)ll.style.display='none'; if(lbl)lbl.style.display='none'; if(typeof renderLeague==='function')renderLeague(); return; }
+  if(lv)lv.style.display='none'; if(ll)ll.style.display=''; if(lbl)lbl.style.display='';
+  currentLbMode=mode;
   const labels={math:'🔢 Math Blast',word:'🔤 Word Hunt',combo:'🌀 Combo Mix',time:'⏱️ Time Attack'};
   document.getElementById('lb-mode-label').textContent=labels[mode]+' — Top Players';
-  initAudio(); sfxClick();
   renderLeaderboard();
 }
+/* ═══════════ 🛡️ WEEKLY LEAGUES — Bronze→Diamond, weekly reset, top 5 promote / bottom 4 relegate ═══════════ */
+const DIVISIONS=[
+  {name:'Bronze',em:'🥉',col:'#cd7f4a'},{name:'Silver',em:'🥈',col:'#c0c7d0'},{name:'Gold',em:'🥇',col:'#ffd84a'},
+  {name:'Platinum',em:'💠',col:'#5ad1ff'},{name:'Diamond',em:'💎',col:'#8a5cff'}
+];
+// 15 ranks: each division has 3 tiers (Bronze 1→2→3 → Silver 1→2→3 → … → Diamond 3). rank = 0..14.
+const LEAGUE_MAXRANK=DIVISIONS.length*3-1;
+let leaguePoints=0, leagueRank=0;
+function _seed(s){ var x=Math.sin(s)*10000; return x-Math.floor(x); }
+function _rDiv(r){ return DIVISIONS[Math.floor(r/3)]||DIVISIONS[0]; }
+function rankName(r){ return _rDiv(r).name+' '+((r%3)+1); }
+function rankCol(r){ return _rDiv(r).col; }
+function rankEm(r){ return _rDiv(r).em; }
+function loadLeague(){
+  leagueRank=parseInt(localStorage_get('numa_league_rank')||'0');
+  var wk=parseInt(localStorage_get('numa_league_week')||'-1');
+  leaguePoints=parseInt(localStorage_get('numa_league_pts')||'0');
+  var now=(typeof weekNum==='function')?weekNum():0;
+  if(wk!==now){
+    if(wk>=0) resolveLeagueWeek();          // promotion/relegation from last week's final rank
+    leaguePoints=0; localStorage_set('numa_league_pts','0'); localStorage_set('numa_league_week',String(now));
+  }
+}
+function addLeaguePoints(n){ loadLeague(); leaguePoints+=n; localStorage_set('numa_league_pts',String(leaguePoints)); }
+function resolveLeagueWeek(){
+  var rank=parseInt(localStorage_get('numa_league_lastrank')||'20'), old=leagueRank, dir=0;
+  if(rank<=5 && leagueRank<LEAGUE_MAXRANK){ leagueRank++; dir=1; }
+  else if(rank>=16 && leagueRank>0){ leagueRank--; dir=-1; }
+  localStorage_set('numa_league_rank',String(leagueRank));
+  if(rank<=3){ gainGold(500); pGems+=5; }   // top-3 weekly reward
+  window._leaguePromo={dir:dir, to:leagueRank, from:old, top3:(rank<=3)};   // pending celebration show
+}
+function leagueRoster(){
+  loadLeague();
+  var base=300+leagueRank*260;   // higher rank = tougher opponents (finer curve across 15 tiers)
+  var names=['Blitz','Nova','Echo','Titan','Zephyr','Quark','Vortex','Pixel','Rune','Sage','Onyx','Flux','Cobra','Lyra','Drake','Wren','Ash','Volt','Kai'];
+  var ems=['🦊','🐺','🦁','🐯','🐲','🦈','🦅','🐍'];
+  var wk=(typeof weekNum==='function')?weekNum():0, roster=[];
+  for(var i=0;i<19;i++){ var sd=wk*100+leagueRank*20+i;
+    roster.push({name:names[i%names.length]+Math.floor(_seed(sd)*90+10), pts:Math.floor(base*(0.5+_seed(sd+1)*1.8)), em:ems[i%8]}); }
+  roster.push({name:'You', pts:leaguePoints, you:true, em:(typeof playerAvatar!=='undefined'&&!playerAvatar.startsWith('data:'))?playerAvatar:'🙂'});
+  roster.sort(function(a,b){return b.pts-a.pts;});
+  return roster;
+}
+function renderLeague(){
+  var host=document.getElementById('league-view'); if(!host) return;
+  loadLeague();
+  var roster=leagueRoster(), myRank=roster.length;
+  roster.forEach(function(p,i){ if(p.you) myRank=i+1; });
+  localStorage_set('numa_league_lastrank',String(myRank));
+  var dleft=7-(Math.floor(Date.now()/86400000+4)%7), col=rankCol(leagueRank);
+  var h='<div class="lg-head" style="--lgc:'+col+'"><div class="lg-em">'+rankEm(leagueRank)+'</div><div style="flex:1;min-width:0;">'
+    +'<div class="lg-nm">'+rankName(leagueRank)+'</div>'
+    +'<div class="lg-sub">LV '+(typeof pLevel!=='undefined'?pLevel:1)+' · '+leaguePoints.toLocaleString()+' pts · resets in '+dleft+'d</div></div>'
+    +'<div class="lg-myrank">#'+myRank+'</div></div>'
+    +'<div class="lg-zonehint"><span style="color:#43e0a0;">▲ Top 5 promote</span> &nbsp; <span style="color:#ff5a7a;">▼ Bottom 4 drop</span></div><div class="lg-rows">';
+  roster.forEach(function(p,i){
+    var zone=i<5?'promote':(i>=roster.length-4?'relegate':'');
+    h+='<div class="lg-row '+(p.you?'you':'')+' '+zone+'"><div class="lg-rk">'+(i+1)+'</div><div class="lg-av">'+p.em+'</div>'
+      +'<div class="lg-pn">'+p.name+'</div><div class="lg-pts">'+p.pts.toLocaleString()+'</div></div>';
+  });
+  host.innerHTML=h+'</div>';
+  if(window._leaguePromo){ var pr=window._leaguePromo; window._leaguePromo=null; showLeaguePromo(pr); }
+}
+function showLeaguePromo(pr){
+  var m=document.getElementById('leaguePromoModal');
+  if(!m){ if(pr.dir>0&&typeof showBuyToast==='function') showBuyToast('🛡️ Promoted to '+rankName(pr.to)+'!'); return; }
+  var promoted=pr.dir>0, held=pr.dir===0, col=rankCol(pr.to);
+  var badge=document.getElementById('lp-badge'); badge.textContent=rankEm(pr.to); badge.style.setProperty('--lpc',col);
+  badge.className='lp-badge'; void badge.offsetWidth; badge.classList.add(promoted?'lp-up':(held?'lp-hold':'lp-down'));
+  document.getElementById('lp-title').textContent=promoted?'PROMOTED!':(held?'RANK HELD':'RELEGATED');
+  var rk=document.getElementById('lp-rank'); rk.textContent=rankName(pr.to); rk.style.color=col;
+  document.getElementById('lp-sub').textContent=promoted?'You climbed to a new tier! 🎉':(held?'You held your tier — push higher!':'Dropped a tier — climb back next week!');
+  document.getElementById('lp-reward').style.display=pr.top3?'block':'none';
+  m.style.display='flex';
+  if(promoted){ if(typeof fireConfetti==='function')fireConfetti(160); if(typeof sfxLevelUp==='function')sfxLevelUp(); if(typeof thunderSound==='function')thunderSound(1.2); if(typeof haptic==='function')haptic([30,20,40,20,60]); }
+  else { if(typeof sfxClick==='function')sfxClick(); }
+}
+function closeLeaguePromo(){ var m=document.getElementById('leaguePromoModal'); if(m)m.style.display='none'; }
 function _avatarEmoji(){ const a=(typeof playerAvatar!=='undefined')?playerAvatar:''; return (a && !a.startsWith('data:'))?a:'🙂'; }
 // lazily get the Firestore handle (robust against config init timing/caching)
 function fbDB(){ if(!window.fbDb && typeof firebase!=='undefined' && firebase.firestore){ try{ window.fbDb=firebase.firestore(); }catch(e){} } return window.fbDb; }
@@ -7998,7 +8341,9 @@ function loadQuests(){
 }
 function questAdvance(type,amount,asMax){
   if(!todayQuests.length) loadQuests();
-  if(!todayQuests.some(q=>q.type===type)) return; // only track active quests
+  if(typeof weeklyAdvance==='function') weeklyAdvance(type,amount,asMax);   // weekly tracks independently of daily
+  if(type==='solve' && typeof addLeaguePoints==='function') addLeaguePoints((amount||1)*10);   // weekly league points
+  if(!todayQuests.some(q=>q.type===type)) return; // only track active DAILY quests
   const cur=questProgress[type]||0;
   questProgress[type]=asMax?Math.max(cur,amount):cur+amount;
   saveQuests();
@@ -8034,6 +8379,62 @@ function renderDaily(){
       +'<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:6px;margin-top:6px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--gold),#d97706);border-radius:6px;transition:width .4s;"></div></div>'
       +'<div class="badge-desc" style="margin-top:4px;display:flex;align-items:center;gap:5px;">'+prog+'/'+q.goal+' &bull; '+rewardText(q.reward)+'</div></div>'
       +right;
+    list.appendChild(row);
+  });
+  if(typeof renderWeekly==='function') renderWeekly();
+}
+
+/* ═══════════ 🗓️ WEEKLY CHALLENGES + 🎁 CHEST ═══════════ */
+const WEEKLY_POOL=[
+  {type:'solve', icon:'🎯', title:'Solve 150 puzzles', goal:150, reward:{gem:5}},
+  {type:'levels',icon:'📈', title:'Reach level 15',    goal:15,  reward:{gold:1500}},
+  {type:'combo', icon:'🔥', title:'Hit a 12 combo',     goal:12,  reward:{gem:4}},
+  {type:'boss',  icon:'⚔️', title:'Defeat 5 bosses',    goal:5,   reward:{chest:true}},
+  {type:'words', icon:'🔤', title:'Spell 60 words',     goal:60,  reward:{gold:1200}}
+];
+let weeklyProg={}, weeklyClaimed=[];
+function weekNum(){ return Math.floor((Date.now()/86400000 + 4)/7); }
+function loadWeekly(){
+  if(parseInt(localStorage_get('numa_week')||'-1')!==weekNum()){ weeklyProg={}; weeklyClaimed=[]; localStorage_set('numa_week',String(weekNum())); saveWeekly(); return; }
+  try{ weeklyProg=JSON.parse(localStorage_get('numa_week_prog')||'{}'); }catch(e){ weeklyProg={}; }
+  try{ weeklyClaimed=JSON.parse(localStorage_get('numa_week_claimed')||'[]'); }catch(e){ weeklyClaimed=[]; }
+}
+function saveWeekly(){ localStorage_set('numa_week_prog',JSON.stringify(weeklyProg)); localStorage_set('numa_week_claimed',JSON.stringify(weeklyClaimed)); }
+function weeklyAdvance(type,amount,asMax){
+  loadWeekly();
+  if(!WEEKLY_POOL.some(function(q){return q.type===type;})) return;
+  var cur=weeklyProg[type]||0; weeklyProg[type]=asMax?Math.max(cur,amount):cur+amount; saveWeekly();
+}
+function openChest(){
+  var g=800+Math.floor(Math.random()*1200), gem=1+Math.floor(Math.random()*3);
+  gainGold(g); pGems+=gem; if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet();
+  if(typeof fireConfetti==='function')fireConfetti(120); if(typeof sfxLevelUp==='function')sfxLevelUp();
+  if(typeof showBuyToast==='function')showBuyToast('🎁 CHEST: 🪙'+g+' + 💎'+gem+'!');
+}
+function claimWeekly(i){
+  loadWeekly(); var q=WEEKLY_POOL[i]; if(!q||weeklyClaimed.indexOf(i)>=0) return;
+  if((weeklyProg[q.type]||0)<q.goal) return;
+  weeklyClaimed.push(i); saveWeekly();
+  if(q.reward.gold) gainGold(q.reward.gold);
+  if(q.reward.gem) pGems+=q.reward.gem;
+  if(q.reward.chest){ openChest(); } else { if(typeof fireConfetti==='function')fireConfetti(40); if(typeof showBuyToast==='function')showBuyToast(q.reward.gold?('+'+q.reward.gold+'🪙 claimed!'):('+'+q.reward.gem+'💎 claimed!')); }
+  if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet();
+  renderWeekly();
+}
+function renderWeekly(){
+  loadWeekly();
+  var list=document.getElementById('weekly-list'); if(!list) return;
+  var rst=document.getElementById('weekly-reset'); if(rst){ var dleft=7-(Math.floor(Date.now()/86400000+4)%7); rst.textContent='resets in '+dleft+'d'; }
+  list.innerHTML='';
+  WEEKLY_POOL.forEach(function(q,i){
+    var prog=Math.min(weeklyProg[q.type]||0,q.goal), done=prog>=q.goal, claimed=weeklyClaimed.indexOf(i)>=0, pct=(prog/q.goal)*100;
+    var right = claimed?'<div class="quest-done">✓</div>' : done?'<button class="quest-claim" onclick="claimWeekly('+i+')">CLAIM</button>' : '';
+    var rew = q.reward.chest?'🎁 Chest':(q.reward.gold?('🪙'+q.reward.gold):('💎'+q.reward.gem));
+    var row=document.createElement('div'); row.className='badge-row'+((done||claimed)?' earned':'');
+    row.innerHTML='<div class="badge-ico">'+(claimed?'✅':q.icon)+'</div>'
+      +'<div class="badge-txt" style="flex:1;"><div class="badge-title">'+q.title+'</div>'
+      +'<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:6px;margin-top:6px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#a855f7,#6d28d9);border-radius:6px;transition:width .4s;"></div></div>'
+      +'<div class="badge-desc" style="margin-top:4px;">'+prog+'/'+q.goal+' &bull; '+rew+'</div></div>'+right;
     list.appendChild(row);
   });
 }
@@ -9001,7 +9402,7 @@ let splashDismissed=false;
 function dismissSplash(){
   if(splashDismissed) return;
   splashDismissed=true; splashDone=true; // stop splash rAF loops
-  initAudio(); sfxClick();
+  initAudio(); if(typeof thunderSound==='function') thunderSound(1.2);   // 🌩 entry lightning crack on tap
   const sp=document.getElementById('splash');
   sp.classList.add('hiding');
   setTimeout(()=>{ if(sp) sp.style.display='none'; }, 600);
