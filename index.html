@@ -3794,7 +3794,7 @@ function spawnDuel(){
     const colsInRow=Math.min(cols, N-row*cols);                  // last row may have fewer → center them
     const colIdx=pos-row*cols;
     const xPct=(100/(colsInRow+1))*(colIdx+1);
-    const yPct=rows>1 ? (16+row*(60/(rows-1))) : 30;
+    const yPct=rows>1 ? (42+row*(40/(rows-1))) : 56;   // orbs in the LOWER half — clear of the boss + top camera/notch (user "sayı tam kamerada kalıyor")
     const el=document.createElement('div'); el.className='duel-orb'; el.textContent=val;
     el.style.left=xPct+'%'; el.style.top=yPct+'%'; el.style.animationDelay=(idx*0.18)+'s';
     el.onpointerdown=ev=>{ ev.preventDefault(); ev.stopPropagation(); tapDuel(val===waveEq.ans,el); };
