@@ -575,14 +575,14 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .wrong-taunt{position:absolute;transform:translate(-50%,-50%);z-index:13;pointer-events:none;white-space:nowrap;
   font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:#ff6b6b;
   text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 12px rgba(255,60,60,.6);
-  animation:wrongTauntA 1.05s cubic-bezier(.2,1.5,.4,1) forwards;}
+  animation:wrongTauntA 2.05s cubic-bezier(.2,1.5,.4,1) forwards;}
 @keyframes wrongTauntA{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-8deg);}
   20%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(4deg);}
   40%{transform:translate(-50%,-50%) scale(1) rotate(-2deg);}
   80%{opacity:1;}100%{opacity:0;transform:translate(-50%,-130%) scale(.95);}}
 /* big mocking SMILE that pops with the taunt */
 .wrong-mock{position:absolute;transform:translate(-50%,-50%);z-index:14;pointer-events:none;font-size:48px;
-  filter:drop-shadow(0 3px 7px rgba(0,0,0,.6));animation:wrongMockA 1.1s cubic-bezier(.2,1.6,.4,1) forwards;}
+  filter:drop-shadow(0 3px 7px rgba(0,0,0,.6));animation:wrongMockA 2.1s cubic-bezier(.2,1.6,.4,1) forwards;}
 @keyframes wrongMockA{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-18deg);}
   18%{opacity:1;transform:translate(-50%,-50%) scale(1.28) rotate(12deg);}
   34%{transform:translate(-50%,-50%) scale(1) rotate(-6deg);}
@@ -1086,7 +1086,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .boss-taunt{position:absolute;top:-8px;left:50%;z-index:9990;white-space:nowrap;pointer-events:none;
   font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.85);
   background:rgba(8,12,20,.7);border:1px solid rgba(255,255,255,.12);padding:3px 11px;border-radius:11px;
-  animation:bossTauntFloat 1.7s ease-out forwards;}
+  animation:bossTauntFloat 2.7s ease-out forwards;}
 @keyframes bossTauntFloat{0%{opacity:0;transform:translateX(-50%) translateY(8px) scale(.8);}18%{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}80%{opacity:1;}100%{opacity:0;transform:translateX(-50%) translateY(-16px);}}
 /* boss recoils as it hurls lightning */
 .boss-char.boss-cast{animation:bossCast .26s ease;}
@@ -3170,7 +3170,7 @@ function renderWorldMap(){
   for(let i=1;i<WM_POS.length;i++){ const a=WM_POS[i-1],b=WM_POS[i],mx=(a.x+b.x)/2; d+=' Q'+mx+','+((a.y+b.y)/2)+' '+b.x+','+b.y; }
   document.getElementById('wm-track').setAttribute('d',d);
   // done-portion: up to the current level node
-  const curIdx=Math.min((pLevel-1)-base,9);
+  const curIdx=Math.min((Math.max(pLevel,pMaxLevel)-1)-base,9);   // done-path reflects furthest progress
   let dd='M'+WM_POS[0].x+','+WM_POS[0].y;
   for(let i=1;i<=Math.max(curIdx,0);i++){ const a=WM_POS[i-1],b=WM_POS[i],mx=(a.x+b.x)/2; dd+=' Q'+mx+','+((a.y+b.y)/2)+' '+b.x+','+b.y; }
   document.getElementById('wm-track-done').setAttribute('d',curIdx>0?dd:'');
@@ -3181,7 +3181,7 @@ function renderWorldMap(){
     const lvl=base+i+1;
     const node=document.createElement('div');
     const isBossN=(i===9), isMiniN=(i===4);
-    let state=lvl<pLevel?'done':(lvl===pLevel?'cur':'lock');
+    let state=lvl>pMaxLevel?'lock':(lvl===pLevel?'cur':'done');   // unlocked up to the furthest level reached; replay any of them
     node.className='wm-node '+state+(isBossN?' boss':isMiniN?' mini':'');
     node.style.left=(WM_POS[i].x/360*100)+'%';
     node.style.top=(WM_POS[i].y/760*100)+'%';
@@ -3193,14 +3193,21 @@ function renderWorldMap(){
     } else {
       node.innerHTML='<span class="wn-num">'+(state==='lock'?'🔒':(i+1))+'</span>'+(state==='done'?'<div class="wn-st">'+star(stars)+'</div>':'');
     }
-    if(state!=='lock'){ node.onclick=()=>{ if(lvl===pLevel) resumeFromMap(); else { initAudio(); if(typeof sfxTap==='function') sfxTap(); showBuyToast&&showBuyToast('Level '+lvl+' · '+stars+'⭐'); } }; }
+    if(state!=='lock'){ node.onclick=()=>{ jumpToLevel(lvl); }; }   // tap ANY unlocked level → play from there (no achievement toast)
     host.appendChild(node);
   }
   const pl=document.getElementById('wm-play-lbl'); if(pl) pl.textContent='PLAY LEVEL '+pLevel;
 }
 function resumeFromMap(){
   initAudio(); if(typeof sfxClick==='function') sfxClick();
-  if(typeof gMode!=='undefined' && gMode && pScore>0 && typeof continueGame==='function'){ /* mid-run */ }
+  startGame(selectedMode||'math');
+}
+// jump to (replay) any unlocked level from the world map — moves the current cursor, keeps pMaxLevel
+function jumpToLevel(lvl){
+  initAudio(); if(typeof sfxClick==='function') sfxClick();
+  pLevel=Math.max(1,lvl);
+  if(typeof saveWallet==='function') saveWallet();
+  if(typeof updateHUD==='function') updateHUD();
   startGame(selectedMode||'math');
 }
 
@@ -4282,7 +4289,7 @@ function waveFallSpeed(){
   // arrives near L20. L1 start is unchanged; intra-level accel softened 1.038→1.028 too.
   const sl=1+(effLevel()-1)/3;
   let v=Math.min((77+sl*3.9)*Math.pow(1.027,solvedCount),215);  // px/sec — base bumped ~10% (user "az hızlansın"), cap raised 198→215
-  if(gMode==='time') v*=1.2;
+  if(gMode==='time') v*=1.35;   // Time Attack noticeably faster (user "az daha hızlı")
   if(isBoss) v*=1.03;   // boss barely faster (was ×1.1 — felt too fast once solves stacked)
   // FINAL STRETCH RUSH: the last couple solves of a level speed up for tension (matches the
   // yellow→red level-bar warning) — "telaş" as the level is about to complete.
@@ -4465,11 +4472,11 @@ function showWrongTaunt(x,y){
   const f=document.createElement('div'); f.className='wrong-mock';
   f.textContent=WRONG_FACES[Math.floor(Math.random()*WRONG_FACES.length)];
   f.style.left=x+'px'; f.style.top=(y-44)+'px';
-  board.appendChild(f); setTimeout(()=>f.remove(),1120);
+  board.appendChild(f); setTimeout(()=>f.remove(),2100);
   const d=document.createElement('div'); d.className='wrong-taunt';
   d.textContent=WRONG_TAUNTS[Math.floor(Math.random()*WRONG_TAUNTS.length)];
   d.style.left=x+'px'; d.style.top=y+'px';
-  board.appendChild(d); setTimeout(()=>d.remove(),1050);
+  board.appendChild(d); setTimeout(()=>d.remove(),2050);
 }
 /* the correct tile crossed the danger line → lose a heart */
 function missCorrectWave(){
@@ -5465,6 +5472,8 @@ function clearTension(){
 let lastSpawn=0, lastFrame=0;
 // effective difficulty level — Time Attack has no real levels, so it ramps with solves
 function effLevel(){ return gMode==='time' ? (1+Math.floor(solvedCount/3)) : pLevel; }
+let _cachedBoardH=0;   // cached board height (perf: avoid per-frame reflow); invalidated on resize
+addEventListener('resize',function(){ _cachedBoardH=0; });
 function gameLoop(){
   if(!gActive||gSubMode==='word'){ lastFrame=0; return; }
   const now=performance.now();
@@ -5474,7 +5483,9 @@ function gameLoop(){
   if(dtMs>50) dtMs=50;
   const dt=(dtMs/1000)*timescale;
   const board=document.getElementById('g-board');
-  const bh=board.clientHeight;
+  // PERF (iPhone 120Hz stutter fix): reading clientHeight EVERY frame forces a synchronous reflow →
+  // jank. Cache it; only re-measure when invalid (invalidated on resize / re-read while 0).
+  let bh=_cachedBoardH; if(!bh){ bh=board.clientHeight; _cachedBoardH=bh; }
   // board hidden / not laid out yet (mid-transition): skip danger checks, retry next frame
   if(!bh){ loopRaf=requestAnimationFrame(gameLoop); return; }
   const DANGER_Y=bh-84;            // danger line (tile is 74px tall)
@@ -5854,14 +5865,11 @@ function handleSuccess(){
     if(!isBoss && solvedCount>0 && solvedCount%5===0){
       taWave++;
       if(taWave>=3) unlockTitle('speed');
-      if(taWave%3===0){
-        startTimeBoss();                          // every 3rd wave = MINI-BOSS
-      } else {
-        timer=Math.min(timer+5, TA_MAX);          // breather bonus
-        showWaveBanner(taWave);
-        initAudio(); if(typeof sfxGod==='function')sfxGod(); if(typeof haptic==='function')haptic([20,30,40]);
-        if(typeof fireConfetti==='function') fireConfetti(40);
-      }
+      // Time Attack = pure 90s adrenaline, NO bosses (user) — every wave-up is a breather + speed step
+      timer=Math.min(timer+5, TA_MAX);
+      showWaveBanner(taWave);
+      initAudio(); if(typeof sfxGod==='function')sfxGod(); if(typeof haptic==='function')haptic([20,30,40]);
+      if(typeof fireConfetti==='function') fireConfetti(40);
     }
     updateHUD();
     setTimeout(()=>setTarget(), 500);
@@ -5883,7 +5891,7 @@ function handleSuccess(){
     questAdvance('levels',pLevel,true);
     timer=60; updateHUD();
     // boss cadence: mini-boss every 5 levels, big boss every 10
-    pendingBoss=(pLevel%5===0 && !wasBoss);
+    pendingBoss=(gMode==='math' && pLevel%5===0 && !wasBoss);   // BOSSES ARE MATH-MODE ONLY (user) — no boss in word/combo/time
     bossKind=(pLevel%10===0)?'big':'mini';
     // FINAL BONUS: only a STRONG combo (streak ≥8 / INSANE+) earns the lightning-chain bonus round.
     // (was streak ≥3 → fired almost every early level, so its "GOD MODE / 3·2·1" text appeared between
@@ -6084,7 +6092,7 @@ function showBossTaunt(){
   if(!arena || !bt) return;
   if(arena.querySelector('.boss-taunt')) return;   // one at a time
   const d=document.createElement('div'); d.className='boss-taunt'; d.textContent='“'+bt.taunt+'”';
-  arena.appendChild(d); setTimeout(()=>d.remove(),1700);
+  arena.appendChild(d); setTimeout(()=>d.remove(),2700);
 }
 // COMBO lightning at the boss — escalates: 1 small → 2 big → 3 super → 4 screen-wide chain
 function bossComboStrike(tier){
@@ -7923,9 +7931,11 @@ function showBuyToast(msg){
    The soft-currency loop (coin shop / power-ups / daily deal) is fully functional and creates the
    DESIRE to spend; real-money items (gem packs, bundles, starter, remove-ads) route through iapStub —
    wire Google Play Billing / StoreKit / Stripe there and grant only on the verified callback. */
+var pMaxLevel=1;   // FURTHEST level ever reached — lets you replay earlier levels from the map without losing progress
 function saveWallet(){
   localStorage_set('numa_gold',String(pGold)); localStorage_set('numa_gems',String(pGems));
   localStorage_set('numa_level',String(pLevel)); localStorage_set('numa_xp',String(pXP));   // campaign progress carries across sessions → VOID REALM actually advances + sticks
+  pMaxLevel=Math.max(pMaxLevel||1,pLevel); localStorage_set('numa_maxlevel',String(pMaxLevel));
 }
 function loadWallet(){
   const g=localStorage_get('numa_gold'), m=localStorage_get('numa_gems'), lv=localStorage_get('numa_level'), xp=localStorage_get('numa_xp');
@@ -7933,6 +7943,7 @@ function loadWallet(){
   if(m!==null && !isNaN(parseInt(m))) pGems=parseInt(m);
   if(lv!==null && !isNaN(parseInt(lv))) pLevel=Math.max(1,parseInt(lv));
   if(xp!==null && !isNaN(parseInt(xp))) pXP=Math.max(0,parseInt(xp));
+  var ml=localStorage_get('numa_maxlevel'); pMaxLevel=Math.max(pLevel,(ml!==null&&!isNaN(parseInt(ml)))?parseInt(ml):pLevel);
 }
 let pNoAds=(localStorage_get('numa_noads')==='1');
 let starterOwned=(localStorage_get('numa_starter')==='1');
