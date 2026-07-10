@@ -2496,7 +2496,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
   <div class="modal-overlay" id="bossModal">
     <div class="modal-box">
       <span class="boss-skull">💀</span>
-      <div class="modal-title" style="color:#ef4444">MINI BOSS!</div>
+      <div class="modal-title" id="boss-title" style="color:#ef4444">MINI BOSS!</div>
       <div class="modal-sub" id="boss-sub">Survive the boss round!</div>
       <button class="modal-btn btn-boss" onclick="startBoss()">⚔️ Fight!</button>
     </div>
@@ -5269,7 +5269,7 @@ function pulseColorBlastBoss(){
 function pulseLevelComplete(){
   gActive=false; clearPulseTimers();
   const wasBoss=isBoss; pLevel++; pulseLvl++;
-  pendingBoss=(pulseLvl%5===0 && !wasBoss); bossKind=(pulseLvl%10===0)?'big':'mini';   // boss every 5 PULSE levels
+  pendingBoss=false;   // NO boss in Pulse (boss is MATH-ONLY; user "pulsede boss olmamalı, altta yer yok")
   if(typeof questAdvance==='function') questAdvance('levels',pLevel,true);
   if(pendingBoss){ if(typeof showBossModal==='function') showBossModal(); }
   else { if(typeof finishLevelUp==='function') finishLevelUp(wasBoss); }
@@ -5474,14 +5474,18 @@ let lastSpawn=0, lastFrame=0;
 function effLevel(){ return gMode==='time' ? (1+Math.floor(solvedCount/3)) : pLevel; }
 let _cachedBoardH=0;   // cached board height (perf: avoid per-frame reflow); invalidated on resize
 addEventListener('resize',function(){ _cachedBoardH=0; });
+let _smoothDt=0;
 function gameLoop(){
-  if(!gActive||gSubMode==='word'){ lastFrame=0; return; }
+  if(!gActive||gSubMode==='word'){ lastFrame=0; _smoothDt=0; return; }
   const now=performance.now();
   // delta-time (seconds) × timescale → identical speed on 60/90/120Hz + hit-stop/slow-mo
-  if(!lastFrame) lastFrame=now;
+  if(!lastFrame){ lastFrame=now; _smoothDt=0; }
   let dtMs=now-lastFrame; lastFrame=now;
   if(dtMs>50) dtMs=50;
-  const dt=(dtMs/1000)*timescale;
+  // SMOOTH the frame time — on 120Hz ProMotion frame intervals jitter (8/16/12ms…); v*rawDt makes
+  // tiles jump unevenly = the "titrek" stutter. A running average keeps movement buttery under jitter.
+  _smoothDt = _smoothDt>0 ? (_smoothDt*0.82 + dtMs*0.18) : dtMs;
+  const dt=(_smoothDt/1000)*timescale;
   const board=document.getElementById('g-board');
   // PERF (iPhone 120Hz stutter fix): reading clientHeight EVERY frame forces a synchronous reflow →
   // jank. Cache it; only re-measure when invalid (invalidated on resize / re-read while 0).
@@ -5920,6 +5924,8 @@ function showBossModal(){
   const bsub=document.getElementById('boss-sub');
   const skull=document.querySelector('#bossModal .boss-skull');
   if(skull) skull.textContent = mini?'💀':'👹';
+  const btitle=document.getElementById('boss-title');   // was hardcoded "MINI BOSS!" → level 10 big boss looked identical
+  if(btitle){ btitle.textContent = mini?'MINI BOSS!':'⚠ BOSS BATTLE!'; btitle.style.color = mini?'#ef4444':'#ffd84a'; }
   if(bsub) bsub.innerHTML = '<span style="color:'+bt.eye+';font-family:Syne,sans-serif;font-size:17px;font-weight:800;">'+bt.name+'</span><br>'
     + '<span style="opacity:.8;font-style:italic;">"'+bt.taunt+'"</span><br><br>'
     + (mini ? 'MINI-BOSS · land <strong style="color:#fff">'+bossTarget+' hits</strong>'
