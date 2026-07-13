@@ -15,7 +15,8 @@
 <meta name="apple-mobile-web-app-title" content="NUMA BLAST">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;600;700&family=Press+Start+2P&family=Bungee&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<!-- fonts bundled LOCALLY (vendor/) so the app works offline in the WebView (Apple wants this). Web still works too. -->
+<link rel="stylesheet" href="vendor/fonts.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root {
@@ -335,7 +336,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .target-panel{position:relative;padding:2px 10px 8px;text-align:center;border:none;background:transparent;}
 .tp-top{display:none;}                          /* redundant MATH labels removed */
 /* clue line — only shown in WORD mode */
-.tp-hint{font-size:18px;font-weight:800;color:var(--gold);line-height:1.3;margin:2px 0 6px;text-shadow:0 0 16px rgba(245,158,11,.35);}
+.tp-hint{font-size:21px;font-weight:800;color:var(--gold);line-height:1.3;margin:2px 0 8px;text-shadow:0 0 16px rgba(245,158,11,.35);}
 .target-panel.tp-math .tp-hint{display:none;}   /* math: no "make the number X" text */
 .tp-bottom{display:flex;flex-direction:column;align-items:stretch;gap:8px;}
 /* big glowing hero number */
@@ -344,7 +345,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
   text-shadow:0 0 20px var(--panel-acc,rgba(0,212,255,.65)),0 0 52px var(--panel-acc,rgba(0,212,255,.4)),0 4px 0 rgba(0,0,0,.3);
   animation:tpValPulse 2.6s ease-in-out infinite;}
 @keyframes tpValPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.045);}}
-.tp-val.word-val{font-size:26px;letter-spacing:5px;color:rgba(255,255,255,.8);animation:none;text-shadow:none;}
+.tp-val.word-val{font-size:46px;letter-spacing:9px;color:rgba(255,255,255,.85);animation:none;text-shadow:0 0 18px rgba(0,212,255,.4);}
 .tp-stats{display:flex;align-items:center;gap:8px;}
 .tp-hint-sub{font-size:10px;color:var(--mut);font-weight:600;}
 #lvl-obj{align-items:center;justify-content:center;gap:7px;align-self:center;margin:2px 0 6px;
@@ -697,6 +698,14 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 #hint-btn.nudge{animation:hnud .6s ease infinite;}
 @keyframes hnud{0%,100%{transform:scale(1);}50%{transform:scale(1.1);box-shadow:0 0 22px rgba(255,200,60,.55);}}
 .timer-track{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;position:relative;}
+/* TIME ATTACK: big, prominent, draining countdown bar (turns red + pulses under 15s) */
+.target-panel.ta-active .tp-stats{flex-wrap:wrap;gap:6px 10px;}
+.target-panel.ta-active .timer-track{flex:1 0 100%;height:16px;border:1px solid rgba(255,255,255,.15);box-shadow:inset 0 1px 3px rgba(0,0,0,.5);}
+.target-panel.ta-active #timer-fill{transition:width 1s linear,background .3s;}
+.target-panel.ta-active .timer-lbl{font-family:'Bungee',sans-serif;font-size:18px;color:#fff;order:-1;}
+.target-panel.ta-active.ta-low #timer-fill{background:linear-gradient(90deg,#ff2d2d,#ff7a1f)!important;box-shadow:0 0 14px rgba(255,60,60,.7);}
+.target-panel.ta-active.ta-low .timer-lbl{color:#ff5a5a;animation:taBlink .6s steps(2) infinite;}
+@keyframes taBlink{50%{opacity:.35;}}
 #timer-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--grn),var(--acc));border-radius:6px;transition:width 1s linear;}
 .timer-lbl{font-size:10px;font-weight:700;color:var(--mut);white-space:nowrap;}
 .score-chip{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--txt);background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:8px;padding:3px 10px;}
@@ -744,7 +753,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 @keyframes edgeScan{0%{background-position:0 0,0 -36%;}100%{background-position:0 0,0 136%;}}
 
 /* TILE GRID (for letter mode) */
-.tile-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px;}
+.tile-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 14px;max-width:420px;margin:0 auto;width:100%;align-content:center;}   /* 5→4 cols = ~30% bigger letters, fills the empty word board */
 
 /* FALLING TILE */
 .gtile{position:absolute;width:17%;aspect-ratio:1;min-width:54px;max-width:80px;border-radius:16px;display:flex;align-items:center;justify-content:center;
@@ -758,8 +767,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 @keyframes bonusPulse{from{transform:scale(1) rotate(-5deg);box-shadow:0 0 20px rgba(255,215,0,0.4);}to{transform:scale(1.12) rotate(5deg);box-shadow:0 0 35px rgba(255,215,0,0.7);}}
 
 /* STATIC LETTER TILE */
-.ltile{width:100%;aspect-ratio:1;border-radius:14px;display:flex;align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#fff;cursor:pointer;
+.ltile{width:100%;aspect-ratio:1;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#fff;cursor:pointer;
   box-shadow:0 5px 0 rgba(0,0,0,.55),0 0 15px rgba(0,0,0,.3);transition:transform .1s,box-shadow .1s;position:relative;overflow:hidden;}
 .ltile:active{transform:scale(.88) translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.5);}
 .ltile.selected{box-shadow:0 0 0 3px #fff,0 5px 0 rgba(0,0,0,.5),0 0 25px rgba(255,255,255,.3) !important;transform:scale(1.12);}
@@ -1025,7 +1034,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
   animation:wslotPop .25s ease;}
 @keyframes wslotPop{0%{transform:scale(0.7);}60%{transform:scale(1.15);}100%{transform:scale(1);}}
 /* word-mode clue: enlarged emoji icon above the clue text */
-.clue-icon{display:block;font-size:36px;line-height:1;margin-bottom:5px;}
+.clue-icon{display:block;font-size:58px;line-height:1;margin-bottom:8px;}
 .clue-text{display:block;}
 /* ═══ BOSS CHARACTER (SVG) ═══ */
 #boss-arena{padding:2px 0 6px;display:flex;justify-content:center;align-items:flex-start;}
@@ -1248,20 +1257,20 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 /* in-game: meta chrome disappears — pure arena */
 .in-game #topbar{display:none!important;}
 .in-game .bottom-nav{display:none!important;}
-.in-game .screens{height:calc(100% - env(safe-area-inset-bottom));}
+.in-game .screens{height:calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom));padding-top:env(safe-area-inset-top);}   /* topbar hidden in-game → push content below the notch/camera (boss text + equation were under it) */
 .in-game #boss-back{display:flex;}            /* quit always reachable in-game */
 .in-game .g-hud{padding-left:44px;}           /* clear the corner back button */
 .boss-active .g-prof,.boss-active .g-gold-chip{display:none!important;}   /* boss = clean arena */
 .g-prof{display:flex;align-items:center;gap:6px;}
-.g-prof-av{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;overflow:hidden;
+.g-prof-av{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;
   background:radial-gradient(circle at 35% 30%,#5a3aa8,#2a1858);border:1px solid rgba(255,255,255,.18);flex-shrink:0;}
 .g-prof-av img{width:100%;height:100%;object-fit:cover;}
 .g-prof-txt{display:flex;flex-direction:column;line-height:1.05;}
-.g-prof-txt b{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#efe8fa;letter-spacing:.3px;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.g-prof-txt i{font-family:'Rajdhani',sans-serif;font-style:normal;font-weight:700;font-size:9px;letter-spacing:1px;color:#9a8fbf;}
-.g-gold-chip{display:flex;align-items:center;gap:5px;padding:3px 10px 3px 7px;border-radius:14px;
+.g-prof-txt b{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#efe8fa;letter-spacing:.3px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.g-prof-txt i{font-family:'Rajdhani',sans-serif;font-style:normal;font-weight:700;font-size:11px;letter-spacing:1px;color:#9a8fbf;}
+.g-gold-chip{display:flex;align-items:center;gap:6px;padding:5px 13px 5px 9px;border-radius:16px;
   background:linear-gradient(180deg,rgba(255,201,74,.16),rgba(255,201,74,.05));border:1px solid rgba(255,201,74,.35);}
-.g-gold-chip b{font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#ffd97a;}
+.g-gold-chip b{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#ffd97a;}
 .g-gold-chip .coin{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe080,#d89010 75%);box-shadow:0 0 6px rgba(255,190,60,.5);flex-shrink:0;}
 /* vignette mood */
 #vignette{position:absolute;inset:0;pointer-events:none;z-index:9;border-radius:inherit;opacity:0;transition:opacity .7s;
@@ -1285,7 +1294,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 /* tile press feedback (concept) */
 .wtile:active{filter:brightness(1.6);}
 /* boss = clean focus: only the target number, the boss, its HP (+ hint & back) */
-#boss-back{display:none;position:absolute;top:8px;left:10px;z-index:60;width:38px;height:38px;border-radius:12px;
+#boss-back{display:none;position:absolute;top:calc(8px + env(safe-area-inset-top));left:10px;z-index:60;width:38px;height:38px;border-radius:12px;
   background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.18);color:#fff;align-items:center;justify-content:center;cursor:pointer;}
 #boss-back svg{width:20px;height:20px;}
 .boss-active #boss-back{display:flex;}
@@ -1742,9 +1751,10 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .lg-switch-mode b{color:#00d4ff;font-weight:700;}
 </style>
 <!-- Firebase Auth (compat CDN — no bundler needed) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<!-- Firebase SDK bundled LOCALLY (vendor/) for offline-capable app build -->
+<script src="vendor/firebase-app-compat.js"></script>
+<script src="vendor/firebase-auth-compat.js"></script>
+<script src="vendor/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 </head>
 <body>
@@ -2073,6 +2083,8 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         </div>
         <div class="sp-buy"><div class="sp-price">$4.99</div></div>
       </div>
+      <!-- Apple REQUIRES a visible restore option for non-consumables (Founder / No Ads) -->
+      <div onclick="restorePurchases()" style="text-align:center;font-size:11px;color:#8f86ad;text-decoration:underline;cursor:pointer;padding:2px 0 4px;">Restore Purchases</div>
       <div class="sec-lbl">💎 Spend Gems</div>
       <div class="mkt-item" onclick="buyRefillGem()">
         <div class="mkt-icon">💖</div>
@@ -5172,7 +5184,9 @@ function injectPulseCSS(){
   #phone.pulse-nav.in-game .g-hud{display:flex!important;}
   .pulse-wrap{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;}
   .pulse-wheel{width:min(88%,320px);height:auto;filter:drop-shadow(0 12px 30px rgba(0,0,0,.55));}
-  .pulse-wheel .pslice-p{cursor:pointer;transition:opacity .12s,filter .12s,transform .08s;transform-origin:120px 120px;}
+  .pulse-wheel{touch-action:none;}   /* no scroll/zoom delay swallowing taps */
+  .pulse-wheel .pslice-p{cursor:pointer;transition:opacity .12s,filter .12s,transform .08s;transform-origin:120px 120px;pointer-events:all;}   /* all = fill+stroke tappable (no dead gaps between slices) */
+  .pulse-wheel #pulse-hub,.pulse-wheel #pulse-sub,.pulse-wheel circle{pointer-events:none;}   /* center hub never blocks a slice tap */
   .pulse-wheel.dim .pslice-p{opacity:.44;}
   .pulse-wheel .pslice-p.lit{opacity:1;filter:brightness(1.85) saturate(1.45);transform:scale(1.05);}
   .pulse-wheel .pslice-p:active{opacity:.8;}
@@ -5312,6 +5326,7 @@ function setTarget(){
     const showTimer=(gMode==='time');
     if(tt) tt.style.display=showTimer?'':'none';
     if(tk) tk.style.display=showTimer?'':'none';
+    const tpP=document.getElementById('target-panel'); if(tpP) tpP.classList.toggle('ta-active',showTimer);   // big prominent draining timer in Time Attack
     // tray bar repurposed: no expression building in wave mode
     const ge=document.getElementById('g-tray');
     if(ge) ge.innerHTML='<span class="tray-empty">⚡ Tap the answer!</span>';
@@ -5370,6 +5385,7 @@ function tick(){
   const maxT=(gMode==='time')?TA_MAX:60;
   document.getElementById('timer-text').textContent=timer+'s';
   document.getElementById('timer-fill').style.width=(Math.max(0,timer/maxT)*100)+'%';
+  if(gMode==='time'){ const tpP=document.getElementById('target-panel'); if(tpP) tpP.classList.toggle('ta-low', timer<=15); }
   updateTimerTension();
   if(timer<=0){
     setDanger(false);
@@ -5476,15 +5492,17 @@ let _cachedBoardH=0;   // cached board height (perf: avoid per-frame reflow); in
 addEventListener('resize',function(){ _cachedBoardH=0; });
 let _smoothDt=0;
 function gameLoop(){
-  if(!gActive||gSubMode==='word'){ lastFrame=0; _smoothDt=0; return; }
+  if(!gActive||gSubMode==='word'){ lastFrame=0; _smoothDt=16.7; return; }
   const now=performance.now();
   // delta-time (seconds) × timescale → identical speed on 60/90/120Hz + hit-stop/slow-mo
-  if(!lastFrame){ lastFrame=now; _smoothDt=0; }
+  if(!lastFrame){ lastFrame=now; }
   let dtMs=now-lastFrame; lastFrame=now;
   if(dtMs>50) dtMs=50;
-  // SMOOTH the frame time — on 120Hz ProMotion frame intervals jitter (8/16/12ms…); v*rawDt makes
-  // tiles jump unevenly = the "titrek" stutter. A running average keeps movement buttery under jitter.
-  _smoothDt = _smoothDt>0 ? (_smoothDt*0.82 + dtMs*0.18) : dtMs;
+  // SMOOTH the frame time — 120Hz ProMotion frame intervals jitter (8/16/12ms…); v*rawDt makes
+  // tiles jump unevenly = the "titrek" stutter. Running average keeps movement buttery under jitter.
+  // Seeded at 16.7 (not 0) so the FIRST level/first frames aren't cold-started laggy.
+  if(!_smoothDt) _smoothDt=16.7;
+  _smoothDt = _smoothDt*0.82 + dtMs*0.18;
   const dt=(_smoothDt/1000)*timescale;
   const board=document.getElementById('g-board');
   // PERF (iPhone 120Hz stutter fix): reading clientHeight EVERY frame forces a synchronous reflow →
@@ -7958,6 +7976,62 @@ function iapStub(desc){
   initAudio(); if(typeof sfxClick==='function') sfxClick();
   showBuyToast('🛒 '+desc+' — connect billing to complete');
 }
+/* ═══════════ 🔌 NATIVE BRIDGE (Flutter/Capacitor) — IAP + Rewarded Ads ═══════════
+   The native shell injects window.NumaNative with postMessage. This JS side:
+   • asks native to purchase/show-ad (nativeBuy / nativeRewardedAd)
+   • exposes window.NumaBridge callbacks the native side calls on success.
+   If no native host is present (plain web), everything falls back to the existing stubs. */
+window.NumaBridge = {
+  // ← called BY the native side on a VERIFIED purchase (product id)
+  onPurchase:function(productId){
+    if(/valuepack/i.test(productId) && typeof grantValuePack==='function') grantValuePack();
+    else if(/founder/i.test(productId) && typeof grantFounderPack==='function') grantFounderPack();
+  },
+  // ← called BY the native side when a rewarded ad finished (user earned the reward)
+  onRewardEarned:function(){ if(typeof resumeFromGameOver==='function') resumeFromGameOver(); },
+  onPurchaseFailed:function(msg){ if(typeof showBuyToast==='function') showBuyToast('❌ '+(msg||'Purchase cancelled')); },
+  // ← called BY native after a NATIVE Google/Apple sign-in: we complete Firebase auth with the token.
+  // (In a WebView the web OAuth popup is blocked, so the native plugin does the sign-in and hands us the credential.)
+  onNativeAuth:function(provider, idToken, accessToken, rawNonce){
+    var err=document.getElementById('lg-err');
+    try{
+      if(!(window.fbAuth && typeof firebase!=='undefined')){ if(err) err.textContent='Auth unavailable'; return; }
+      var cred;
+      if(provider==='apple'){ var op=new firebase.auth.OAuthProvider('apple.com'); cred=op.credential({idToken:idToken, rawNonce:rawNonce}); }
+      else { cred=firebase.auth.GoogleAuthProvider.credential(idToken, accessToken); }
+      if(err) err.textContent='Signing in…';
+      window.fbAuth.signInWithCredential(cred).then(function(res){
+        var u=res.user;
+        authMethod=provider; isGuest=false; localStorage_set('numa_auth',provider);
+        if(u&&u.displayName){ playerName=u.displayName; localStorage_set('numa_name',playerName); }
+        if(u&&u.email) localStorage_set('numa_email',u.email);
+        if(err) err.textContent='';
+        if(u&&u.uid&&typeof restoreProfileSnapshot==='function'&&restoreProfileSnapshot(u.uid)){ location.reload(); return; }
+        if(typeof finishLogin==='function') finishLogin('⚡ Signed in! Welcome.');
+      }).catch(function(e){ if(err) err.textContent=(typeof fbErr==='function')?fbErr(e):'Sign-in failed'; });
+    }catch(e){ if(err) err.textContent='Sign-in failed'; }
+  },
+  onNativeAuthFailed:function(msg){ var err=document.getElementById('lg-err'); if(err) err.textContent=msg||'Sign-in cancelled'; }
+};
+function _nativeHost(){
+  // Flutter: window.NumaNative.postMessage ·  Capacitor: window.Capacitor
+  if(window.NumaNative && typeof window.NumaNative.postMessage==='function') return 'flutter';
+  return null;
+}
+function nativeBuy(productId){
+  var host=_nativeHost();
+  if(host==='flutter'){ window.NumaNative.postMessage(JSON.stringify({action:'buy',productId:productId})); return true; }
+  return false;   // no native host → caller falls back to stub
+}
+function nativeRewardedAd(){
+  var host=_nativeHost();
+  if(host==='flutter'){ window.NumaNative.postMessage(JSON.stringify({action:'rewardedAd'})); return true; }
+  return false;
+}
+function restorePurchases(){
+  if(_nativeHost()==='flutter'){ window.NumaNative.postMessage(JSON.stringify({action:'restore'})); showBuyToast('↺ Restoring purchases…'); }
+  else showBuyToast('↺ Restore works in the app version');
+}
 
 /* GEM → GOLD coin shop — a real gem sink that makes the premium currency genuinely useful */
 const coinPacks={ s:{gold:800,gems:6}, m:{gold:2400,gems:16}, l:{gold:8000,gems:50} };   // more gold per gem → spending gems feels rewarding
@@ -7996,14 +8070,14 @@ function _grantPlusMonth(){
   showBuyToast('⭐ Numa Plus! No ads · +'+PLUS_MONTHLY_GOLD+'🪙 · +'+PLUS_MONTHLY_GEMS+'💎');
 }
 // IAPs — on verified billing (Capacitor/StoreKit) the purchase callback calls the matching grant fn.
-function buyValuePack(){ iapStub('Value Pack — $1.99'); }
+function buyValuePack(){ if(!nativeBuy('com.murat.numablast.valuepack')) iapStub('Value Pack — $1.99'); }
 function grantValuePack(){   // call ONLY from a verified purchase callback
   gainGold(2500); pGems+=15; pNoAds=true; localStorage_set('numa_noads','1');
   if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet();
   if(typeof fireConfetti==='function')fireConfetti(90); if(typeof sfxLevelUp==='function')sfxLevelUp();
   showBuyToast('⭐ Value Pack: +2,500 🪙 +15 💎 · Ads removed!');
 }
-function buyFounderPack(){ iapStub('Founder Pack — $4.99'); }
+function buyFounderPack(){ if(!nativeBuy('com.murat.numablast.founder')) iapStub('Founder Pack — $4.99'); }
 function grantFounderPack(){   // call ONLY from a verified purchase callback — grants the EXCLUSIVE Founder title
   gainGold(6000); pGems+=45; pNoAds=true; localStorage_set('numa_noads','1');
   if(typeof unlockTitle==='function') unlockTitle('founder');
@@ -8097,7 +8171,8 @@ function continueWithGem(){
 }
 function continueWithAd(){
   showBuyToast('📺 Loading ad...');
-  setTimeout(()=>resumeFromGameOver(), 2500);
+  if(nativeRewardedAd()) return;   // real AdMob rewarded ad → NumaBridge.onRewardEarned resumes on completion
+  setTimeout(()=>resumeFromGameOver(), 2500);   // web fallback (no native host)
 }
 function resumeFromGameOver(){
   pLives=3; timer=(gMode==='time')?TA_START:60; updateHUD();
@@ -8111,7 +8186,9 @@ function resumeFromGameOver(){
 
 /* ═══ SOUND ENGINE ═══ */
 let audioCtx=null, soundOn=true;
-function initAudio(){ if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}} }
+// iOS/WebView: the AudioContext starts 'suspended' and must be resumed inside a user gesture,
+// otherwise the FIRST sound (entry thunder) plays into a dead context = silent.
+function initAudio(){ if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(audioCtx&&audioCtx.state==='suspended'){try{audioCtx.resume();}catch(e){}} }
 /* THUNDER — synthesized lightning crack→rumble (noise burst + lowpass sweep + sub rumble). No audio file. */
 function thunderSound(power){
   if(!soundOn) return; initAudio(); if(!audioCtx) return;
@@ -8149,7 +8226,18 @@ function sfxLevelUp(){ [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,0
 function sfxGod(){ [392,523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>beep(f,0.25,'square',0.12),i*60)); }
 function sfxGold(){ beep(1047,0.06,'sine',0.1); setTimeout(()=>beep(1319,0.08,'sine',0.1),50); }
 function sfxClick(){ beep(440,0.05,'sine',0.08); }
-function haptic(ms){ if(typeof hapticOn!=='undefined'&&!hapticOn)return; if(navigator.vibrate)try{navigator.vibrate(ms);}catch(e){} }
+function haptic(ms){
+  if(typeof hapticOn!=='undefined'&&!hapticOn)return;
+  // iOS has NO navigator.vibrate even in a WebView → route to native Flutter Haptics.
+  // strength picked from the pattern's total length: long/patterned = heavy, short = light.
+  if(_nativeHost()==='flutter'){
+    var total=Array.isArray(ms)?ms.reduce(function(a,b){return a+b;},0):(ms||10);
+    var kind=total>=90?'heavy':total>=35?'medium':'light';
+    try{ window.NumaNative.postMessage(JSON.stringify({action:'haptic',kind:kind})); }catch(e){}
+    return;
+  }
+  if(navigator.vibrate)try{navigator.vibrate(ms);}catch(e){}
+}
 
 /* ═══ LEADERBOARD ═══ */
 // per-mode fake players (different rosters per mode)
@@ -9419,7 +9507,7 @@ let splashDismissed=false;
 function dismissSplash(){
   if(splashDismissed) return;
   splashDismissed=true; splashDone=true; // stop splash rAF loops
-  initAudio(); if(typeof thunderSound==='function') thunderSound(1.2);   // 🌩 entry lightning crack on tap
+  initAudio(); if(typeof thunderSound==='function') setTimeout(function(){ thunderSound(1.3); },180);   // 🌩 entry lightning — delayed so iOS AudioContext.resume() has taken effect (else silent)
   const sp=document.getElementById('splash');
   sp.classList.add('hiding');
   setTimeout(()=>{ if(sp) sp.style.display='none'; }, 600);
@@ -9535,6 +9623,13 @@ function fbErr(e){
 function loginWith(provider){
   initAudio(); sfxClick();
   const err=document.getElementById('lg-err');
+  // NATIVE APP: web OAuth popups are blocked inside a WebView (Google refuses embedded UAs).
+  // Ask Flutter to run the native google_sign_in / sign_in_with_apple; it calls NumaBridge.onNativeAuth back.
+  if(_nativeHost()==='flutter'){
+    if(err) err.textContent='Opening '+(provider==='apple'?'Apple':'Google')+'…';
+    try{ window.NumaNative.postMessage(JSON.stringify({action:(provider==='apple'?'appleSignIn':'googleSignIn')})); }catch(e){ if(err) err.textContent='Sign-in unavailable'; }
+    return;
+  }
   if(window.fbAuth && typeof firebase!=='undefined'){
     let p;
     if(provider==='google') p=new firebase.auth.GoogleAuthProvider();
