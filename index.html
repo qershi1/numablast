@@ -2571,9 +2571,22 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
     @keyframes lpDrop{0%{transform:translateY(-30px) scale(.6);opacity:0;}100%{transform:none;opacity:1;}}
     #leaguePromoModal .lp-badge::after{content:'';position:absolute;inset:-9px;border-radius:50%;border:2px solid var(--lpc,#ffd84a);opacity:.6;animation:lpRing 1.7s ease-out infinite;}
     @keyframes lpRing{0%{transform:scale(1);opacity:.6;}100%{transform:scale(1.4);opacity:0;}}
-    #leaguePromoModal .lp-title{font-family:'Bungee',sans-serif;font-size:24px;color:#fff;letter-spacing:1px;}
-    #leaguePromoModal .lp-rank{font-family:'Bungee',sans-serif;font-size:19px;margin:2px 0 8px;}
+    #leaguePromoModal .lp-title{font-family:'Bungee',sans-serif;font-size:26px;color:#fff;letter-spacing:1px;text-shadow:0 0 22px var(--lpc,#ffd84a);}
+    #leaguePromoModal .lp-rank{font-family:'Bungee',sans-serif;font-size:20px;margin:2px 0 8px;}
     #leaguePromoModal #lp-reward{color:var(--gold);font-weight:800;font-size:13px;margin:4px 0 2px;}
+    /* fancy card: coloured glowing border + conic light sweep behind the badge */
+    #leaguePromoModal .modal-box{position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--lpc,#ffd84a) 50%,transparent);box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 50px -12px var(--lpc,#ffd84a);}
+    #leaguePromoModal .lp-badge{--lpc:#ffd84a;}
+    #leaguePromoModal .lp-badge::before{content:'';position:absolute;inset:-70px;z-index:-1;border-radius:50%;
+      background:conic-gradient(transparent, color-mix(in srgb,var(--lpc) 60%,transparent), transparent 30%);animation:lpSweep 3s linear infinite;}
+    @keyframes lpSweep{to{transform:rotate(1turn);}}
+    #leaguePromoModal .modal-box.lp-boxpop{animation:lpBoxPop .5s cubic-bezier(.2,1.6,.4,1);}
+    @keyframes lpBoxPop{0%{transform:scale(.7);}55%{transform:scale(1.06);}100%{transform:scale(1);}}
+    /* screen-wide celebration overlays (appended to #phone) */
+    .lp-flash{position:absolute;inset:0;z-index:9997;pointer-events:none;background:radial-gradient(circle at 50% 42%, #fff, var(--lpc,#ffd84a) 45%, transparent 70%);animation:lpFlashA .6s ease-out forwards;}
+    @keyframes lpFlashA{0%{opacity:.85;}100%{opacity:0;}}
+    .lp-shock{position:absolute;left:50%;top:42%;width:60px;height:60px;transform:translate(-50%,-50%);z-index:9996;pointer-events:none;border-radius:50%;border:5px solid var(--lpc,#ffd84a);animation:lpShockA .85s ease-out forwards;}
+    @keyframes lpShockA{0%{width:60px;height:60px;opacity:.9;}100%{width:560px;height:560px;opacity:0;border-width:1px;}}
   </style>
   <div class="modal-overlay" id="leaguePromoModal">
     <div class="modal-box" style="text-align:center;max-width:320px;">
@@ -2583,6 +2596,17 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
       <div class="modal-sub" id="lp-sub"></div>
       <div id="lp-reward" style="display:none;">🏆 Top 3 finish! +500 🪙 +5 💎</div>
       <button class="modal-btn btn-gold" onclick="closeLeaguePromo()">AWESOME!</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="nameModal">
+    <div class="modal-box" style="text-align:center;max-width:320px;">
+      <div style="font-size:34px;">✏️</div>
+      <div class="modal-title">Your Name</div>
+      <input id="name-input" maxlength="16" placeholder="Enter your name" autocomplete="off"
+        style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:13px 14px;color:#fff;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;text-align:center;margin:14px 0 6px;outline:none;">
+      <button class="modal-btn btn-gold" onclick="savePlayerName()">SAVE</button>
+      <button class="modal-btn" style="background:rgba(255,255,255,0.06);color:var(--txt);" onclick="hideModal('nameModal')">Cancel</button>
     </div>
   </div>
 
@@ -2653,7 +2677,7 @@ function petHasReveal(){ return _eqPet()==='null'; }
 
 /* ── DAILY LOGIN CALENDAR ── */
 const LOGIN_REWARDS=[
-  {g:200},{g:300},{g:400,gem:1},{g:600},{g:800,gem:2},{g:1000},{chest:true},{g:1200},{gem:3},{pet:true}
+  {g:120},{g:180},{g:240,gem:1},{g:360},{g:480,gem:2},{g:600},{chest:true},{g:720},{gem:3},{pet:true}
 ];
 function _loginDayNum(){ return Math.floor(Date.now()/86400000); }
 function checkDailyLogin(){
@@ -4275,8 +4299,10 @@ function genWaveEq(){
   else { b=wrnd(2,9); ans=wrnd(2,9); a=b*ans; }
   const dset=new Set([ans]);
   let guard=0;
-  // more options as you level up (4 early → up to 8) so the answer isn't instantly obvious
-  const optionCount = Math.max(3, Math.min(4 + Math.floor(lvl/2), 8));
+  // FEWER options as the tiles get FASTER (user "önce 4 sonra 3 çok hızlanırsa 2, insanı sinir etmez").
+  // 4 tiles normally → 3 when quick → 2 when very fast, so a fast wave isn't an unfair scramble.
+  const _spd = (typeof waveFallSpeed==='function') ? waveFallSpeed() : 70;
+  const optionCount = _spd>=82 ? 2 : _spd>=70 ? 3 : 4;   // thresholds tuned to the NEW slower speed range (~63 base → ~90 fast)
   // decoys cluster TIGHT around the answer → you must COMPUTE, not spot the odd number.
   // boss: always ±3; normal: eases in — wide before L5, ±3 from L5 up (spot-the-number ends there)
   const decoyRange = (isBoss || lvl>=5) ? 3 : Math.max(4, optionCount);
@@ -4299,9 +4325,10 @@ function waveFallSpeed(){
   // DIFFICULTY STRETCH (user: "L7 even is too fast — this speed should be a L20 thing"): the speed
   // curve now climbs ~3× slower per level. sl maps L1→1, L7→3, L20→~7.3, so what used to hit by L7
   // arrives near L20. L1 start is unchanged; intra-level accel softened 1.038→1.028 too.
-  const sl=1+(effLevel()-1)/3;
-  let v=Math.min((77+sl*3.9)*Math.pow(1.027,solvedCount),215);  // px/sec — base bumped ~10% (user "az hızlansın"), cap raised 198→215
-  if(gMode==='time') v*=1.35;   // Time Attack noticeably faster (user "az daha hızlı")
+  // AFTER L10 stop ramping the level term (user "10 lvl sonra hız düşür, düşünecek saniye ver")
+  const sl=1+Math.min(effLevel()-1,11)/3;
+  let v=Math.min((60+sl*3.0)*Math.pow(1.021,solvedCount),172);  // px/sec — SLOWED ~25% everywhere (user "hız çok az düşür tüm oyunlarda"), gentler intra-level accel, lower cap
+  if(gMode==='time') v*=1.15;   // Time Attack a touch faster (was 1.35 — "çok hızlanıyor")
   if(isBoss) v*=1.03;   // boss barely faster (was ×1.1 — felt too fast once solves stacked)
   // FINAL STRETCH RUSH: the last couple solves of a level speed up for tension (matches the
   // yellow→red level-bar warning) — "telaş" as the level is about to complete.
@@ -5782,12 +5809,12 @@ function handleSuccess(){
   const feverMult=(gSubMode==='math'&&streakCount>=8)?2:1;   // FEVER (streak 8+): double points
   let pts=Math.round(basePts*comboMult*bossBonus*exprMult*feverMult*(typeof petMul==='function'?petMul('score'):1));
   if(typeof skillOvercharge!=='undefined' && skillOvercharge){ pts*=3; skillOvercharge=false; if(typeof skFlash==='function') skFlash('⚡ ×3!','#ffd84a'); if(typeof triggerSparks==='function') triggerSparks(24,true); }   // OVERCHARGE skill
-  let goldEarned=Math.max(1,Math.round((2+comboMult)*bossBonus*exprMult*0.45));   // gold is SCARCE — it's the skill currency now; earned slowly, spent on FREEZE/PURGE/etc.
+  let goldEarned=Math.max(1,Math.round((2+comboMult)*bossBonus*exprMult*0.28));   // gold SCARCER (user "3 günde 10k çok kolay") — skill currency, earned slowly
   if(exprBonus>0) setTimeout(()=>showGoldPop('⚡ '+(opCount)+'-OP CHAIN! +'+Math.round((exprMult-1)*100)+'%'),200);
   // GOD MODE: huge bonus + chance for gem
-  if(comboMult>=3){ goldEarned+=4; if(Math.random()<0.12){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); } }
+  if(comboMult>=3){ goldEarned+=2; if(Math.random()<0.10){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); } }
   // active god mode = triple everything
-  if(godModeActive){ pScore+=pts*2; pXP+=pts*2; goldEarned+=5; }
+  if(godModeActive){ pScore+=pts*2; pXP+=pts*2; goldEarned+=2; }
   // Boss solve: guaranteed gem
   if(isBoss && Math.random()<0.22){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); }
   pScore+=pts; gainGold(goldEarned); pXP+=pts; solvedCount++; pTotalSolved++;
@@ -7960,6 +7987,7 @@ function saveWallet(){
   localStorage_set('numa_gold',String(pGold)); localStorage_set('numa_gems',String(pGems));
   localStorage_set('numa_level',String(pLevel)); localStorage_set('numa_xp',String(pXP));   // campaign progress carries across sessions → VOID REALM actually advances + sticks
   pMaxLevel=Math.max(pMaxLevel||1,pLevel); localStorage_set('numa_maxlevel',String(pMaxLevel));
+  if(typeof saveCloud==='function') saveCloud();   // ☁ debounced push to the account
 }
 function loadWallet(){
   const g=localStorage_get('numa_gold'), m=localStorage_get('numa_gems'), lv=localStorage_get('numa_level'), xp=localStorage_get('numa_xp');
@@ -7971,6 +7999,46 @@ function loadWallet(){
 }
 let pNoAds=(localStorage_get('numa_noads')==='1');
 let starterOwned=(localStorage_get('numa_starter')==='1');
+
+/* ═══════════ ☁ CLOUD SAVE — per-account progress in Firestore players/{uid} ═══════════
+   Signed-in users' gold/gems/level/league/titles/pets sync to the cloud so an account
+   keeps its progress across devices/reinstalls (localStorage alone is device-only). */
+var _cloudSaveT=null;
+function _cloudKeys(){ return ['numa_gold','numa_gems','numa_level','numa_maxlevel','numa_xp','numa_titles','numa_title','numa_pets','numa_pet','numa_themes','numa_theme','numa_noads','numa_signup_gift','numa_league_rank','numa_league_pts','numa_league_week','numa_league_lastrank','numa_best_math','numa_best_word','numa_best_combo','numa_best_time','numa_best_pulse','numa_name','numa_avatar','numa_trained']; }
+function _cloudUser(){ try{ return (window.fbAuth&&window.fbAuth.currentUser&&typeof isGuest!=='undefined'&&!isGuest)?window.fbAuth.currentUser:null; }catch(e){ return null; } }
+function saveCloud(){
+  var u=_cloudUser(), db=(typeof fbDB==='function')?fbDB():null; if(!u||!db) return;
+  clearTimeout(_cloudSaveT);
+  _cloudSaveT=setTimeout(function(){
+    try{ var data={updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+      _cloudKeys().forEach(function(k){ var v=localStorage_get(k); if(v!==null) data[k]=v; });
+      db.collection('players').doc(u.uid).set(data,{merge:true}).catch(function(e){console.warn('[cloud] save',e);});
+    }catch(e){ console.warn('[cloud] save',e); }
+  },1500);   // debounce — never hammer Firestore on every gold tick
+}
+function loadCloud(){
+  return new Promise(function(res){
+    var u=_cloudUser(), db=(typeof fbDB==='function')?fbDB():null; if(!u||!db){ res(false); return; }
+    db.collection('players').doc(u.uid).get().then(function(snap){
+      if(!snap.exists){ res(false); return; }   // first-ever sign-in → caller pushes current (guest) progress up
+      var d=snap.data()||{};
+      _cloudKeys().forEach(function(k){ if(d[k]!==undefined && d[k]!==null) localStorage_set(k,String(d[k])); });
+      if(typeof loadWallet==='function') loadWallet();
+      try{ if(typeof unlockedTitles!=='undefined'){ unlockedTitles=JSON.parse(localStorage_get('numa_titles')||'["rookie"]'); equippedTitleId=localStorage_get('numa_title')||'rookie'; } }catch(e){}
+      try{ if(typeof ownedPets!=='undefined'){ ownedPets=JSON.parse(localStorage_get('numa_pets')||'[]'); equippedPet=localStorage_get('numa_pet')||''; } }catch(e){}
+      try{ if(typeof ownedThemes!=='undefined'){ ownedThemes=JSON.parse(localStorage_get('numa_themes')||'["default"]'); activeTheme=localStorage_get('numa_theme')||'default'; } }catch(e){}
+      pNoAds=(localStorage_get('numa_noads')==='1');
+      res(true);
+    }).catch(function(e){ console.warn('[cloud] load',e); res(false); });
+  });
+}
+// after a successful sign-in: cloud wins for a returning account; a brand-new account inherits the guest progress
+function syncCloudOnLogin(){
+  loadCloud().then(function(had){
+    if(had){ if(typeof updateHUD==='function') updateHUD(); if(typeof applyTheme==='function') applyTheme(activeTheme); if(typeof renderLeague==='function') renderLeague(); }
+    else { saveCloud(); }
+  }).catch(function(){});
+}
 
 function iapStub(desc){
   initAudio(); if(typeof sfxClick==='function') sfxClick();
@@ -8339,7 +8407,18 @@ function showLeaguePromo(pr){
   document.getElementById('lp-sub').textContent=promoted?'You climbed to a new tier! 🎉':(held?'You held your tier — push higher!':'Dropped a tier — climb back next week!');
   document.getElementById('lp-reward').style.display=pr.top3?'block':'none';
   m.style.display='flex';
-  if(promoted){ if(typeof fireConfetti==='function')fireConfetti(160); if(typeof sfxLevelUp==='function')sfxLevelUp(); if(typeof thunderSound==='function')thunderSound(1.2); if(typeof haptic==='function')haptic([30,20,40,20,60]); }
+  if(promoted){
+    // 🎆 BIG celebration: screen flash + shockwave + repeated confetti bursts + thunder + long haptic
+    var ph=document.getElementById('phone');
+    if(ph){ var fl=document.createElement('div'); fl.className='lp-flash'; fl.style.setProperty('--lpc',col); ph.appendChild(fl); setTimeout(function(){fl.remove();},650);
+      var sr=document.createElement('div'); sr.className='lp-shock'; sr.style.setProperty('--lpc',col); ph.appendChild(sr); setTimeout(function(){sr.remove();},900); }
+    var box=m.querySelector('.modal-box'); if(box){ box.classList.remove('lp-boxpop'); void box.offsetWidth; box.classList.add('lp-boxpop'); }
+    if(typeof fireConfetti==='function'){ fireConfetti(180); setTimeout(function(){fireConfetti(120);},280); setTimeout(function(){fireConfetti(90);},600); }
+    if(typeof sfxLevelUp==='function')sfxLevelUp();
+    if(typeof sfxGod==='function') setTimeout(sfxGod,120);
+    if(typeof thunderSound==='function')thunderSound(1.4);
+    if(typeof haptic==='function')haptic([40,25,50,25,80]);
+  }
   else { if(typeof sfxClick==='function')sfxClick(); }
 }
 function closeLeaguePromo(){ var m=document.getElementById('leaguePromoModal'); if(m)m.style.display='none'; }
@@ -8685,14 +8764,22 @@ function applyProfile(){
 }
 
 function editPlayerName(){
-  const name=prompt('Enter your name:', playerName);
-  if(name && name.trim()){
-    playerName=name.trim().slice(0,16);
+  // prompt() is blocked in iOS WKWebView → use an in-page input modal instead
+  initAudio(); sfxClick();
+  var inp=document.getElementById('name-input'); if(inp) inp.value=playerName||'';
+  showModal('nameModal');
+  setTimeout(function(){ if(inp){ try{ inp.focus(); inp.select(); }catch(e){} } },120);
+}
+function savePlayerName(){
+  var inp=document.getElementById('name-input'); var name=inp?inp.value.trim():'';
+  if(name){
+    playerName=name.slice(0,16);
     localStorage_set('numa_name',playerName);
     applyProfile();
-    if(typeof updateHUD==='function') updateHUD();   // refresh the topbar name tag too
-    initAudio(); sfxClick();
+    if(typeof updateHUD==='function') updateHUD();
+    if(typeof saveCloud==='function') saveCloud();
   }
+  hideModal('nameModal'); initAudio(); sfxClick();
 }
 
 function openAvatarPicker(){
@@ -9507,7 +9594,12 @@ let splashDismissed=false;
 function dismissSplash(){
   if(splashDismissed) return;
   splashDismissed=true; splashDone=true; // stop splash rAF loops
-  initAudio(); if(typeof thunderSound==='function') setTimeout(function(){ thunderSound(1.3); },180);   // 🌩 entry lightning — delayed so iOS AudioContext.resume() has taken effect (else silent)
+  initAudio();   // 🌩 entry lightning — WAIT for iOS AudioContext.resume() to actually finish, else the first sound is silent
+  if(typeof thunderSound==='function'){
+    var _fire=function(){ thunderSound(1.4); };
+    try{ if(audioCtx&&audioCtx.resume){ audioCtx.resume().then(function(){ setTimeout(_fire,90); }, function(){ setTimeout(_fire,320); }); } else setTimeout(_fire,320); }
+    catch(e){ setTimeout(_fire,320); }
+  }
   const sp=document.getElementById('splash');
   sp.classList.add('hiding');
   setTimeout(()=>{ if(sp) sp.style.display='none'; }, 600);
@@ -9710,6 +9802,7 @@ function _handleRedirectAuth(){
   if(!window.fbAuth) return;
   window.fbAuth.onAuthStateChanged(function(u){
     if(u && !isAuthed()){ _applyFbUser(u, null); }
+    else if(u && typeof isGuest!=='undefined' && !isGuest && typeof syncCloudOnLogin==='function'){ syncCloudOnLogin(); }   // ☁ already-signed-in on load → pull cloud progress
   });
   window.fbAuth.getRedirectResult().then(function(res){
     if(res && res.user){ _applyFbUser(res.user, localStorage_get('numa_pending_auth')||'google'); }
@@ -9769,6 +9862,7 @@ function grantSignupGift(){
 }
 function finishLogin(msg){
   applyAuthProfile();
+  if(typeof syncCloudOnLogin==='function') syncCloudOnLogin();   // ☁ pull the account's cloud progress (or push guest progress up on first sign-in)
   grantSignupGift();
   hideLogin();
   if(typeof haptic==='function') haptic([20,15,30]);
