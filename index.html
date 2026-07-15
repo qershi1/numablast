@@ -1337,6 +1337,33 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .lb-gold .lb-rank{animation:lbCrownBob 1.4s ease-in-out infinite;}
 @keyframes lbCrownBob{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-2px) scale(1.12);}}
 
+/* ── LEADERBOARD ROWS v2 (user: "leaderboard yazılar çok anlaşılmıyor, NUMA IQ gibi ama değişik renklerde,
+   ilk 3 ü kendi yerine daha iyi punto ile") — the old rows reused the generic .badge-row, so the score sat
+   in tiny grey .badge-desc text. Now: Bungee score, rank-coloured, top-3 blown up, your row pinned cyan. ── */
+.lbx{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:13px;margin-bottom:5px;position:relative;z-index:0;
+  background:linear-gradient(160deg,rgba(40,28,62,.5),rgba(20,13,32,.72));border:1px solid rgba(255,255,255,.07);}
+.lbx-rk{font-family:'Bungee',sans-serif;font-size:15px;width:32px;text-align:center;color:var(--rkc,#9a8fc0);flex-shrink:0;}
+.lbx-av{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;
+  background:rgba(255,255,255,.06);flex-shrink:0;overflow:hidden;}
+.lbx-av img{width:100%;height:100%;object-fit:cover;}
+.lbx-nm{flex:1;min-width:0;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:#eaf2ff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lbx-sc{font-family:'Bungee',sans-serif;font-size:16px;color:var(--rkc,#fff);flex-shrink:0;}
+.lbx-sc small{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:9px;color:var(--mut);margin-left:3px;letter-spacing:1px;}
+/* PODIUM — bigger type, coloured glow, #1 gets the NUMA IQ light beam */
+.lbx-top{padding:13px 12px;border-width:1.5px;border-color:color-mix(in srgb,var(--rkc) 55%,transparent);
+  box-shadow:0 0 24px -9px var(--rkc);overflow:hidden;}
+.lbx-top .lbx-rk{font-size:27px;width:40px;}
+.lbx-top .lbx-av{width:44px;height:44px;font-size:24px;border-radius:12px;}
+.lbx-top .lbx-nm{font-size:16.5px;}
+.lbx-top .lbx-sc{font-size:21px;text-shadow:0 0 16px var(--rkc);}
+.lbx-1::before{content:'';position:absolute;inset:-70%;z-index:-2;
+  background:conic-gradient(transparent 0deg,var(--rkc) 42deg,#fff 60deg,transparent 96deg);animation:iqBeam 2.6s linear infinite;}
+.lbx-1::after{content:'';position:absolute;inset:1.5px;z-index:-1;border-radius:12px;background:linear-gradient(180deg,#191327,#100c1c);}
+/* YOUR row — always findable at a glance */
+.lbx-you{border-color:rgba(0,212,255,.55);background:linear-gradient(90deg,rgba(0,212,255,.16),rgba(0,212,255,.03));}
+.lbx-you .lbx-nm::after{content:'YOU';font-family:'Rajdhani',sans-serif;font-size:9px;letter-spacing:1px;margin-left:6px;
+  padding:2px 5px;border-radius:5px;background:rgba(0,212,255,.25);color:#7fe3ff;vertical-align:middle;}
 .lb-tab{flex:1;text-align:center;padding:9px 4px;border-radius:12px;background:linear-gradient(160deg,rgba(40,28,62,.6),rgba(20,13,32,.8));
   border:1px solid var(--bdr);font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:var(--mut);cursor:pointer;transition:all .15s;white-space:nowrap;}
 .lb-tab:active{transform:scale(.95);}
@@ -2144,6 +2171,7 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         <div class="lb-tab" data-mode="word" onclick="switchLbTab('word',this)">🔤 Word</div>
         <div class="lb-tab" data-mode="combo" onclick="switchLbTab('combo',this)">🌀 Combo</div>
         <div class="lb-tab" data-mode="time" onclick="switchLbTab('time',this)">⏱️ Time</div>
+        <div class="lb-tab" data-mode="pulse" onclick="switchLbTab('pulse',this)">💗 Pulse</div>
       </div>
       <div class="sec-lbl" id="lb-mode-label" style="display:none;">🔢 Math Blast — Top Players</div>
       <div id="lb-list"></div>
@@ -2155,6 +2183,11 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         .lg-sub{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10.5px;color:var(--mut);letter-spacing:.5px;margin-top:2px;}
         .lg-myrank{font-family:'Bungee',sans-serif;font-size:18px;color:var(--lgc);flex-shrink:0;}
         .lg-zonehint{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:10px;letter-spacing:.5px;text-align:center;margin-bottom:8px;opacity:.85;}
+        /* promotion progress — the bar makes the RELATIVE threshold legible ("why am I not promoting?") */
+        .lg-bar{height:9px;border-radius:6px;background:rgba(255,255,255,.07);overflow:hidden;margin:0 2px 6px;border:1px solid rgba(255,255,255,.08);}
+        .lg-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--lgc,#43e0a0),#fff);box-shadow:0 0 12px -2px var(--lgc,#43e0a0);transition:width .6s cubic-bezier(.2,1,.3,1);}
+        .lg-need{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;color:var(--mut);text-align:center;margin-bottom:8px;}
+        .lg-need b{color:#43e0a0;font-size:12.5px;}
         .lg-rows{display:flex;flex-direction:column;gap:4px;}
         .lg-row{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);}
         .lg-row.promote{border-left:3px solid #43e0a0;}
@@ -2410,6 +2443,14 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         <span style="font-family:'Rajdhani',sans-serif;font-weight:800;font-size:11px;letter-spacing:2px;color:var(--mut);">NUMA&nbsp;IQ</span>
         <span id="go-iq-n" style="font-family:'Bungee',sans-serif;font-size:21px;color:var(--go-iqc,#fff);">100</span>
         <span id="go-iq-t" style="font-family:'Syne',sans-serif;font-weight:800;font-size:12.5px;color:var(--go-iqc,#fff);letter-spacing:.5px;">NOT BAD</span>
+      </div>
+      <!-- 🛡️ LEAGUE payout: the run's LP counts up here, then the promotion modal fires if you cleared the bar -->
+      <div id="go-lp" style="display:none;align-items:center;justify-content:center;gap:8px;margin:0 0 10px;padding:9px 14px;border-radius:12px;
+        background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid var(--lpc,#43e0a0);">
+        <span style="font-size:15px;">🛡️</span>
+        <span id="go-lp-n" style="font-family:'Bungee',sans-serif;font-size:19px;color:#43e0a0;">+0</span>
+        <span style="font-family:'Rajdhani',sans-serif;font-weight:800;font-size:11px;letter-spacing:1.5px;color:var(--mut);">LP</span>
+        <span id="go-lp-rank" style="font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:var(--lpc,#fff);margin-left:2px;">Bronze 1</span>
       </div>
       <div id="go-msg" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;color:var(--txt);opacity:.85;line-height:1.45;margin:0 4px 16px;"></div>
       <button class="modal-btn btn-gold" onclick="continueWithGem()">💎 Continue — 3 Gems</button>
@@ -4299,13 +4340,14 @@ function genWaveEq(){
   else { b=wrnd(2,9); ans=wrnd(2,9); a=b*ans; }
   const dset=new Set([ans]);
   let guard=0;
-  // FEWER options as the tiles get FASTER (user "önce 4 sonra 3 çok hızlanırsa 2, insanı sinir etmez").
-  // 4 tiles normally → 3 when quick → 2 when very fast, so a fast wave isn't an unfair scramble.
+  // OPTION COUNT (user 2026-07-15: "6 olsun, 5, en son hızlıda 4"). The old 4→3→2 ladder collapsed to
+  // a 2-tile coin-flip almost everywhere ("nerde olursan ol 2 tile, ikisine de tıklayabilirsin") — the
+  // wave stopped asking you to compute. Floor is now 4: 6 normally → 5 when quick → 4 when very fast.
   const _spd = (typeof waveFallSpeed==='function') ? waveFallSpeed() : 70;
-  const optionCount = _spd>=82 ? 2 : _spd>=70 ? 3 : 4;   // thresholds tuned to the NEW slower speed range (~63 base → ~90 fast)
+  const optionCount = _spd>=100 ? 4 : _spd>=85 ? 5 : 6;   // 6 is the NORM; 5 late in a level; 4 only at top speed
   // decoys cluster TIGHT around the answer → you must COMPUTE, not spot the odd number.
-  // boss: always ±3; normal: eases in — wide before L5, ±3 from L5 up (spot-the-number ends there)
-  const decoyRange = (isBoss || lvl>=5) ? 3 : Math.max(4, optionCount);
+  // more options need a slightly wider band to stay distinct; boss stays at the tightest ±3.
+  const decoyRange = isBoss ? 3 : (lvl>=5 ? Math.max(3, optionCount-2) : Math.max(4, optionCount));
   while(dset.size<optionCount && guard++<120){ const d=ans+(Math.random()<.5?-1:1)*wrnd(1,decoyRange); if(d>0 && d!==ans) dset.add(d); }
   let _e=1; while(dset.size<optionCount){ if(ans+_e>0) dset.add(ans+_e); _e++; }
   waveEq={a,b,op,ans,answers:[...dset].sort(()=>Math.random()-.5)};
@@ -4327,7 +4369,8 @@ function waveFallSpeed(){
   // arrives near L20. L1 start is unchanged; intra-level accel softened 1.038→1.028 too.
   // AFTER L10 stop ramping the level term (user "10 lvl sonra hız düşür, düşünecek saniye ver")
   const sl=1+Math.min(effLevel()-1,11)/3;
-  let v=Math.min((60+sl*3.0)*Math.pow(1.021,solvedCount),172);  // px/sec — SLOWED ~25% everywhere (user "hız çok az düşür tüm oyunlarda"), gentler intra-level accel, lower cap
+  // −10% again 2026-07-15: the tile count went back UP (6/5/4), so more to read per wave → give it air.
+  let v=Math.min((54+sl*2.7)*Math.pow(1.021,solvedCount),155);  // px/sec — gentler intra-level accel, lower cap
   if(gMode==='time') v*=1.15;   // Time Attack a touch faster (was 1.35 — "çok hızlanıyor")
   if(isBoss) v*=1.03;   // boss barely faster (was ×1.1 — felt too fast once solves stacked)
   // FINAL STRETCH RUSH: the last couple solves of a level speed up for tension (matches the
@@ -4987,23 +5030,50 @@ function injectSkillCSS(){
     flex-direction:row;gap:14px;pointer-events:auto;}
   .boss-active #skill-bar,.in-game.boss-active #skill-bar{display:none!important;}
   .sk-charge{display:none;}
-  .sk-btn{position:relative;width:52px;height:52px;border-radius:50%;cursor:pointer;padding:0;
+  .sk-btn{position:relative;width:64px;height:64px;border-radius:50%;cursor:pointer;padding:0;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     background:radial-gradient(circle at 32% 26%,rgba(72,60,116,.96),rgba(17,13,32,.97) 72%);
     border:2px solid var(--skc,rgba(255,255,255,.22));
     box-shadow:0 6px 14px rgba(0,0,0,.55),0 0 14px -5px var(--skc,transparent),inset 0 1px 0 rgba(255,255,255,.16);
     font-family:Rajdhani,sans-serif;font-weight:800;color:#9a8fc0;transition:transform .1s,filter .2s,opacity .2s;opacity:.55;}
-  .sk-btn .sk-ic{font-size:20px;line-height:1;filter:grayscale(.6);}
-  .sk-btn .sk-cost{font-size:10px;font-weight:800;color:#ffd84a;line-height:1.1;letter-spacing:0;margin-top:1px;}
-  .sk-btn .sk-cost::before{content:'🪙';font-size:8px;margin-right:1px;}
-  .sk-btn .sk-lv{font-size:9px;color:#8f86ad;line-height:1.1;letter-spacing:.5px;margin-top:1px;}
+  .sk-btn .sk-ic{font-size:27px;line-height:1;filter:grayscale(.6);}
+  .sk-btn .sk-cost{font-size:11.5px;font-weight:800;color:#ffd84a;line-height:1.1;letter-spacing:0;margin-top:2px;}
+  .sk-btn .sk-cost::before{content:'🪙';font-size:9px;margin-right:1px;}
+  .sk-btn .sk-lv{font-size:10.5px;color:#8f86ad;line-height:1.1;letter-spacing:.5px;margin-top:2px;}
   .sk-btn.ready{opacity:1;color:#eaf2ff;}
   .sk-btn.ready .sk-ic{filter:none;}
   .sk-btn.ready:active{transform:scale(.88);}
   .sk-btn.active{border-color:#43e0a0;color:#43e0a0;box-shadow:0 0 14px rgba(67,224,160,.5);animation:skActive 1s ease-in-out infinite;}
   .sk-btn.sk-locked{opacity:.34;}
   .sk-btn.sk-locked .sk-ic{filter:grayscale(1) brightness(.65);}
-  .sk-btn.sk-locked::after{content:'🔒';position:absolute;top:-3px;right:-3px;font-size:12px;}
+  .sk-btn.sk-locked::after{content:'🔒';position:absolute;top:-3px;right:-3px;font-size:13px;}
+  /* ── SKILL FX (user: "anime yaparsan freeze/slow/shield anlaşılır") — the buttons said what you BOUGHT,
+     nothing on screen said what it DID. Each skill now paints the board so the effect is unmistakable. ── */
+  .skfx{position:absolute;inset:0;z-index:13;pointer-events:none;border-radius:inherit;overflow:hidden;animation:skfxIn .3s ease both;}
+  @keyframes skfxIn{from{opacity:0;}to{opacity:1;}}
+  /* FREEZE — frost creeps in from the edges and the tiles ice over in place */
+  .skfx-freeze{box-shadow:inset 0 0 60px 10px rgba(122,223,255,.5),inset 0 0 150px 34px rgba(122,223,255,.22);
+    background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(122,223,255,.2) 100%);}
+  .skfx-freeze::before{content:'❄  ❄  ❄  ❄';position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-around;
+    font-size:21px;color:rgba(206,246,255,.8);padding-top:5px;text-shadow:0 0 12px #7adfff;animation:frostBreathe 1.6s ease-in-out infinite;}
+  .skfx-freeze::after{content:'';position:absolute;inset:0;border:3px solid rgba(180,240,255,.55);border-radius:inherit;
+    box-shadow:inset 0 0 30px rgba(255,255,255,.35);animation:frostBreathe 1.6s ease-in-out infinite;}
+  @keyframes frostBreathe{0%,100%{opacity:.45;}50%{opacity:1;}}
+  .frozen .wtile{filter:brightness(1.2) saturate(.3) hue-rotate(155deg) drop-shadow(0 0 9px #7adfff);transition:filter .3s;}
+  /* SLOW — heavy blue vignette + a sweep that visibly drags down the board */
+  .skfx-slow{box-shadow:inset 0 0 70px 14px rgba(90,140,255,.42);
+    background:linear-gradient(180deg,rgba(70,120,255,.15),transparent 42%,rgba(70,120,255,.15));}
+  .skfx-slow::after{content:'';position:absolute;left:0;right:0;height:32%;
+    background:linear-gradient(180deg,transparent,rgba(167,240,255,.18),transparent);animation:slowSweep 3.4s linear infinite;}
+  @keyframes slowSweep{0%{top:-32%;}100%{top:100%;}}
+  /* SHIELD — an energy dome parked on the danger line; it shatters when it eats the hit */
+  .skfx-shield{background:radial-gradient(ellipse at 50% 116%,rgba(67,224,160,.3),transparent 60%);}
+  .skfx-shield::before{content:'';position:absolute;left:4%;right:4%;bottom:60px;height:80px;border-radius:50%/100% 100% 0 0;
+    border:2.5px solid #43e0a0;border-bottom:0;box-shadow:0 0 26px -2px #43e0a0,inset 0 -16px 28px -10px #43e0a0;
+    transform-origin:50% 100%;animation:domePulse 1.7s ease-in-out infinite;}
+  @keyframes domePulse{0%,100%{opacity:.6;transform:scaleY(1);}50%{opacity:1;transform:scaleY(1.1);}}
+  .skfx-shield.brk::before{animation:domeBrk .5s ease forwards;}
+  @keyframes domeBrk{0%{opacity:1;transform:scaleY(1);}40%{opacity:1;transform:scaleY(1.35) scaleX(1.06);filter:brightness(2.4);}100%{opacity:0;transform:scaleY(.35);}}
   @keyframes skActive{0%,100%{filter:brightness(1);}50%{filter:brightness(1.4);}}
   .sk-flash{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font-family:Bungee,sans-serif;font-size:30px;z-index:9990;pointer-events:none;text-shadow:0 0 22px currentColor;animation:skFlashA 1s ease forwards;}
   @keyframes skFlashA{0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}22%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}80%{opacity:1;}100%{opacity:0;transform:translate(-50%,-66%) scale(1);}}
@@ -5029,6 +5099,23 @@ function gainSkillCharge(){ _skillSolveCnt++; if(_skillSolveCnt>=SKILL_SOLVES_PE
 function skFlash(txt,col){ const ph=document.getElementById('phone'); if(!ph) return; const d=document.createElement('div'); d.className='sk-flash'; d.textContent=txt; d.style.color=col||'#fff'; ph.appendChild(d); setTimeout(()=>d.remove(),1000); }
 function showSkillToast(msg){ const ph=document.getElementById('phone'); if(!ph) return; const d=document.createElement('div'); d.className='sk-toast'; d.textContent=msg; ph.appendChild(d); setTimeout(()=>d.remove(),1600); }
 function _skillRestoreTs(token,val){ const t=token; setTimeout(()=>{ if(_skillTsToken===t) timescale=1; }, val); }
+/* paint the board for the duration of a skill. ms=0 → stays until removed by hand (shield). */
+function skFx(kind,ms){
+  const bf=document.getElementById('board-frame'); if(!bf) return null;
+  const d=document.createElement('div'); d.className='skfx skfx-'+kind; bf.appendChild(d);
+  if(kind==='freeze') bf.classList.add('frozen');
+  if(ms>0) setTimeout(()=>{
+    d.style.transition='opacity .4s'; d.style.opacity='0';
+    if(kind==='freeze') bf.classList.remove('frozen');
+    setTimeout(()=>d.remove(),420);
+  },ms);
+  return d;
+}
+function clearSkillFx(){
+  document.querySelectorAll('.skfx').forEach(e=>e.remove());
+  const bf=document.getElementById('board-frame'); if(bf) bf.classList.remove('frozen');
+  window._skShieldFx=null;
+}
 function useSkill(id){
   if(!skillBarVisible()) return;
   const def=SKILL_DEFS.find(s=>s.id===id); if(!def) return;
@@ -5039,18 +5126,29 @@ function useSkill(id){
   if(id==='purge'){ const anyDecoy=(typeof fallers!=='undefined' && fallers.some(f=>!f.correct && f.val!=='BONUS' && !f.dead && f.el)); if(!anyDecoy){ showSkillToast('💣 Nothing to purge here!'); if(typeof haptic==='function')haptic([30,30]); return; } }
   pGold-=petSkillCost(def.cost); if(typeof updateHUD==='function')updateHUD(); if(typeof saveWallet==='function')saveWallet();
   initAudio(); if(typeof haptic==='function')haptic(20);
-  if(id==='freeze'){ _skillTsToken++; timescale=0.05; skFlash('❄️ FREEZE',def.col); beep(880,.12,'sine',.13); _skillRestoreTs(_skillTsToken,2000); }
-  else if(id==='slowmo'){ _skillTsToken++; timescale=0.42; skFlash('🐌 SLOW-MO',def.col); beep(520,.2,'sine',.12); _skillRestoreTs(_skillTsToken,3500); }
+  if(id==='freeze'){ _skillTsToken++; timescale=0.05; skFlash('❄️ FREEZE',def.col); beep(880,.12,'sine',.13); skFx('freeze',2000); _skillRestoreTs(_skillTsToken,2000); }
+  else if(id==='slowmo'){ _skillTsToken++; timescale=0.42; skFlash('🐌 SLOW-MO',def.col); beep(520,.2,'sine',.12); skFx('slow',3500); _skillRestoreTs(_skillTsToken,3500); }
   else if(id==='purge'){ skFlash('💣 PURGE',def.col); beep(170,.18,'sawtooth',.15);
     if(typeof fallers!=='undefined' && fallers.length){ fallers.forEach(f=>{ if(!f.correct && f.val!=='BONUS' && f.el){ f.el.style.transition='transform .25s,opacity .25s'; f.el.style.opacity='0'; const tf=f.el.style.transform||''; f.el.style.transform=tf+' scale(1.4)'; setTimeout(()=>f.el&&f.el.remove(),260); f.dead=true; } }); fallers=fallers.filter(f=>!f.dead); }
     if(typeof triggerSparks==='function') triggerSparks(20,true); }
   else if(id==='over'){ skillOvercharge=true; skFlash('⚡ OVERCHARGE',def.col); showSkillToast('⚡ Next solve ×3 + chain lightning!'); }
-  else if(id==='shield'){ skillShield=true; skFlash('🛡️ SHIELD',def.col); showSkillToast('🛡️ Blocks your next miss'); }
+  else if(id==='shield'){ skillShield=true; skFlash('🛡️ SHIELD',def.col); showSkillToast('🛡️ Blocks your next miss');
+    if(window._skShieldFx) window._skShieldFx.remove();
+    window._skShieldFx=skFx('shield',0);   // dome stays up until it eats a hit
+  }
   renderSkillBar();
 }
 // called by life-loss paths — returns true if the hit was blocked by a shield
-function consumeShield(){ if(skillShield){ skillShield=false; if(typeof skFlash==='function') skFlash('🛡️ BLOCKED','#43e0a0'); if(typeof haptic==='function')haptic([20,40,20]); renderSkillBar(); return true; } return false; }
-function resetSkills(){ skillCharges=1; _skillSolveCnt=0; skillShield=false; skillOvercharge=false; _skillTsToken++; }
+function consumeShield(){
+  if(!skillShield) return false;
+  skillShield=false;
+  const sf=window._skShieldFx;
+  if(sf){ window._skShieldFx=null; sf.classList.add('brk'); setTimeout(()=>sf.remove(),520); }   // dome shatters
+  if(typeof skFlash==='function') skFlash('🛡️ BLOCKED','#43e0a0');
+  if(typeof haptic==='function')haptic([20,40,20]);
+  renderSkillBar(); return true;
+}
+function resetSkills(){ skillCharges=1; _skillSolveCnt=0; skillShield=false; skillOvercharge=false; _skillTsToken++; clearSkillFx(); }
 
 /* ═══════════ P3: PERFECT WAVE · COMBO BANK · PARRY · FINAL WAVE ═══════════ */
 let levelPerfectWaves=0, bankPts=0, parryActive=false, finalWaveOn=false;
@@ -8004,7 +8102,7 @@ let starterOwned=(localStorage_get('numa_starter')==='1');
    Signed-in users' gold/gems/level/league/titles/pets sync to the cloud so an account
    keeps its progress across devices/reinstalls (localStorage alone is device-only). */
 var _cloudSaveT=null;
-function _cloudKeys(){ return ['numa_gold','numa_gems','numa_level','numa_maxlevel','numa_xp','numa_titles','numa_title','numa_pets','numa_pet','numa_themes','numa_theme','numa_noads','numa_signup_gift','numa_league_rank','numa_league_pts','numa_league_week','numa_league_lastrank','numa_best_math','numa_best_word','numa_best_combo','numa_best_time','numa_best_pulse','numa_name','numa_avatar','numa_trained']; }
+function _cloudKeys(){ return ['numa_gold','numa_gems','numa_level','numa_maxlevel','numa_xp','numa_titles','numa_title','numa_pets','numa_pet','numa_themes','numa_theme','numa_noads','numa_signup_gift','numa_league_rank','numa_season_lp','numa_season','numa_best_math','numa_best_word','numa_best_combo','numa_best_time','numa_best_pulse','numa_name','numa_avatar','numa_trained']; }
 function _cloudUser(){ try{ return (window.fbAuth&&window.fbAuth.currentUser&&typeof isGuest!=='undefined'&&!isGuest)?window.fbAuth.currentUser:null; }catch(e){ return null; } }
 function saveCloud(){
   var u=_cloudUser(), db=(typeof fbDB==='function')?fbDB():null; if(!u||!db) return;
@@ -8313,7 +8411,8 @@ const fakeRosters={
   math:[{n:'MathKing',s:9840,e:'👑'},{n:'NumCruncher',s:8200,e:'🧮'},{n:'QuickAdd',s:7100,e:'⚡'},{n:'Calculatron',s:6300,e:'🤖'},{n:'DigitDan',s:5400,e:'🎯'},{n:'SumSage',s:4600,e:'🧙'},{n:'PrimeTime',s:3900,e:'⭐'},{n:'EvenSteven',s:3200,e:'🔢'}],
   word:[{n:'WordWiz',s:8900,e:'📚'},{n:'LetterLord',s:7800,e:'✏️'},{n:'SpellBee',s:6900,e:'🐝'},{n:'Vocabular',s:5800,e:'🦉'},{n:'Lexicon',s:4900,e:'📖'},{n:'Scrabbler',s:4100,e:'🔤'},{n:'TypoFree',s:3400,e:'✅'},{n:'Syllable',s:2800,e:'🗣️'}],
   combo:[{n:'ComboGod',s:9200,e:'🔥'},{n:'ChainMaster',s:8100,e:'⛓️'},{n:'MultiHit',s:7000,e:'💥'},{n:'Streaker',s:5900,e:'🌀'},{n:'FusionPro',s:5000,e:'⚛️'},{n:'MixMaster',s:4200,e:'🎛️'},{n:'BlendKing',s:3500,e:'🌪️'},{n:'ComboKid',s:2900,e:'✨'}],
-  time:[{n:'SpeedyZ',s:7600,e:'💨'},{n:'FlashRun',s:6800,e:'⚡'},{n:'RapidFire',s:5900,e:'🚀'},{n:'BlitzBob',s:5100,e:'🏃'},{n:'TurboTom',s:4400,e:'🏎️'},{n:'FastLane',s:3700,e:'🛣️'},{n:'NoTimeWaste',s:3000,e:'⏱️'},{n:'QuickDraw',s:2500,e:'🎯'}]
+  time:[{n:'SpeedyZ',s:7600,e:'💨'},{n:'FlashRun',s:6800,e:'⚡'},{n:'RapidFire',s:5900,e:'🚀'},{n:'BlitzBob',s:5100,e:'🏃'},{n:'TurboTom',s:4400,e:'🏎️'},{n:'FastLane',s:3700,e:'🛣️'},{n:'NoTimeWaste',s:3000,e:'⏱️'},{n:'QuickDraw',s:2500,e:'🎯'}],
+  pulse:[{n:'PulseLord',s:8400,e:'💗'},{n:'RhythmRay',s:7200,e:'🎵'},{n:'BeatDrop',s:6100,e:'🥁'},{n:'SyncSam',s:5200,e:'🌊'},{n:'TempoTee',s:4400,e:'⏳'},{n:'WavePro',s:3600,e:'📡'},{n:'OnBeat',s:2900,e:'✨'},{n:'PulseKid',s:2300,e:'💫'}]
 };
 let currentLbMode='math';
 function modeBest(mode){ return parseInt(localStorage_get('numa_best_'+mode)||'0'); }
@@ -8328,7 +8427,7 @@ function switchLbTab(mode,el){
   if(mode==='league'){ if(lv)lv.style.display='block'; if(ll)ll.style.display='none'; if(lbl)lbl.style.display='none'; if(typeof renderLeague==='function')renderLeague(); return; }
   if(lv)lv.style.display='none'; if(ll)ll.style.display=''; if(lbl)lbl.style.display='';
   currentLbMode=mode;
-  const labels={math:'🔢 Math Blast',word:'🔤 Word Hunt',combo:'🌀 Combo Mix',time:'⏱️ Time Attack'};
+  const labels={math:'🔢 Math Blast',word:'🔤 Word Hunt',combo:'🌀 Combo Mix',time:'⏱️ Time Attack',pulse:'💗 Pulse'};
   document.getElementById('lb-mode-label').textContent=labels[mode]+' — Top Players';
   renderLeaderboard();
 }
@@ -8345,53 +8444,135 @@ function _rDiv(r){ return DIVISIONS[Math.floor(r/3)]||DIVISIONS[0]; }
 function rankName(r){ return _rDiv(r).name+' '+((r%3)+1); }
 function rankCol(r){ return _rDiv(r).col; }
 function rankEm(r){ return _rDiv(r).em; }
+/* ── SEASONS: 3-month blocks. LP is cumulative all season; the ONLY reset is the season roll.
+   Promotion is INSTANT and RELATIVE — you climb the moment your LP beats the 5th place of your
+   tier's cohort (bots + real players of the same tier). No fixed number: a crowded tier is harder. */
+function seasonNum(){ var d=new Date(); return (d.getFullYear()-2026)*4+Math.floor(d.getMonth()/3); }
+function seasonLabel(){ return 'SEASON '+(seasonNum()+1); }
+function seasonDaysLeft(){ var d=new Date(), q=Math.floor(d.getMonth()/3), end=new Date(d.getFullYear(),q*3+3,1);
+  return Math.max(1,Math.ceil((end-d.getTime())/86400000)); }
+// bot cohort shape: the 5th-place factor is 1.0, so tierBase(r) IS the natural promotion bar
+function tierBase(r){ return Math.round(250*Math.pow(1.38,r)); }   // Bronze 1 ≈ 250 LP → Diamond 3 ≈ 22k
+const _BOTF=[1.85,1.42,1.19,1.07,1.00,0.94,0.88,0.82,0.76,0.70,0.64,0.58,0.52,0.46,0.40,0.34,0.28,0.22,0.16];
 function loadLeague(){
   leagueRank=parseInt(localStorage_get('numa_league_rank')||'0');
-  var wk=parseInt(localStorage_get('numa_league_week')||'-1');
-  leaguePoints=parseInt(localStorage_get('numa_league_pts')||'0');
-  var now=(typeof weekNum==='function')?weekNum():0;
-  if(wk!==now){
-    if(wk>=0) resolveLeagueWeek();          // promotion/relegation from last week's final rank
-    leaguePoints=0; localStorage_set('numa_league_pts','0'); localStorage_set('numa_league_week',String(now));
+  leaguePoints=parseInt(localStorage_get('numa_season_lp')||localStorage_get('numa_league_pts')||'0');
+  var st=parseInt(localStorage_get('numa_season')||'-1'), now=seasonNum();
+  if(st!==now){
+    if(st>=0){ resolveSeasonEnd(); leaguePoints=0; localStorage_set('numa_season_lp','0'); }
+    else localStorage_set('numa_season_lp',String(leaguePoints));   // first run on the new system: carry legacy pts in
+    localStorage_set('numa_season',String(now));
   }
 }
-function addLeaguePoints(n){ loadLeague(); leaguePoints+=n; localStorage_set('numa_league_pts',String(leaguePoints)); }
-function resolveLeagueWeek(){
-  var rank=parseInt(localStorage_get('numa_league_lastrank')||'20'), old=leagueRank, dir=0;
-  if(rank<=5 && leagueRank<LEAGUE_MAXRANK){ leagueRank++; dir=1; }
-  else if(rank>=16 && leagueRank>0){ leagueRank--; dir=-1; }
+function addLeaguePoints(n){ loadLeague(); leaguePoints+=n; localStorage_set('numa_season_lp',String(leaguePoints)); }
+/* season roll: pay out by final tier, then a SOFT reset — down one division (3 tiers), never to zero */
+function resolveSeasonEnd(){
+  var old=leagueRank;
+  leagueRank=Math.max(0,leagueRank-3);
   localStorage_set('numa_league_rank',String(leagueRank));
-  if(rank<=3){ gainGold(500); pGems+=5; }   // top-3 weekly reward
-  window._leaguePromo={dir:dir, to:leagueRank, from:old, top3:(rank<=3)};   // pending celebration show
+  var gold=250+old*180, gems=Math.floor(old/3)*3;
+  if(typeof gainGold==='function') gainGold(gold);
+  if(gems>0 && typeof pGems!=='undefined'){ pGems+=gems; if(typeof saveWallet==='function') saveWallet(); }
+  window._leaguePromo={dir:0,to:leagueRank,from:old,season:true,gold:gold,gems:gems,finalName:rankName(old)};
 }
-function leagueRoster(){
+/* real same-tier rivals pulled from Firestore (see fetchLeagueLP) */
+function _realRivals(){
+  var me=(window.fbAuth&&window.fbAuth.currentUser)?window.fbAuth.currentUser.uid:null;
+  return (window._lbLP||[]).filter(function(p){ return p.tier===leagueRank && p.lp>0 && p.uid!==me; });
+}
+/* the cohort board: 19 bots + every real player in my tier + me. Bots drift UP across the season
+   so the bar is alive, and real players push it further — that's the "adalet": you only promote
+   when you actually beat 15 of them, not when a fixed counter ticks over. */
+function leagueBoard(){
   loadLeague();
-  var base=300+leagueRank*260;   // higher rank = tougher opponents (finer curve across 15 tiers)
+  var base=tierBase(leagueRank), s=seasonNum(), dayIn=Math.max(0,90-seasonDaysLeft());
   var names=['Blitz','Nova','Echo','Titan','Zephyr','Quark','Vortex','Pixel','Rune','Sage','Onyx','Flux','Cobra','Lyra','Drake','Wren','Ash','Volt','Kai'];
-  var ems=['🦊','🐺','🦁','🐯','🐲','🦈','🦅','🐍'];
-  var wk=(typeof weekNum==='function')?weekNum():0, roster=[];
-  for(var i=0;i<19;i++){ var sd=wk*100+leagueRank*20+i;
-    roster.push({name:names[i%names.length]+Math.floor(_seed(sd)*90+10), pts:Math.floor(base*(0.5+_seed(sd+1)*1.8)), em:ems[i%8]}); }
-  roster.push({name:'You', pts:leaguePoints, you:true, em:(typeof playerAvatar!=='undefined'&&!playerAvatar.startsWith('data:'))?playerAvatar:'🙂'});
-  roster.sort(function(a,b){return b.pts-a.pts;});
-  return roster;
+  var ems=['🦊','🐺','🦁','🐯','🐲','🦈','🦅','🐍'], others=[];
+  for(var i=0;i<19;i++){
+    var sd=s*1000+leagueRank*37+i;
+    var drift=1+(dayIn/90)*0.28*(0.4+_seed(sd+7));    // rivals keep grinding too (up to ~+28% by season end)
+    var jit=0.92+_seed(sd+3)*0.16;
+    others.push({name:names[i%names.length]+Math.floor(_seed(sd)*90+10),
+      pts:Math.max(5,Math.round(base*_BOTF[i]*jit*drift)), em:ems[i%8]});
+  }
+  _realRivals().forEach(function(p){ others.push({name:p.name,pts:p.lp,em:p.av||'🙂',real:true}); });
+  others.sort(function(a,b){ return b.pts-a.pts; });
+  var promoteAt=others.length>=5?others[4].pts+1:0;    // beat the 5th rival → you sit ≤5th → promote
+  var me={name:((typeof playerName!=='undefined'&&playerName)?playerName:'You'),pts:leaguePoints,you:true,
+          em:(typeof playerAvatar!=='undefined'&&!playerAvatar.startsWith('data:'))?playerAvatar:'🙂'};
+  var all=others.slice(0,19).concat([me]);
+  all.sort(function(a,b){ return b.pts-a.pts; });
+  var myRank=all.length; all.forEach(function(p,i){ if(p.you) myRank=i+1; });
+  return {all:all, promoteAt:promoteAt, myRank:myRank};
+}
+/* INSTANT promotion — checked at the end of a run (and when the Ranks screen opens). Can climb
+   several tiers at once after a monster run; the modal celebrates the final tier. */
+function checkLeaguePromotion(){
+  loadLeague();
+  var old=leagueRank, hops=0;
+  while(leagueRank<LEAGUE_MAXRANK && hops<5){
+    var b=leagueBoard();
+    if(!(b.promoteAt>0 && leaguePoints>=b.promoteAt)) break;
+    leagueRank++; hops++;
+    localStorage_set('numa_league_rank',String(leagueRank));
+  }
+  if(hops>0){ window._leaguePromo={dir:1,to:leagueRank,from:old}; submitLeague(); if(typeof saveCloud==='function') saveCloud(); }
+  return hops>0;
+}
+/* LP is earned at RUN END and scales with how well you played, not how long you sat there */
+function awardRunLP(){
+  var boss=window._runBossKills||0;
+  var lp=Math.max(5, Math.floor((typeof pScore!=='undefined'?pScore:0)/40) + (typeof pLevel!=='undefined'?pLevel:1)*20 + boss*50);
+  window._runBossKills=0;
+  addLeaguePoints(lp);
+  submitLeague();
+  return lp;
+}
+/* push my LP + tier so OTHER players see me as a real rival in their cohort */
+function submitLeague(){
+  try{
+    var db=fbDB();
+    if(!db||!window.fbAuth||!window.fbAuth.currentUser||isGuest) return;
+    var u=window.fbAuth.currentUser;
+    db.collection('scores').doc(u.uid).set({name:((typeof playerName!=='undefined'&&playerName)?playerName:'Player').slice(0,16),
+      av:_avatarEmoji(), lp:leaguePoints, tier:leagueRank, season:seasonNum(),
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).catch(function(e){ console.warn('[lg] write',e); });
+  }catch(e){ console.warn('[lg] submit',e); }
+}
+/* single-field orderBy → no composite index needed; we bucket by tier client-side */
+function fetchLeagueLP(force){
+  var now=Date.now();
+  if(!force && window._lbLPAt && now-window._lbLPAt<60000) return;
+  var db=fbDB(); if(!db) return;
+  window._lbLPAt=now;
+  db.collection('scores').orderBy('lp','desc').limit(100).get().then(function(snap){
+    var out=[], s=seasonNum();
+    snap.forEach(function(d){ var x=d.data()||{};
+      if(typeof x.lp==='number' && x.lp>0 && x.season===s) out.push({name:x.name||'Player',av:x.av||'🙂',lp:x.lp,tier:(typeof x.tier==='number'?x.tier:0),uid:d.id}); });
+    window._lbLP=out;
+    var lv=document.getElementById('league-view');
+    if(lv && lv.style.display!=='none') renderLeague();
+  }).catch(function(e){ console.warn('[lg] read',e); });
 }
 function renderLeague(){
   var host=document.getElementById('league-view'); if(!host) return;
-  loadLeague();
-  var roster=leagueRoster(), myRank=roster.length;
-  roster.forEach(function(p,i){ if(p.you) myRank=i+1; });
-  localStorage_set('numa_league_lastrank',String(myRank));
-  var dleft=7-(Math.floor(Date.now()/86400000+4)%7), col=rankCol(leagueRank);
+  loadLeague(); fetchLeagueLP(false);
+  checkLeaguePromotion();
+  var b=leagueBoard(), col=rankCol(leagueRank), maxed=leagueRank>=LEAGUE_MAXRANK;
+  var need=Math.max(0,b.promoteAt-leaguePoints);
+  var pct=maxed?100:(b.promoteAt>0?Math.max(2,Math.min(100,leaguePoints/b.promoteAt*100)):0);
   var h='<div class="lg-head" style="--lgc:'+col+'"><div class="lg-em">'+rankEm(leagueRank)+'</div><div style="flex:1;min-width:0;">'
     +'<div class="lg-nm">'+rankName(leagueRank)+'</div>'
-    +'<div class="lg-sub">LV '+(typeof pLevel!=='undefined'?pLevel:1)+' · '+leaguePoints.toLocaleString()+' pts · resets in '+dleft+'d</div></div>'
-    +'<div class="lg-myrank">#'+myRank+'</div></div>'
-    +'<div class="lg-zonehint"><span style="color:#43e0a0;">▲ Top 5 promote</span> &nbsp; <span style="color:#ff5a7a;">▼ Bottom 4 drop</span></div><div class="lg-rows">';
-  roster.forEach(function(p,i){
-    var zone=i<5?'promote':(i>=roster.length-4?'relegate':'');
-    h+='<div class="lg-row '+(p.you?'you':'')+' '+zone+'"><div class="lg-rk">'+(i+1)+'</div><div class="lg-av">'+p.em+'</div>'
-      +'<div class="lg-pn">'+p.name+'</div><div class="lg-pts">'+p.pts.toLocaleString()+'</div></div>';
+    +'<div class="lg-sub">'+seasonLabel()+' · '+leaguePoints.toLocaleString()+' LP · ends in '+seasonDaysLeft()+'d</div></div>'
+    +'<div class="lg-myrank">#'+b.myRank+'</div></div>'
+    +'<div class="lg-bar"><div class="lg-fill" style="width:'+pct+'%;--lgc:'+col+'"></div></div>'
+    +'<div class="lg-need">'+(maxed?'👑 TOP TIER — defend it until season end'
+        :(need<=0?'⚡ PROMOTION READY — finish a run to claim it!'
+        :'▲ <b>'+need.toLocaleString()+' LP</b> to pass '+(b.promoteAt-1).toLocaleString()+' and promote'))+'</div>'
+    +'<div class="lg-zonehint"><span style="color:#43e0a0;">▲ Top 5 promote INSTANTLY</span> · <span style="color:var(--mut);">no drops until season end</span></div><div class="lg-rows">';
+  b.all.forEach(function(p,i){
+    h+='<div class="lg-row '+(p.you?'you':'')+' '+(i<5?'promote':'')+'"><div class="lg-rk">'+(i+1)+'</div><div class="lg-av">'+p.em+'</div>'
+      +'<div class="lg-pn">'+p.name+(p.real?' <span style="color:#43e0a0;font-size:9px;">●LIVE</span>':'')+'</div><div class="lg-pts">'+p.pts.toLocaleString()+'</div></div>';
   });
   host.innerHTML=h+'</div>';
   if(window._leaguePromo){ var pr=window._leaguePromo; window._leaguePromo=null; showLeaguePromo(pr); }
@@ -8399,13 +8580,17 @@ function renderLeague(){
 function showLeaguePromo(pr){
   var m=document.getElementById('leaguePromoModal');
   if(!m){ if(pr.dir>0&&typeof showBuyToast==='function') showBuyToast('🛡️ Promoted to '+rankName(pr.to)+'!'); return; }
-  var promoted=pr.dir>0, held=pr.dir===0, col=rankCol(pr.to);
+  var promoted=pr.dir>0, season=!!pr.season, col=rankCol(pr.to);
   var badge=document.getElementById('lp-badge'); badge.textContent=rankEm(pr.to); badge.style.setProperty('--lpc',col);
-  badge.className='lp-badge'; void badge.offsetWidth; badge.classList.add(promoted?'lp-up':(held?'lp-hold':'lp-down'));
-  document.getElementById('lp-title').textContent=promoted?'PROMOTED!':(held?'RANK HELD':'RELEGATED');
+  badge.className='lp-badge'; void badge.offsetWidth; badge.classList.add(promoted?'lp-up':(season?'lp-down':'lp-hold'));
+  document.getElementById('lp-title').textContent=promoted?'PROMOTED!':(season?'SEASON OVER':'RANK HELD');
   var rk=document.getElementById('lp-rank'); rk.textContent=rankName(pr.to); rk.style.color=col;
-  document.getElementById('lp-sub').textContent=promoted?'You climbed to a new tier! 🎉':(held?'You held your tier — push higher!':'Dropped a tier — climb back next week!');
-  document.getElementById('lp-reward').style.display=pr.top3?'block':'none';
+  var jumped=promoted&&(pr.to-pr.from>1);
+  document.getElementById('lp-sub').textContent=promoted?(jumped?('🔥 You blasted through '+(pr.to-pr.from)+' tiers in one run!'):'You beat the top 5 of your league! 🎉')
+    :(season?('Finished as '+(pr.finalName||'')+' — new season, fresh climb.'):'You held your tier — push higher!');
+  var rw=document.getElementById('lp-reward');
+  rw.style.display=season?'block':'none';
+  if(season) rw.textContent='🎁 Season reward: 🪙 '+(pr.gold||0).toLocaleString()+(pr.gems?('  ·  💎 '+pr.gems):'');
   m.style.display='flex';
   if(promoted){
     // 🎆 BIG celebration: screen flash + shockwave + repeated confetti bursts + thunder + long haptic
@@ -8463,28 +8648,19 @@ function renderLeaderboard(){
 function _paintLbRows(list, all){
   all.forEach((p,i)=>{
     const rank=i+1;
-    const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
+    // rank colour ladder — podium metals, then a cool violet→cyan tail so the whole list stays readable
+    const rkc = rank===1?'#ffd700' : rank===2?'#d8dde6' : rank===3?'#cd7f4a'
+              : rank<=6?'#8a5cff' : rank<=10?'#5ad1ff' : '#9a8fc0';
+    const medal = rank===1?'🥇' : rank===2?'🥈' : rank===3?'🥉' : String(rank);
     const row=document.createElement('div');
-    row.className='badge-row';
-    // tier styling: gold/silver/bronze podium glow
-    let extraClass='', nameClass='', crown='';
-    if(rank===1){ extraClass=' lb-gold'; nameClass=' lb-shimmer-gold'; crown=' 👑'; }
-    else if(rank===2){ extraClass=' lb-silver'; }
-    else if(rank===3){ extraClass=' lb-bronze'; }
-    if(p.you) extraClass+=' lb-you';
-    row.className='badge-row'+extraClass;
-    // avatar: image or emoji
-    let avatarHtml;
-    if(p.you && playerAvatar.startsWith('data:')){
-      avatarHtml='<div class="badge-ico" style="overflow:hidden;padding:0;"><img src="'+playerAvatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"></div>';
-    } else {
-      avatarHtml='<div class="badge-ico">'+p.emoji+'</div>';
-    }
-    const rankColor=rank===1?'#ffd700':rank===2?'#d8dde6':rank===3?'#cd7f4a':'var(--mut)';
-    const nameTxt=(p.you?(p.name+' (You)'):p.name)+crown;
-    row.innerHTML='<div class="lb-rank" style="font-family:Syne,sans-serif;font-size:16px;font-weight:800;width:36px;text-align:center;color:'+rankColor+';">'+medal+'</div>'
-      +avatarHtml
-      +'<div class="badge-txt"><div class="badge-title'+nameClass+'">'+nameTxt+'</div><div class="badge-desc">'+p.score.toLocaleString()+' pts</div></div>';
+    row.className='lbx'+(rank<=3?' lbx-top lbx-'+rank:'')+(p.you?' lbx-you':'');
+    row.style.setProperty('--rkc',rkc);
+    const avatarHtml = (p.you && typeof playerAvatar!=='undefined' && playerAvatar.startsWith('data:'))
+      ? '<div class="lbx-av"><img src="'+playerAvatar+'"></div>'
+      : '<div class="lbx-av">'+p.emoji+'</div>';
+    row.innerHTML='<div class="lbx-rk">'+medal+'</div>'+avatarHtml
+      +'<div class="lbx-nm">'+p.name+(rank===1?' 👑':'')+'</div>'
+      +'<div class="lbx-sc">'+p.score.toLocaleString()+'<small>PTS</small></div>';
     list.appendChild(row);
   });
 }
@@ -8526,7 +8702,7 @@ function loadQuests(){
 function questAdvance(type,amount,asMax){
   if(!todayQuests.length) loadQuests();
   if(typeof weeklyAdvance==='function') weeklyAdvance(type,amount,asMax);   // weekly tracks independently of daily
-  if(type==='solve' && typeof addLeaguePoints==='function') addLeaguePoints((amount||1)*10);   // weekly league points
+  if(type==='boss') window._runBossKills=(window._runBossKills||0)+(amount||1);   // feeds the run's LP payout
   if(!todayQuests.some(q=>q.type===type)) return; // only track active DAILY quests
   const cur=questProgress[type]||0;
   questProgress[type]=asMax?Math.max(cur,amount):cur+amount;
@@ -8883,6 +9059,20 @@ function showGameOver(){
   if(msg) msg.textContent = (Math.random()<0.01)
     ? '📉 IQ status: buffering… 😂 Screenshot this and send it to a friend.'
     : GO_MSGS[Math.floor(Math.random()*GO_MSGS.length)];
+  // ── 🛡️ LEAGUE: pay the run's LP, then check promotion IMMEDIATELY (no weekly wait) ──
+  try{
+    const gainedLP=awardRunLP();
+    const promoted=checkLeaguePromotion();
+    const lpBox=document.getElementById('go-lp');
+    if(lpBox){
+      lpBox.style.display='flex'; lpBox.style.setProperty('--lpc',rankCol(leagueRank));
+      document.getElementById('go-lp-rank').textContent=rankName(leagueRank);
+      const nEl=document.getElementById('go-lp-n'); let shown=0;
+      const step=Math.max(1,Math.ceil(gainedLP/22));
+      const iv=setInterval(()=>{ shown+=step; if(shown>=gainedLP){ shown=gainedLP; clearInterval(iv); } nEl.textContent='+'+shown; },28);
+    }
+    if(promoted){ const pr=window._leaguePromo; window._leaguePromo=null; setTimeout(()=>showLeaguePromo(pr),1500); }
+  }catch(e){ console.warn('[lg] run payout',e); }
   totalGamesPlayed++;
   showModal('energyModal');
 }
