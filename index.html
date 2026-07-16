@@ -2215,6 +2215,10 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
         .lg-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--lgc,#43e0a0),#fff);box-shadow:0 0 12px -2px var(--lgc,#43e0a0);transition:width .6s cubic-bezier(.2,1,.3,1);}
         .lg-need{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;color:var(--mut);text-align:center;margin-bottom:8px;}
         .lg-need b{color:#43e0a0;font-size:12.5px;}
+        /* the whole 7-division ladder at a glance — the poster's row, live */
+        .lg-ladder{display:flex;justify-content:space-between;gap:2px;margin:0 4px 8px;}
+        .lg-tick{flex:1;text-align:center;font-size:15px;opacity:.3;filter:grayscale(1);transition:all .25s;}
+        .lg-tick.on{opacity:1;filter:none;transform:scale(1.35);text-shadow:0 0 12px var(--lgc);}
         .lg-rows{display:flex;flex-direction:column;gap:4px;}
         .lg-row{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);}
         .lg-row.promote{border-left:3px solid #43e0a0;}
@@ -2825,7 +2829,13 @@ const OBJECTIVES=[
 ];
 let levelHintsUsed=0, levelMaxStreak=0;
 /* ── B: progressive feature unlocks (campaign levels 1–5+) ── */
-function campLevel(){ return gMode==='time' ? 99 : pLevel; }
+/* CAMPAIGN level — how far the PLAYER has come, not how far this mode's own ladder has.
+   Since modes got their own ladders (2026-07-15), pLevel is the CURRENT MODE's level: a level-20
+   math player entering pulse is pLevel=1 there. Anything that gates PROGRESSION must not read that
+   — it would strip a veteran of their combo system, perfect waves and skills the moment they try a
+   new mode (user's pulse screenshot: skills showing 🔒 LV 2 / LV 4 / LV 7 at campaign level 20).
+   Mode ladders control DIFFICULTY only; unlocks follow the account. */
+function campLevel(){ return gMode==='time' ? 99 : (typeof campaignLevel==='function' ? campaignLevel() : pLevel); }
 function featUnlocked(id){
   // answer-glow is a TRAINING aid only: first 3 levels, and NEVER in Time Attack
   // (the blanket time-mode "return true" below used to leave it on every run = answer always given away)
@@ -5115,10 +5125,18 @@ const SKILL_DEFS=[
   {id:'slowmo',ic:'🐌',name:'SLOW',   lvl:4, col:'#a7f0ff', cost:25},
   {id:'shield',ic:'🛡️',name:'SHIELD', lvl:7, col:'#43e0a0', cost:50}
 ];
-function skillsUnlocked(){ return SKILL_DEFS.filter(s=>pLevel>=s.lvl); }
+function skillsUnlocked(){ return SKILL_DEFS.filter(s=>campLevel()>=s.lvl); }   // account progress, not this mode's ladder
 // visible in every falling-wave mode; hidden in boss (duel arena) and BUILD/CHAIN (their UI owns
 // the board's bottom band, and freeze/slow don't affect their setTimeout clocks anyway)
 function skillBarVisible(){ return gActive && !isBoss && !(typeof buildActive!=='undefined'&&buildActive) && !(typeof cwActive!=='undefined'&&cwActive); }
+/* Which skills actually DO something in the mode you are in (user: "orda skile gerek yok ki, pulse ile
+   word'de"). He was right, and it was worse than "unnecessary": FREEZE and SLOW both just set
+   `timescale`, which ONLY the falling-tile game loop reads — in word and pulse they were 30 gold for
+   literally nothing. SHIELD is real wherever a heart can be lost, so it stays. */
+function skillAppliesHere(id){
+  if(gSubMode==='math') return true;   // math / combo / time — the falling-tile game, all three bite
+  return id==='shield';                // word + pulse — only the heart insurance means anything
+}
 function injectSkillCSS(){
   if(document.getElementById('skill-css')) return;
   const s=document.createElement('style'); s.id='skill-css';
@@ -5186,8 +5204,8 @@ function renderSkillBar(){
   const bar=document.getElementById('skill-bar'); if(!bar) return;
   if(!skillBarVisible()){ bar.style.display='none'; return; }
   bar.style.display='flex';
-  bar.innerHTML=SKILL_DEFS.map(s=>{
-    const locked=pLevel<s.lvl;
+  bar.innerHTML=SKILL_DEFS.filter(s=>skillAppliesHere(s.id)).map(s=>{
+    const locked=campLevel()<s.lvl;
     const armed=(s.id==='shield'&&skillShield);
     const afford=pGold>=petSkillCost(s.cost);
     if(locked) return '<button class="sk-btn sk-locked" data-sk="'+s.id+'" onclick="useSkill(\''+s.id+'\')"><span class="sk-ic">'+s.ic+'</span><span class="sk-lv">LV '+s.lvl+'</span></button>';
@@ -5218,7 +5236,8 @@ function clearSkillFx(){
 function useSkill(id){
   if(!skillBarVisible()) return;
   const def=SKILL_DEFS.find(s=>s.id===id); if(!def) return;
-  if(pLevel<def.lvl){ showSkillToast('🔒 '+def.name+' unlocks at Level '+def.lvl); if(typeof haptic==='function')haptic([20,20]); return; }
+  if(!skillAppliesHere(id)) return;   // never charge gold for a skill this mode cannot use
+  if(campLevel()<def.lvl){ showSkillToast('🔒 '+def.name+' unlocks at Level '+def.lvl); if(typeof haptic==='function')haptic([20,20]); return; }
   if((id==='shield'&&skillShield)||(id==='over'&&skillOvercharge)) return;   // already armed
   if(pGold<petSkillCost(def.cost)){ showSkillToast('Need 🪙'+petSkillCost(def.cost)+' — earn gold by solving!'); if(typeof haptic==='function')haptic([30,30]); return; }
   // PURGE only makes sense when there are decoy fallers — don't charge gold for a no-op (word/pulse)
@@ -5411,9 +5430,14 @@ function injectPulseCSS(){
   .pulse-wheel{touch-action:none;}   /* no scroll/zoom delay swallowing taps */
   .pulse-wheel .pslice-p{cursor:pointer;transition:opacity .12s,filter .12s,transform .08s;transform-origin:120px 120px;pointer-events:all;}   /* all = fill+stroke tappable (no dead gaps between slices) */
   .pulse-wheel #pulse-hub,.pulse-wheel #pulse-sub,.pulse-wheel circle{pointer-events:none;}   /* center hub never blocks a slice tap */
-  .pulse-wheel.dim .pslice-p{opacity:.44;}
-  .pulse-wheel .pslice-p.lit{opacity:1;filter:brightness(1.85) saturate(1.45);transform:scale(1.05);}
+  /* .62 not .44 — the wheel must still read as four SATURATED colours while it waits, like the poster;
+     the contrast against a .lit slice comes from the bloom, not from draining the resting colour. */
+  .pulse-wheel.dim .pslice-p{opacity:.62;}
+  /* a lit slice now blooms instead of just brightening — it reads as a lamp behind glass */
+  .pulse-wheel .pslice-p.lit{opacity:1;filter:brightness(1.9) saturate(1.5) drop-shadow(0 0 14px currentColor);transform:scale(1.05);}
   .pulse-wheel .pslice-p:active{opacity:.8;}
+  .pulse-wheel .p-rim{animation:pRim 2.6s ease-in-out infinite;}
+  @keyframes pRim{0%,100%{opacity:.55;}50%{opacity:1;}}
   .pulse-hub-t{font-family:Bungee,sans-serif;font-size:13px;fill:#f0eaff;}
   .pulse-hub-s{font-family:Rajdhani,sans-serif;font-size:8.5px;font-weight:700;fill:#9a8fc0;}
   .pulse-blast{position:absolute;inset:0;pointer-events:none;border-radius:inherit;animation:pulseBlast .5s ease-out forwards;
@@ -5429,11 +5453,35 @@ function buildPulseWheel(){
   const N=pulseSlices(); _pulseN=N; _pulseFreqMap=[];
   const cx=120,cy=120,r=108,step=360/N,P=[];
   for(let k=0;k<=N;k++){ const a=(-90+k*step)*Math.PI/180; P.push([+(cx+r*Math.cos(a)).toFixed(1),+(cy+r*Math.sin(a)).toFixed(1)]); }
+  /* GLOSSY WHEEL (user: "pulse bu tarz yapsan hoş durmuş düz yerine — renkler eşit tabi").
+     The slices stay EXACTLY as they were geometrically (equal 360/N wedges, same paths, same hit
+     testing — pulse tap sensitivity was a hard-won fix, so the tap layer is untouched). Everything
+     below is paint ON TOP with pointer-events:none: a sheen, a rim vignette, a glowing outer ring and
+     a deeper hub. Wider dark separators + the bigger hub turn the flat pie into the poster's donut. */
+  const defs='<defs>'
+    // keep these LIGHT: the slices already sit at .44 opacity while dimmed, so a heavy sheen/vignette
+    // on top turns the whole wheel milky grey (first attempt did exactly that).
+    +'<radialGradient id="pgloss" cx="34%" cy="22%" r="72%">'
+      +'<stop offset="0" stop-color="#fff" stop-opacity=".26"/>'
+      +'<stop offset=".38" stop-color="#fff" stop-opacity=".04"/>'
+      +'<stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
+    +'<radialGradient id="pvig" cx="50%" cy="50%" r="50%">'
+      +'<stop offset=".70" stop-color="#000" stop-opacity="0"/>'
+      +'<stop offset="1" stop-color="#000" stop-opacity=".3"/></radialGradient>'
+    +'<radialGradient id="phub" cx="38%" cy="28%" r="85%">'
+      +'<stop offset="0" stop-color="#2b1f52"/><stop offset="1" stop-color="#080413"/></radialGradient>'
+    +'</defs>';
   let svg='';
   for(let i=0;i<N;i++){ const ci=Math.floor(i*6/N); _pulseFreqMap[i]=PULSE_FREQS[ci];
-    svg+='<path class="pslice-p" data-i="'+i+'" d="M120,120 L'+P[i][0]+','+P[i][1]+' A108,108 0 0,1 '+P[i+1][0]+','+P[i+1][1]+' Z" fill="'+PULSE_COLS[ci]+'" stroke="#0b0714" stroke-width="2.5"/>'; }
-  board.innerHTML='<div class="pulse-wrap"><svg class="pulse-wheel dim" viewBox="0 0 240 240">'+svg
-    +'<circle cx="120" cy="120" r="40" fill="#0e0822" stroke="#3a2a55" stroke-width="2"/>'
+    // style="color:…" so the .lit drop-shadow can glow in the slice's OWN colour via currentColor —
+    // fill= alone would leave currentColor at its inherited default and the bloom would be black.
+    svg+='<path class="pslice-p" data-i="'+i+'" data-c="'+ci+'" style="color:'+PULSE_COLS[ci]+'" d="M120,120 L'+P[i][0]+','+P[i][1]+' A108,108 0 0,1 '+P[i+1][0]+','+P[i+1][1]+' Z" fill="'+PULSE_COLS[ci]+'" stroke="#07040f" stroke-width="5"/>'; }
+  board.innerHTML='<div class="pulse-wrap"><svg class="pulse-wheel dim" viewBox="0 0 240 240">'+defs+svg
+    +'<circle cx="120" cy="120" r="108" fill="url(#pvig)"/>'
+    +'<circle cx="120" cy="120" r="108" fill="url(#pgloss)"/>'
+    +'<circle class="p-rim" cx="120" cy="120" r="108" fill="none" stroke="rgba(190,170,255,.28)" stroke-width="3"/>'
+    +'<circle cx="120" cy="120" r="52" fill="url(#phub)" stroke="#5a4390" stroke-width="2.5"/>'
+    +'<circle cx="120" cy="120" r="46" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="1"/>'
     +'<text id="pulse-hub" x="120" y="117" text-anchor="middle" class="pulse-hub-t">WATCH</text>'
     +'<text id="pulse-sub" x="120" y="134" text-anchor="middle" class="pulse-hub-s"></text></svg></div>';
   board.querySelectorAll('.pslice-p').forEach(p=>{ p.onpointerdown=ev=>{ev.preventDefault();ev.stopPropagation();tapPulseSlice(+p.getAttribute('data-i'));}; });
@@ -5449,6 +5497,10 @@ function setupPulseTarget(){
   const tv=document.getElementById('g-target'); if(tv){ tv.style.display=''; tv.className='tp-val'; tv.innerHTML='<span class="eq-display">🎡 PULSE</span>'; }
   const lbl=document.getElementById('tp-label'); if(lbl) lbl.textContent='🎡 Memory';
   const tm=document.getElementById('tp-mode'); if(tm) tm.textContent='PULSE';
+  // Pulse has no clue — but #g-hint is shared with word mode, and pulse never cleared it, so the last
+  // word's clue sat on the pulse screen ("🌽 Yellow cob eaten off the cob" over the memory wheel).
+  const hn=document.getElementById('g-hint'); if(hn){ hn.textContent=''; hn.innerHTML=''; }
+  const hs=document.getElementById('tp-hint-sub'); if(hs) hs.style.display='none';
   const tt=document.getElementById('timer-text'),tk=document.querySelector('.timer-track'); if(tt)tt.style.display='none'; if(tk)tk.style.display='none';
   const ge=document.getElementById('g-tray'); if(ge) ge.innerHTML='<span class="tray-empty">🎡 Watch the colors, then repeat</span>';
   const hbp=document.getElementById('hint-btn'); if(hbp) hbp.style.display='none';
@@ -5494,7 +5546,10 @@ function pulseRoundWin(){
 function pulseWrong(){
   pulseBusy=true; streakCount=0; comboMult=1;
   if(typeof impact==='function') impact('fail'); if(typeof shakePhone==='function') shakePhone();
-  pLives--; levelLivesLost=(levelLivesLost||0)+1; updateHUD(); if(typeof wobbleHearts==='function') wobbleHearts();
+  // pulse took the heart directly and never asked the shield — so a bought shield did nothing here
+  if(typeof consumeShield==='function' && consumeShield()){ }
+  else { pLives--; levelLivesLost=(levelLivesLost||0)+1; }
+  updateHUD(); if(typeof wobbleHearts==='function') wobbleHearts();
   if(pLives<=0){ gActive=false; clearPulseTimers(); if(typeof showGameOver==='function') showGameOver(); return; }
   setPulseLabel('OOPS!','watch again');
   _pulseTimers.push(setTimeout(()=>{ pulseInput=[]; playPulseSequence(); }, 1150));
@@ -6188,8 +6243,9 @@ function finishLevelUp(wasBoss){
   if(typeof recordLevelStars==='function') recordLevelStars(pLevel-1, starsEarned);
   // ── TITLE unlocks ──
   if(wasBoss) unlockTitle('boss_slayer');
-  if(pLevel>=10) unlockTitle('wizard');
-  if(pLevel>=20) unlockTitle('legend');
+  // titles are account milestones — a word L10 must not hand out the campaign's L10 title
+  if(campLevel()>=10) unlockTitle('wizard');
+  if(campLevel()>=20) unlockTitle('legend');
   if(!wasBoss && starsEarned===3) unlockTitle('perfect');
   // ── OBJECTIVE bonus (normal levels only) ──
   let objLine='';
@@ -8205,19 +8261,36 @@ let starterOwned=(localStorage_get('numa_starter')==='1');
 /* ═══════════ ☁ CLOUD SAVE — per-account progress in Firestore players/{uid} ═══════════
    Signed-in users' gold/gems/level/league/titles/pets sync to the cloud so an account
    keeps its progress across devices/reinstalls (localStorage alone is device-only). */
-var _cloudSaveT=null;
+/* WRITE BUDGET (2026-07-15 — the Usage graph showed 265 writes in a day from ONE player, vs 34 reads;
+   Spark allows 20k writes/day, so that was ~75 users before the quota died).
+   Cause: saveCloud's "debounce" was 1500ms while two solves are 3-6s apart, so it NEVER collapsed
+   anything — every single gold tick shipped a document write. The comment claimed the opposite.
+   Now: a real THROTTLE (one write per 45s at most) + a forced flush at the moments that actually
+   matter (game over, leaving to home, app going to background). ~20 solves/run → 1-2 writes, not 20. */
+var _cloudSaveT=null, _cloudDirty=false, _cloudLastSave=0;
+const CLOUD_MIN_GAP=45000;
 function _cloudKeys(){ return ['numa_gold','numa_gems','numa_level','numa_level_word','numa_level_combo','numa_level_pulse','numa_level_time','numa_maxlevel','numa_xp','numa_titles','numa_title','numa_pets','numa_pet','numa_themes','numa_theme','numa_noads','numa_signup_gift','numa_league_rank','numa_season_lp','numa_season','numa_best_math','numa_best_word','numa_best_combo','numa_best_time','numa_best_pulse','numa_name','numa_avatar','numa_trained']; }
 function _cloudUser(){ try{ return (window.fbAuth&&window.fbAuth.currentUser&&typeof isGuest!=='undefined'&&!isGuest)?window.fbAuth.currentUser:null; }catch(e){ return null; } }
-function saveCloud(){
+function _cloudFlush(){
+  if(!_cloudDirty) return;
   var u=_cloudUser(), db=(typeof fbDB==='function')?fbDB():null; if(!u||!db) return;
-  clearTimeout(_cloudSaveT);
-  _cloudSaveT=setTimeout(function(){
-    try{ var data={updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
-      _cloudKeys().forEach(function(k){ var v=localStorage_get(k); if(v!==null) data[k]=v; });
-      db.collection('players').doc(u.uid).set(data,{merge:true}).catch(function(e){console.warn('[cloud] save',e);});
-    }catch(e){ console.warn('[cloud] save',e); }
-  },1500);   // debounce — never hammer Firestore on every gold tick
+  _cloudDirty=false; _cloudLastSave=Date.now();
+  try{ var data={updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+    _cloudKeys().forEach(function(k){ var v=localStorage_get(k); if(v!==null) data[k]=v; });
+    db.collection('players').doc(u.uid).set(data,{merge:true}).catch(function(e){console.warn('[cloud] save',e);});
+  }catch(e){ console.warn('[cloud] save',e); }
 }
+function saveCloud(force){
+  var u=_cloudUser(), db=(typeof fbDB==='function')?fbDB():null; if(!u||!db) return;
+  _cloudDirty=true;
+  if(force){ clearTimeout(_cloudSaveT); _cloudFlush(); return; }
+  if(_cloudSaveT) return;                       // a flush is already queued — let it collect more
+  var wait=Math.max(0, CLOUD_MIN_GAP-(Date.now()-_cloudLastSave));
+  _cloudSaveT=setTimeout(function(){ _cloudSaveT=null; _cloudFlush(); }, wait);
+}
+// progress must survive the app being swiped away / backgrounded — that is what force is for
+addEventListener('pagehide',function(){ saveCloud(true); });
+addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') saveCloud(true); });
 function loadCloud(){
   return new Promise(function(res){
     var u=_cloudUser(), db=(typeof fbDB==='function')?fbDB():null; if(!u||!db){ res(false); return; }
@@ -8536,92 +8609,101 @@ function switchLbTab(mode,el){
   renderLeaderboard();
 }
 /* ═══════════ 🛡️ WEEKLY LEAGUES — Bronze→Diamond, weekly reset, top 5 promote / bottom 4 relegate ═══════════ */
+/* ═══ DIVISIONS — fixed 500-LP bands, exactly as printed on the poster ═══
+   Bronze 0-499 · Silver 500-999 · Gold 1000-1499 · Platinum 1500-1999 · Diamond 2000-2499
+   · Master 2500-2999 · Grandmaster 3000+
+   This REPLACES the old cohort-relative ladder (5 divisions × 3 tiers, promote by beating the 5th
+   rival). Rank is now simply DERIVED from LP, so the poster is the contract: a player can read their
+   own number and know exactly what it buys. Promotion is still instant — crossing 500 IS the promotion. */
+const LEAGUE_STEP=500;
 const DIVISIONS=[
-  {name:'Bronze',em:'🥉',col:'#cd7f4a'},{name:'Silver',em:'🥈',col:'#c0c7d0'},{name:'Gold',em:'🥇',col:'#ffd84a'},
-  {name:'Platinum',em:'💠',col:'#5ad1ff'},{name:'Diamond',em:'💎',col:'#8a5cff'}
+  {name:'Bronze',     em:'🥉',col:'#cd7f4a'},
+  {name:'Silver',     em:'🥈',col:'#c0c7d0'},
+  {name:'Gold',       em:'🥇',col:'#ffd84a'},
+  {name:'Platinum',   em:'💠',col:'#3fe0c8'},
+  {name:'Diamond',    em:'💎',col:'#5ad1ff'},
+  {name:'Master',     em:'👑',col:'#a855f7'},
+  {name:'Grandmaster',em:'⚔️',col:'#ff4d4d'}
 ];
-// 15 ranks: each division has 3 tiers (Bronze 1→2→3 → Silver 1→2→3 → … → Diamond 3). rank = 0..14.
-const LEAGUE_MAXRANK=DIVISIONS.length*3-1;
+const LEAGUE_MAXRANK=DIVISIONS.length-1;   // 6
 let leaguePoints=0, leagueRank=0;
 function _seed(s){ var x=Math.sin(s)*10000; return x-Math.floor(x); }
-function _rDiv(r){ return DIVISIONS[Math.floor(r/3)]||DIVISIONS[0]; }
-function rankName(r){ return _rDiv(r).name+' '+((r%3)+1); }
+function rankFromLP(lp){ return Math.max(0,Math.min(LEAGUE_MAXRANK,Math.floor((lp||0)/LEAGUE_STEP))); }
+function _rDiv(r){ return DIVISIONS[Math.max(0,Math.min(LEAGUE_MAXRANK,r))]||DIVISIONS[0]; }
+function rankName(r){ return _rDiv(r).name; }
 function rankCol(r){ return _rDiv(r).col; }
 function rankEm(r){ return _rDiv(r).em; }
-/* ── SEASONS: 3-month blocks. LP is cumulative all season; the ONLY reset is the season roll.
-   Promotion is INSTANT and RELATIVE — you climb the moment your LP beats the 5th place of your
-   tier's cohort (bots + real players of the same tier). No fixed number: a crowded tier is harder. */
+function rankRange(r){ return r>=LEAGUE_MAXRANK ? (LEAGUE_MAXRANK*LEAGUE_STEP)+'+' : (r*LEAGUE_STEP)+' - '+((r+1)*LEAGUE_STEP-1); }
+/* ── SEASONS: 3-month blocks. LP is cumulative all season; the ONLY reset is the season roll. ── */
 function seasonNum(){ var d=new Date(); return (d.getFullYear()-2026)*4+Math.floor(d.getMonth()/3); }
 function seasonLabel(){ return 'SEASON '+(seasonNum()+1); }
 function seasonDaysLeft(){ var d=new Date(), q=Math.floor(d.getMonth()/3), end=new Date(d.getFullYear(),q*3+3,1);
   return Math.max(1,Math.ceil((end-d.getTime())/86400000)); }
-// bot cohort shape: the 5th-place factor is 1.0, so tierBase(r) IS the natural promotion bar
-function tierBase(r){ return Math.round(250*Math.pow(1.38,r)); }   // Bronze 1 ≈ 250 LP → Diamond 3 ≈ 22k
-const _BOTF=[1.85,1.42,1.19,1.07,1.00,0.94,0.88,0.82,0.76,0.70,0.64,0.58,0.52,0.46,0.40,0.34,0.28,0.22,0.16];
 function loadLeague(){
-  leagueRank=parseInt(localStorage_get('numa_league_rank')||'0');
   leaguePoints=parseInt(localStorage_get('numa_season_lp')||localStorage_get('numa_league_pts')||'0');
+  if(isNaN(leaguePoints)||leaguePoints<0) leaguePoints=0;
   var st=parseInt(localStorage_get('numa_season')||'-1'), now=seasonNum();
   if(st!==now){
-    if(st>=0){ resolveSeasonEnd(); leaguePoints=0; localStorage_set('numa_season_lp','0'); }
-    else localStorage_set('numa_season_lp',String(leaguePoints));   // first run on the new system: carry legacy pts in
+    if(st>=0) resolveSeasonEnd();          // sets leaguePoints itself (soft reset)
+    localStorage_set('numa_season_lp',String(leaguePoints));
     localStorage_set('numa_season',String(now));
   }
-}
-function addLeaguePoints(n){ loadLeague(); leaguePoints+=n; localStorage_set('numa_season_lp',String(leaguePoints)); }
-/* season roll: pay out by final tier, then a SOFT reset — down one division (3 tiers), never to zero */
-function resolveSeasonEnd(){
-  var old=leagueRank;
-  leagueRank=Math.max(0,leagueRank-3);
+  leagueRank=rankFromLP(leaguePoints);     // rank is DERIVED — never stored as truth
   localStorage_set('numa_league_rank',String(leagueRank));
-  var gold=250+old*180, gems=Math.floor(old/3)*3;
+}
+function addLeaguePoints(n){ loadLeague(); leaguePoints+=n; localStorage_set('numa_season_lp',String(leaguePoints)); leagueRank=rankFromLP(leaguePoints); }
+/* season roll: pay out by final division, then a SOFT reset — keep 25% of your LP so a Grandmaster
+   restarts around Gold instead of back at zero with everyone else. */
+function resolveSeasonEnd(){
+  var oldLP=leaguePoints, old=rankFromLP(oldLP);
+  var gold=250+old*260, gems=old*3;
   if(typeof gainGold==='function') gainGold(gold);
   if(gems>0 && typeof pGems!=='undefined'){ pGems+=gems; if(typeof saveWallet==='function') saveWallet(); }
+  leaguePoints=Math.floor(oldLP*0.25);
+  leagueRank=rankFromLP(leaguePoints);
+  localStorage_set('numa_league_rank',String(leagueRank));
   window._leaguePromo={dir:0,to:leagueRank,from:old,season:true,gold:gold,gems:gems,finalName:rankName(old)};
 }
-/* real same-tier rivals pulled from Firestore (see fetchLeagueLP) */
+/* real same-division rivals pulled from Firestore (see fetchLeagueLP) */
 function _realRivals(){
   var me=(window.fbAuth&&window.fbAuth.currentUser)?window.fbAuth.currentUser.uid:null;
-  return (window._lbLP||[]).filter(function(p){ return p.tier===leagueRank && p.lp>0 && p.uid!==me; });
+  return (window._lbLP||[]).filter(function(p){ return rankFromLP(p.lp)===leagueRank && p.lp>0 && p.uid!==me; });
 }
-/* the cohort board: 19 bots + every real player in my tier + me. Bots drift UP across the season
-   so the bar is alive, and real players push it further — that's the "adalet": you only promote
-   when you actually beat 15 of them, not when a fixed counter ticks over. */
+/* The board is now a RANKING inside your division, not the promotion gate: 19 bots scattered across
+   your band + every real player in it + you. Bots drift up across the season so the board stays alive. */
 function leagueBoard(){
   loadLeague();
-  var base=tierBase(leagueRank), s=seasonNum(), dayIn=Math.max(0,90-seasonDaysLeft());
+  var lo=leagueRank*LEAGUE_STEP, span=(leagueRank>=LEAGUE_MAXRANK?LEAGUE_STEP*2:LEAGUE_STEP);
+  var s=seasonNum(), dayIn=Math.max(0,90-seasonDaysLeft());
   var names=['Blitz','Nova','Echo','Titan','Zephyr','Quark','Vortex','Pixel','Rune','Sage','Onyx','Flux','Cobra','Lyra','Drake','Wren','Ash','Volt','Kai'];
   var ems=['🦊','🐺','🦁','🐯','🐲','🦈','🦅','🐍'], others=[];
   for(var i=0;i<19;i++){
     var sd=s*1000+leagueRank*37+i;
-    var drift=1+(dayIn/90)*0.28*(0.4+_seed(sd+7));    // rivals keep grinding too (up to ~+28% by season end)
-    var jit=0.92+_seed(sd+3)*0.16;
+    var frac=_seed(sd+3)*0.94;                              // where in the band this bot sits
+    var drift=(dayIn/90)*0.28*(0.4+_seed(sd+7))*span;       // they grind too, but stay in the band
     others.push({name:names[i%names.length]+Math.floor(_seed(sd)*90+10),
-      pts:Math.max(5,Math.round(base*_BOTF[i]*jit*drift)), em:ems[i%8]});
+      pts:Math.max(1,Math.round(lo+frac*span*0.9+drift)), em:ems[i%8]});
   }
   _realRivals().forEach(function(p){ others.push({name:p.name,pts:p.lp,em:p.av||'🙂',real:true}); });
   others.sort(function(a,b){ return b.pts-a.pts; });
-  var promoteAt=others.length>=5?others[4].pts+1:0;    // beat the 5th rival → you sit ≤5th → promote
   var me={name:((typeof playerName!=='undefined'&&playerName)?playerName:'You'),pts:leaguePoints,you:true,
           em:(typeof playerAvatar!=='undefined'&&!playerAvatar.startsWith('data:'))?playerAvatar:'🙂'};
   var all=others.slice(0,19).concat([me]);
   all.sort(function(a,b){ return b.pts-a.pts; });
   var myRank=all.length; all.forEach(function(p,i){ if(p.you) myRank=i+1; });
-  return {all:all, promoteAt:promoteAt, myRank:myRank};
+  var nextAt=(leagueRank>=LEAGUE_MAXRANK)?0:(leagueRank+1)*LEAGUE_STEP;
+  return {all:all, promoteAt:nextAt, myRank:myRank};
 }
-/* INSTANT promotion — checked at the end of a run (and when the Ranks screen opens). Can climb
-   several tiers at once after a monster run; the modal celebrates the final tier. */
+/* Promotion = crossing a 500 line. Nothing to compute; just detect that the derived rank moved. */
 function checkLeaguePromotion(){
+  var before=parseInt(localStorage_get('numa_league_rank')||'0');
   loadLeague();
-  var old=leagueRank, hops=0;
-  while(leagueRank<LEAGUE_MAXRANK && hops<5){
-    var b=leagueBoard();
-    if(!(b.promoteAt>0 && leaguePoints>=b.promoteAt)) break;
-    leagueRank++; hops++;
-    localStorage_set('numa_league_rank',String(leagueRank));
+  if(leagueRank>before){
+    window._leaguePromo={dir:1,to:leagueRank,from:before};
+    submitLeague(true); if(typeof saveCloud==='function') saveCloud(true);   // a rank change must land immediately
+    return true;
   }
-  if(hops>0){ window._leaguePromo={dir:1,to:leagueRank,from:old}; submitLeague(); if(typeof saveCloud==='function') saveCloud(); }
-  return hops>0;
+  return false;
 }
 /* LP is earned at RUN END and scales with how well you played, not how long you sat there.
    The level term is deliberately SMALL (×8, was ×20): once each mode got its own ladder, a ×20 term would
@@ -8645,7 +8727,11 @@ function awardRunLP(){
   // run and breadth lost. The campaign level is "how far you've come as a player", so every mode pays the
   // same for it, and the ×2 first-run-per-mode bonus then makes playing wide strictly better than grinding one.
   var camp=(typeof campaignLevel==='function')?campaignLevel():(typeof pLevel!=='undefined'?pLevel:1);
-  var lp=Math.max(5, Math.floor((typeof pScore!=='undefined'?pScore:0)/40) + camp*8 + boss*50);
+  // SMALL PAYOUTS (user: "bi oyun 500 lp alınmaz, az az, değeri olmalı"). With 500-LP divisions the old
+  // formula (score/40 + level*8 + boss*50 ≈ 520/run) bought a whole division in ONE game — the ladder
+  // was decoration. Divided by ~6: a strong L20 run pays ~28 (~56 with the daily first-run double), so
+  // Bronze→Silver is ~10-20 runs and Grandmaster is a season-long climb, not an afternoon.
+  var lp=Math.max(8, Math.floor((typeof pScore!=='undefined'?pScore:0)/250) + Math.floor(camp/3) + boss*6);
   var doubled=_claimModeBonus(gMode);
   if(doubled) lp*=2;
   window._runBossKills=0;
@@ -8654,28 +8740,48 @@ function awardRunLP(){
   submitLeague();
   return lp;
 }
-/* push my LP + tier so OTHER players see me as a real rival in their cohort */
-function submitLeague(){
+/* Push my LP + tier so OTHER players see me as a real rival in their cohort.
+   THROTTLED (2026-07-15 write-budget pass): this doc is only a PUBLIC MIRROR — the authoritative LP
+   lives in players/{uid} via numa_season_lp, so this lagging a couple of minutes is invisible to
+   everyone. Writing it on every single run end was pure quota burn. Promotions force it through. */
+var _lgSubmitAt=0;
+const LEAGUE_MIN_GAP=120000;
+function submitLeague(force){
   try{
     var db=fbDB();
     if(!db||!window.fbAuth||!window.fbAuth.currentUser||isGuest) return;
+    if(!force && Date.now()-_lgSubmitAt<LEAGUE_MIN_GAP) return;
+    _lgSubmitAt=Date.now();
     var u=window.fbAuth.currentUser;
     db.collection('scores').doc(u.uid).set({name:((typeof playerName!=='undefined'&&playerName)?playerName:'Player').slice(0,16),
       av:_avatarEmoji(), lp:leaguePoints, tier:leagueRank, season:seasonNum(),
       updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).catch(function(e){ console.warn('[lg] write',e); });
   }catch(e){ console.warn('[lg] submit',e); }
 }
-/* single-field orderBy → no composite index needed; we bucket by tier client-side */
+/* single-field orderBy → no composite index needed; we bucket by tier client-side.
+   READ BUDGET: limit was 100 (= 100 document reads EVERY time the Ranks screen opened, against a
+   50k/day Spark quota). 30 still fills a 20-row cohort board comfortably, and the result is cached
+   in localStorage for 10 min so re-opening Ranks all evening costs ZERO reads. */
+const LB_CACHE_MS=600000;
+function _lbCacheGet(k){
+  try{ var o=JSON.parse(localStorage_get('numa_lbc_'+k)||'null');
+    return (o && Date.now()-o.t<LB_CACHE_MS) ? o.v : null; }catch(e){ return null; }
+}
+function _lbCacheSet(k,v){ try{ localStorage_set('numa_lbc_'+k,JSON.stringify({t:Date.now(),v:v})); }catch(e){} }
 function fetchLeagueLP(force){
   var now=Date.now();
   if(!force && window._lbLPAt && now-window._lbLPAt<60000) return;
+  if(!force){
+    var c=_lbCacheGet('lp');
+    if(c){ window._lbLP=c; window._lbLPAt=now; return; }   // fresh enough — don't spend 30 reads
+  }
   var db=fbDB(); if(!db) return;
   window._lbLPAt=now;
-  db.collection('scores').orderBy('lp','desc').limit(100).get().then(function(snap){
+  db.collection('scores').orderBy('lp','desc').limit(30).get().then(function(snap){
     var out=[], s=seasonNum();
     snap.forEach(function(d){ var x=d.data()||{};
       if(typeof x.lp==='number' && x.lp>0 && x.season===s) out.push({name:x.name||'Player',av:x.av||'🙂',lp:x.lp,tier:(typeof x.tier==='number'?x.tier:0),uid:d.id}); });
-    window._lbLP=out;
+    window._lbLP=out; _lbCacheSet('lp',out);
     var lv=document.getElementById('league-view');
     if(lv && lv.style.display!=='none') renderLeague();
   }).catch(function(e){ console.warn('[lg] read',e); });
@@ -8686,18 +8792,22 @@ function renderLeague(){
   checkLeaguePromotion();
   var b=leagueBoard(), col=rankCol(leagueRank), maxed=leagueRank>=LEAGUE_MAXRANK;
   var need=Math.max(0,b.promoteAt-leaguePoints);
-  var pct=maxed?100:(b.promoteAt>0?Math.max(2,Math.min(100,leaguePoints/b.promoteAt*100)):0);
+  // progress WITHIN the current 500 band, so the bar always reads 0→500 and never re-scales
+  var inBand=leaguePoints-leagueRank*LEAGUE_STEP;
+  var pct=maxed?100:Math.max(2,Math.min(100,inBand/LEAGUE_STEP*100));
   var h='<div class="lg-head" style="--lgc:'+col+'"><div class="lg-em">'+rankEm(leagueRank)+'</div><div style="flex:1;min-width:0;">'
     +'<div class="lg-nm">'+rankName(leagueRank)+'</div>'
     +'<div class="lg-sub">'+seasonLabel()+' · '+leaguePoints.toLocaleString()+' LP · ends in '+seasonDaysLeft()+'d</div></div>'
     +'<div class="lg-myrank">#'+b.myRank+'</div></div>'
     +'<div class="lg-bar"><div class="lg-fill" style="width:'+pct+'%;--lgc:'+col+'"></div></div>'
-    +'<div class="lg-need">'+(maxed?'👑 TOP TIER — defend it until season end'
-        :(need<=0?'⚡ PROMOTION READY — finish a run to claim it!'
-        :'▲ <b>'+need.toLocaleString()+' LP</b> to pass '+(b.promoteAt-1).toLocaleString()+' and promote'))+'</div>'
-    +'<div class="lg-zonehint"><span style="color:#43e0a0;">▲ Top 5 promote INSTANTLY</span> · <span style="color:var(--mut);">no drops until season end</span></div><div class="lg-rows">';
+    +'<div class="lg-need">'+(maxed?'⚔️ GRANDMASTER — the top of the ladder'
+        :'▲ <b>'+need.toLocaleString()+' LP</b> to '+rankName(leagueRank+1)+' &nbsp;·&nbsp; '+inBand+' / '+LEAGUE_STEP)+'</div>'
+    +'<div class="lg-ladder">'+DIVISIONS.map(function(d,i){
+        return '<span class="lg-tick'+(i===leagueRank?' on':'')+'" style="--lgc:'+d.col+'" title="'+d.name+' '+rankRange(i)+'">'+d.em+'</span>';
+      }).join('')+'</div>'
+    +'<div class="lg-zonehint"><span style="color:#43e0a0;">'+rankName(leagueRank)+' '+rankRange(leagueRank)+' LP</span> · <span style="color:var(--mut);">every 500 LP = a promotion</span></div><div class="lg-rows">';
   b.all.forEach(function(p,i){
-    h+='<div class="lg-row '+(p.you?'you':'')+' '+(i<5?'promote':'')+'"><div class="lg-rk">'+(i+1)+'</div><div class="lg-av">'+p.em+'</div>'
+    h+='<div class="lg-row '+(p.you?'you':'')+'"><div class="lg-rk">'+(i+1)+'</div><div class="lg-av">'+p.em+'</div>'
       +'<div class="lg-pn">'+p.name+(p.real?' <span style="color:#43e0a0;font-size:9px;">●LIVE</span>':'')+'</div><div class="lg-pts">'+p.pts.toLocaleString()+'</div></div>';
   });
   host.innerHTML=h+'</div>';
@@ -8712,8 +8822,8 @@ function showLeaguePromo(pr){
   document.getElementById('lp-title').textContent=promoted?'PROMOTED!':(season?'SEASON OVER':'RANK HELD');
   var rk=document.getElementById('lp-rank'); rk.textContent=rankName(pr.to); rk.style.color=col;
   var jumped=promoted&&(pr.to-pr.from>1);
-  document.getElementById('lp-sub').textContent=promoted?(jumped?('🔥 You blasted through '+(pr.to-pr.from)+' tiers in one run!'):'You beat the top 5 of your league! 🎉')
-    :(season?('Finished as '+(pr.finalName||'')+' — new season, fresh climb.'):'You held your tier — push higher!');
+  document.getElementById('lp-sub').textContent=promoted?(jumped?('🔥 You blasted through '+(pr.to-pr.from)+' divisions in one run!'):('You crossed '+(pr.to*LEAGUE_STEP)+' LP — welcome to '+rankName(pr.to)+'! 🎉'))
+    :(season?('Finished as '+(pr.finalName||'')+' — new season, fresh climb.'):'You held your division — push higher!');
   var rw=document.getElementById('lp-reward');
   rw.style.display=season?'block':'none';
   if(season) rw.textContent='🎁 Season reward: 🪙 '+(pr.gold||0).toLocaleString()+(pr.gems?('  ·  💎 '+pr.gems):'');
@@ -8764,10 +8874,16 @@ function renderLeaderboard(){
     _paintLbRows(list, all);
   };
   paint([]);   // show bots + you INSTANTLY (never a blank list while Firestore loads/fails)
+  // 10-min cache: clicking through the 5 mode tabs used to cost 250 reads EVERY visit (limit 50 each).
+  // Cached → 0 reads. Cold → 20 each, which still fills the 20-row board.
+  const cached=_lbCacheGet('m_'+mode);
+  if(cached){ paint(cached); return; }
   const db=fbDB();
   if(db){
-    db.collection('scores').orderBy(mode,'desc').limit(50).get()
-      .then(snap=>{ const real=[]; snap.forEach(d=>{ const x=d.data()||{}; if(typeof x[mode]==='number' && x[mode]>0) real.push({name:(x.name||'Player'),score:x[mode],emoji:(x.av||'🙂'),uid:d.id}); }); if(mode===currentLbMode) paint(real); })   // re-paint with real data when it arrives
+    db.collection('scores').orderBy(mode,'desc').limit(20).get()
+      .then(snap=>{ const real=[]; snap.forEach(d=>{ const x=d.data()||{}; if(typeof x[mode]==='number' && x[mode]>0) real.push({name:(x.name||'Player'),score:x[mode],emoji:(x.av||'🙂'),uid:d.id}); });
+        _lbCacheSet('m_'+mode,real);
+        if(mode===currentLbMode) paint(real); })   // re-paint with real data when it arrives
       .catch(e=>{ console.warn('[lb] read',e); });
   }
 }
