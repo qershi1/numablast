@@ -233,6 +233,9 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
   background:linear-gradient(180deg,#ffc94a,#ff5a2a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   filter:drop-shadow(0 0 12px rgba(255,130,40,.35));}
 .wm-title .wm-sub{font-size:9.5px;letter-spacing:4px;color:#8a6db3;font-weight:700;margin-top:2px;}
+.wm-arrow{width:30px;height:30px;border-radius:10px;border:1px solid rgba(190,150,255,.35);flex-shrink:0;
+  background:rgba(40,25,70,.6);color:#c9b3f5;font-size:13px;cursor:pointer;}
+.wm-arrow:active{transform:scale(.9);background:rgba(90,60,150,.6);}
 .wm-stars{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:20px;font-size:13px;font-weight:800;color:#ffd97a;flex-shrink:0;
   background:rgba(255,200,70,.08);border:1px solid rgba(255,200,70,.35);}
 #wm-map{position:relative;flex:1;min-height:0;overflow:hidden;border-radius:18px;
@@ -2088,7 +2091,12 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
     <div id="map-screen" class="fadein" style="display:none;">
       <div id="wm-header">
         <button class="wm-back" onclick="showScreen('home',document.getElementById('nav-home'))">‹</button>
-        <div class="wm-title"><div class="wm-name" id="wm-name">VOID REALM</div><div class="wm-sub" id="wm-sub">WORLD 1</div></div>
+        <!-- world browser: the player can SEE the whole journey, not just the realm they're stuck in -->
+        <div class="wm-title" style="display:flex;align-items:center;gap:10px;">
+          <button class="wm-arrow" onclick="mapShiftWorld(-1)" aria-label="Previous realm">◀</button>
+          <div style="min-width:0;"><div class="wm-name" id="wm-name">VOID REALM</div><div class="wm-sub" id="wm-sub">WORLD 1</div></div>
+          <button class="wm-arrow" onclick="mapShiftWorld(1)" aria-label="Next realm">▶</button>
+        </div>
         <div class="wm-stars">⭐ <span id="wm-starct">0/30</span></div>
       </div>
       <div id="wm-map">
@@ -2784,7 +2792,7 @@ function claimDailyLogin(){
   var streak=window._pendingLoginDay||1, r=LOGIN_REWARDS[streak-1]||{g:100}, msg=[];
   if(r.g){ gainGold(r.g); msg.push('🪙'+r.g); }
   if(r.gem){ pGems+=r.gem; msg.push('💎'+r.gem); }
-  if(r.chest){ var cg=300+Math.floor(Math.random()*500); gainGold(cg); msg.push('🎁 '+cg+'🪙'); if(Math.random()<0.5){ pGems+=2; msg.push('💎2'); } }
+  if(r.chest){ var cg=150+Math.floor(Math.random()*250); gainGold(cg); msg.push('🎁 '+cg+'🪙'); if(Math.random()<0.35){ pGems+=1; msg.push('💎1'); } }   // halved (economy pass)
   if(r.pet){ var un=PETS.filter(function(p){return !hasPet(p.id);}); if(un.length){ var pick=un[Math.floor(Math.random()*un.length)]; grantPet(pick.id); msg.push('🐾 '+pick.name+'!'); } else { gainGold(2500); msg.push('🪙2500'); } }
   localStorage_set('numa_login_day',String(_loginDayNum()));
   localStorage_set('numa_login_streak',String(streak));
@@ -2893,6 +2901,7 @@ function beginLevel(isBossLevel){
   levelTimedOut=false; levelMaxComboMult=1; levelUsedMult=false; levelObjDone=false; levelLivesLost=0; levelHintsUsed=0; levelMaxStreak=0;
   levelPerfectWaves=0;
   window._buildWavesThisLevel=0; window._chainWavesThisLevel=0; window._lastSpecialAt=-9;   // per-level special-wave caps + combined gap
+  window._slowmoLvlCnt=0;   // near-miss rescue re-arms once per LEVEL
   if(!isBossLevel && gMode!=='time') showFeatureUnlock(pLevel);
   applyProgressiveUI();
   if(isBossLevel || gMode==='time'){ levelObjective=null; updateObjChip(); return; }
@@ -3182,7 +3191,7 @@ function showScreen(id,navEl){
   // campaign surfaces, so restore the math level before they read pLevel (else the map would show
   // word's level 2 and offer to replay the campaign from there).
   if((id==='home'||id==='map') && typeof campaignLevel==='function' && !gActive){ pLevel=campaignLevel(); endRunLevelScope(); }
-  if(id==='map' && typeof renderWorldMap==='function') renderWorldMap();
+  if(id==='map'){ window._mapW=null; if(typeof renderWorldMap==='function') renderWorldMap(); }   // open on the CURRENT realm, then browse freely
   if(id==='badges')renderBadges();
   if(id==='market'){ if(typeof renderMarket==='function') renderMarket(); }
   if(id==='leaderboard'){ const lg=document.querySelector('.lb-tab[data-mode="league"]'); if(lg&&typeof switchLbTab==='function'){ switchLbTab('league',lg); } else renderLeaderboard(); }
@@ -3319,8 +3328,15 @@ const WM_POS=[
   {x:110,y:700},{x:235,y:660},{x:272,y:575},{x:165,y:520},{x:95,y:445},
   {x:200,y:392},{x:290,y:335},{x:215,y:268},{x:120,y:215},{x:185,y:128}
 ];
+/* map world browser (review: "oyuncu dünyayı görmek ister ama sadece o lvl harita gösteriyoruz") */
+function mapShiftWorld(d){
+  const cur=(window._mapW!=null)?window._mapW:worldOf(pLevel);
+  window._mapW=Math.max(0,Math.min(WORLDS.length-1,cur+d));
+  initAudio(); if(typeof sfxClick==='function') sfxClick();
+  renderWorldMap();
+}
 function renderWorldMap(){
-  const w=worldOf(pLevel), base=w*10;
+  const w=(window._mapW!=null)?window._mapW:worldOf(pLevel), base=w*10;
   // painted realm backdrop (World 1 art; reused for now)
   const bg=document.getElementById('wm-bg');
   if(bg) bg.src=worldBg(w);   // per-world map backdrop
@@ -3394,6 +3410,7 @@ function startGame(mode){
   timer=(mode==='time')?TA_START:60;
   taWave=1;
   pScore=0; solvedCount=0;
+  window._runT0=Date.now();   // run clock — rides along with score submits for plausibility checks
   window._runMaxStreak=0;   // fresh combo record for the game-over card
   pLives=3+(typeof petHeartBonus==='function'?petHeartBonus():0); // fresh lives each run (+ Void pet)
   if(typeof hideBoss==='function') hideBoss();
@@ -4420,15 +4437,57 @@ function loseHeartSound(){ beep(260,.14,'sawtooth',.2); setTimeout(()=>beep(180,
 /* equation generator — difficulty scales with level; decoys are ±1..3 (the real challenge) */
 function genWaveEq(){
   const lvl=effLevel();
-  // harder earlier (first 10 were too easy): × from L2, ÷ from L5, bigger numbers
-  const ops = lvl<=1?['+','-'] : lvl<=4?['+','-','×'] : ['+','-','×','÷'];
-  const op=ops[wrnd(0,ops.length-1)];
-  const grow=Math.min(lvl*4,50);
-  let a,b,ans;
-  if(op==='+'){ a=wrnd(2,8+grow); b=wrnd(2,8+grow); ans=a+b; }
-  else if(op==='-'){ a=wrnd(6,14+grow); b=wrnd(2,a-1); ans=a-b; }
-  else if(op==='×'){ a=wrnd(2,Math.min(4+Math.floor(lvl/2),9)); b=wrnd(2,9); ans=a*b; }
-  else { b=wrnd(2,9); ans=wrnd(2,9); a=b*ans; }
+  /* ═══ REALM MATH (review 2026-07-16: "hız artıyor, matematik artmıyor — realm değişince oyuncu yeni
+     matematik oynadığını hissetmeli, boss soru tipini değiştirsin") ═══
+     Each realm OWNS an operation, difficulty comes from FORMAT, not just speed:
+       VOID 1-10: + −   ·  WRAITH 11-20: × rules   ·  CHRONO 21-30: ÷ rules
+       AMALGAM 31-40: everything + MISSING-OPERAND (12 + ? = 20)
+       NULL 41-50: TWO-STAGE — (7 × 3) − ? = 10
+     Bosses ALWAYS ask missing-operand (two-stage in Null): the boss changes the question itself.
+     Non-campaign modes (word grid feeds elsewhere; combo/time use the level ladder realm-mapped too). */
+  const w=Math.min(Math.floor((lvl-1)/10),4);
+  const grow=Math.min(lvl*4,60);
+  const lo=Math.min(2+Math.floor(lvl/4),11);       // operand floor still rises — no 4×2 late
+  const roll=Math.random();
+  // format per realm (+ boss override)
+  let fmt='std';
+  if(isBoss) fmt=(w>=4)?'two':'miss';
+  else if(w===3 && roll<0.35) fmt='miss';
+  else if(w===4) fmt=(roll<0.45)?'two':(roll<0.75?'miss':'std');
+  else if(w>=1 && roll<0.18) fmt='miss';
+  // operation per realm
+  const pick=Math.random();
+  let op;
+  if(w===0) op=pick<0.5?'+':'-';
+  else if(w===1) op=pick<0.65?'×':(pick<0.85?'+':'-');
+  else if(w===2) op=pick<0.6?'÷':(pick<0.85?'×':'-');
+  else op=['+','-','×','÷'][wrnd(0,3)];
+  let a,b,ans,correct,disp,rr=0;
+  do{
+    if(op==='+'){ a=wrnd(lo,8+grow); b=wrnd(lo,8+grow); ans=a+b; }
+    else if(op==='-'){ a=wrnd(lo+5,14+grow); b=wrnd(lo,a-1); ans=a-b; }
+    else if(op==='×'){
+      const aLo=lvl<12?2:Math.min(6+Math.floor(lvl/6),12);
+      const aHi=lvl<12?Math.min(4+Math.floor(lvl/2),9):Math.min(12+Math.floor(lvl/4),19);
+      a=wrnd(aLo,Math.max(aLo+1,aHi)); b=wrnd(lvl<12?2:3,9); ans=a*b;
+    }
+    else { b=wrnd(2,9); ans=wrnd(Math.max(2,Math.floor(lvl/4)),Math.min(9+Math.floor(lvl/3),19)); a=b*ans; }
+    if(fmt==='two'){
+      // (a op2 b2) − ? = t  → tap the missing subtrahend
+      const a2=wrnd(3,9), b2=wrnd(3,9), p=a2*b2;
+      correct=wrnd(2,p-2); disp='('+a2+' × '+b2+') − <span class="q">?</span> = '+(p-correct);
+      a=a2; b=b2; ans=correct;
+    } else if(fmt==='miss'){
+      // hide ONE side: "a op ? = ans"  or  "? op b = ans" — tap the hidden operand
+      const hideB=Math.random()<0.5;
+      correct=hideB?b:a;
+      disp=hideB?(a+' '+op+' <span class="q">?</span> = '+ans):('<span class="q">?</span> '+op+' '+b+' = '+ans);
+      ans=correct;
+    } else { correct=ans; disp=a+' '+op+' '+b+' = <span class="q">?</span>'; }
+    // reroll straight repeats — same face OR same tap-answer back-to-back ("genelde aynı" report)
+  }while(rr++<8 && (disp===window._lastEqKey || correct===window._lastEqAns));
+  window._lastEqKey=disp; window._lastEqAns=correct;
+  ans=correct;
   const dset=new Set([ans]);
   let guard=0;
   // OPTION COUNT (user 2026-07-15: "6 olsun, 5, en son hızlıda 4"). The old 4→3→2 ladder collapsed to
@@ -4455,7 +4514,7 @@ function genWaveEq(){
   const decoyRange = isBoss ? 3 : (lvl>=5 ? Math.max(3, optionCount-2) : Math.max(4, optionCount));
   while(dset.size<optionCount && guard++<120){ const d=ans+(Math.random()<.5?-1:1)*wrnd(1,decoyRange); if(d>0 && d!==ans) dset.add(d); }
   let _e=1; while(dset.size<optionCount){ if(ans+_e>0) dset.add(ans+_e); _e++; }
-  waveEq={a,b,op,ans,answers:[...dset].sort(()=>Math.random()-.5)};
+  waveEq={a,b,op,ans,disp,answers:[...dset].sort(()=>Math.random()-.5)};
   targetVal=ans;                                 // meta systems (boss dmg, hint) read this
   primarySolution=[String(ans)];                 // boss zap "solution tile" filter
   guaranteedSeq=[String(ans)];
@@ -4465,7 +4524,7 @@ function genWaveEq(){
 function renderWaveEq(){
   const tv=document.getElementById('g-target');
   if(!tv||!waveEq) return;
-  tv.innerHTML='<span class="eq-display">'+waveEq.a+' '+waveEq.op+' '+waveEq.b+' = <span class="q">?</span></span>';
+  tv.innerHTML='<span class="eq-display">'+(waveEq.disp||waveEq.a+' '+waveEq.op+' '+waveEq.b+' = <span class="q">?</span>')+'</span>';
   if(tv.animate) tv.animate([{transform:'scale(.6)',opacity:0},{transform:'scale(1.08)',opacity:1},{transform:'scale(1)'}],{duration:320,easing:'cubic-bezier(.2,1.5,.4,1)'});
 }
 function waveFallSpeed(){
@@ -4576,7 +4635,14 @@ function clearWaveMath(fade){
 function respawnWaveMath(){ if(!gActive||gSubMode!=='math') return; clearWaveMath(false); spawnWaveMath(); }
 /* time effects */
 function hitStop(ms){ timescale=0; setTimeout(()=>{ timescale=(slowmoTimer>0)?0.45:1; },ms); }
-function startSlowmo(){ slowmoUsed=true; slowmoTimer=1300; hbTimer=0; timescale=0.45; document.getElementById('phone').classList.add('slowmo'); }
+function startSlowmo(){
+  slowmoUsed=true;   // always mark the wave, or gameLoop re-triggers every frame while near the line
+  // ONCE PER LEVEL, not once per wave (user: "her bastığımda kurtarma yapıyor, baya kolaylaştırıyor").
+  // Per-wave meant EVERY wave you dawdled on got a free rescue — it was a difficulty floor, not a moment.
+  if((window._slowmoLvlCnt||0)>=1) return;
+  window._slowmoLvlCnt=(window._slowmoLvlCnt||0)+1;
+  slowmoTimer=1300; hbTimer=0; timescale=0.45; document.getElementById('phone').classList.add('slowmo');
+}
 function endSlowmo(){ slowmoTimer=0; if(timescale!==0) timescale=1; document.getElementById('phone').classList.remove('slowmo'); }
 /* shouts + fever edge classes (driven by streakCount) */
 function updateWaveCombo(up){
@@ -6064,11 +6130,11 @@ function handleSuccess(){
   let goldEarned=Math.max(1,Math.round((2+comboMult)*bossBonus*exprMult*0.28));   // gold SCARCER (user "3 günde 10k çok kolay") — skill currency, earned slowly
   if(exprBonus>0) setTimeout(()=>showGoldPop('⚡ '+(opCount)+'-OP CHAIN! +'+Math.round((exprMult-1)*100)+'%'),200);
   // GOD MODE: huge bonus + chance for gem
-  if(comboMult>=3){ goldEarned+=2; if(Math.random()<0.10){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); } }
+  if(comboMult>=3){ goldEarned+=2; if(Math.random()<0.04){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); } }   // 10%→4% (economy pass)
   // active god mode = triple everything
   if(godModeActive){ pScore+=pts*2; pXP+=pts*2; goldEarned+=2; }
   // Boss solve: guaranteed gem
-  if(isBoss && Math.random()<0.22){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); }
+  if(isBoss && Math.random()<0.08){ pGems+=1; setTimeout(()=>showGoldPop('💎 +1'),300); }   // 22%→8% (economy pass)
   pScore+=pts; gainGold(goldEarned); pXP+=pts; solvedCount++; pTotalSolved++;
   if(typeof petBuddyReact==='function') petBuddyReact();   // pet hops on each solve
   if(typeof renderSkillBar==='function'){ renderSkillBar(); }   // refresh skill affordability as gold changes
@@ -6250,7 +6316,9 @@ function finishLevelUp(wasBoss){
   // ── OBJECTIVE bonus (normal levels only) ──
   let objLine='';
   if(!wasBoss && levelObjective){
-    if(evalObjective()){ gainGold(12); pGems+=1; objLine=' • 🎯 Goal! +12🪙 +1💎'; }
+    // ECONOMY 2026-07-16 (user: "3 günde 15bin altın 35-40 elmas, free çok kolay"): the objective paid
+    // +1💎 EVERY level — that alone was ~a gem per level. Gems come from bosses/quests/login now.
+    if(evalObjective()){ gainGold(25); objLine=' • 🎯 Goal! +25🪙'; }
     else objLine=' • 🎯 Goal missed';
   }
   let title,sub,gold;
@@ -7305,7 +7373,7 @@ function runSurpriseRound(onDone){
   initAudio(); if(typeof sfxGod==='function') sfxGod(); if(typeof haptic==='function') haptic([20,30,20]);
   const close=(win)=>{
     if(!surpriseActive) return; surpriseActive=false;
-    if(win){ const g=40+pLevel*4, gem=Math.random()<0.35?1:0; gainGold(g); if(gem)pGems+=gem;
+    if(win){ const g=20+pLevel*2, gem=Math.random()<0.15?1:0; gainGold(g); if(gem)pGems+=gem;   // halved (economy pass)
       showSrResult(ov,true,'+'+g+' 🪙'+(gem?' +1 💎':'')); if(typeof fireConfetti==='function') fireConfetti(40); if(typeof sfxGold==='function') sfxGold(); }
     else { showSrResult(ov,false,'No reward — keep going!'); }
     setTimeout(()=>{ ov.classList.add('sr-out'); setTimeout(()=>{ ov.remove(); updateHUD(); onDone&&onDone(); },300); }, win?900:700);
@@ -8502,6 +8570,11 @@ function renderMarket(){
   injectStoreCSS();
   const mg=document.getElementById('mkt-gold'); if(mg) mg.textContent=pGold;
   const mge=document.getElementById('mkt-gems'); if(mge) mge.textContent=pGems;
+  // APP STORE 2.1: a reviewer who taps a "$1.99" card that goes through iapStub (toast, no purchase)
+  // is a guideline rejection. Until StoreKit is wired, the native build simply doesn't show IAP cards.
+  if(typeof _nativeHost==='function' && _nativeHost()==='flutter' && !window.NumaIAPReady){
+    ['value-pack','founder-pack'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display='none'; });
+  }
   // Value Pack is a REPEATABLE gold+gem pack — always buyable at a flat $1.99 (no "/mo", never disabled)
   const vp=document.getElementById('value-pack');
   if(vp){ const vpp=vp.querySelector('.sp-price'); if(vpp) vpp.textContent='$1.99'; vp.style.opacity=''; vp.style.pointerEvents=''; }
@@ -8854,6 +8927,9 @@ function submitScore(mode,score){
     const u=window.fbAuth.currentUser;
     const data={ name:(playerName||'Player').slice(0,16), av:_avatarEmoji(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
     data[mode]=score;   // merge keeps other modes; we only call this on a NEW local best so it's monotonic
+    // PLAUSIBILITY METADATA (security-lite until Cloud Functions): the run's duration rides along, so
+    // rules can bound score-per-second and every reader can drop entries a script faked in 2 seconds.
+    data.dur=Math.max(1,Math.round((Date.now()-(window._runT0||Date.now()))/1000));
     db.collection('scores').doc(u.uid).set(data,{merge:true}).catch(e=>console.warn('[lb] write',e));
   }catch(e){ console.warn('[lb] submit',e); }
 }
@@ -8881,7 +8957,12 @@ function renderLeaderboard(){
   const db=fbDB();
   if(db){
     db.collection('scores').orderBy(mode,'desc').limit(20).get()
-      .then(snap=>{ const real=[]; snap.forEach(d=>{ const x=d.data()||{}; if(typeof x[mode]==='number' && x[mode]>0) real.push({name:(x.name||'Player'),score:x[mode],emoji:(x.av||'🙂'),uid:d.id}); });
+      .then(snap=>{ const real=[]; snap.forEach(d=>{ const x=d.data()||{};
+        // SHADOW-FILTER: entries flagged server-side (ban) or physically implausible (more than
+        // ~80 pts/sec sustained) never render — cheaters see themselves on the board, nobody else does.
+        if(x.ban) return;
+        if(typeof x.dur==='number' && typeof x[mode]==='number' && x[mode]>x.dur*80+500) return;
+        if(typeof x[mode]==='number' && x[mode]>0) real.push({name:(x.name||'Player'),score:x[mode],emoji:(x.av||'🙂'),uid:d.id}); });
         _lbCacheSet('m_'+mode,real);
         if(mode===currentLbMode) paint(real); })   // re-paint with real data when it arrives
       .catch(e=>{ console.warn('[lb] read',e); });
