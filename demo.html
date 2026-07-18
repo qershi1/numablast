@@ -128,6 +128,15 @@
     .rail{grid-template-columns:repeat(2,1fr);}
     header{padding:34px 0 10px;} section{padding:46px 0;}
   }
+  /* the nav ran off the right edge on a phone: brand + two buttons never fit 390px.
+     Drop the secondary button and shorten the CTA instead of letting it overflow. */
+  @media(max-width:560px){
+    .nav-in{padding:10px 0;gap:10px;}
+    .brand{font-size:16px;} .brand img{width:26px;height:26px;}
+    .cta.ghost{display:none;}
+    #nav-cta{font-size:13px;padding:9px 13px;}
+    #nav-cta .full{display:none;}
+  }
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
 </style>
 </head>
@@ -139,7 +148,7 @@
   <div class="brand"><img src="icon-180.png" alt=""><i>NUMA</i>&nbsp;<b>BLAST</b></div>
   <div style="display:flex;gap:10px;align-items:center;">
     <a class="cta ghost" href="#play">Play free</a>
-    <a class="cta" id="nav-cta" href="#get">Get the full game</a>
+    <a class="cta" id="nav-cta" href="#get">Get<span class="full"> the full</span> game</a>
   </div>
 </div></nav>
 
@@ -165,7 +174,7 @@
     <div class="phone">
       <div class="tag">LIVE DEMO · 10 LEVELS</div>
       <iframe id="game" title="NUMA BLAST playable demo"
-        src="index.html?demo=1"
+        src="demo-game.html"
         allow="autoplay"
         sandbox="allow-scripts allow-popups"></iframe>
       <!-- NO allow-same-origin, deliberately: it gives the frame an opaque origin, so the demo gets
