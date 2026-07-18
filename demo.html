@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NUMA BLAST — Play the Demo</title>
+<meta name="description" content="Solve falling equations before they hit the line. Play 10 levels free in your browser, then get the full game on the App Store.">
+<meta property="og:title" content="NUMA BLAST — Math Puzzle Game">
+<meta property="og:description" content="Play 10 levels free in your browser. 5 realms, 5 bosses, 50 levels in the full game.">
+<meta property="og:image" content="icon-180.png">
+<link rel="icon" href="icon-32.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Rajdhani:wght@600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05030c; --ink:#ece7ff; --mut:#9a8fc0;
+    --cy:#00d4ff; --vi:#a855f7; --gold:#ffc94a; --grn:#43e0a0; --pink:#ff4dd2;
+    --card:rgba(255,255,255,.045); --line:rgba(190,160,255,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--ink);font-family:Rajdhani,system-ui,sans-serif;
+    overflow-x:hidden;line-height:1.5;}
+  /* the WebGL canvas sits behind everything and never eats a click */
+  #gl{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .wrap{position:relative;z-index:1;}
+  .shell{width:min(1180px,92vw);margin:0 auto;}
+
+  /* ── NAV ── */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+    background:linear-gradient(180deg,rgba(5,3,12,.92),rgba(5,3,12,.55));border-bottom:1px solid var(--line);}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;padding:12px 0;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:Bungee,sans-serif;font-size:19px;letter-spacing:.5px;}
+  .brand img{width:30px;height:30px;border-radius:8px;}
+  .brand i{font-style:normal;background:linear-gradient(180deg,#fff,#b9a9e8);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .brand b{background:linear-gradient(180deg,var(--gold),#ff6a2a);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .cta{display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;text-decoration:none;
+    font-family:Syne,sans-serif;font-weight:800;font-size:14px;color:#0a0614;
+    background:linear-gradient(180deg,#ffd76a,#ff8a2a);padding:10px 18px;border-radius:13px;
+    box-shadow:0 8px 24px -8px rgba(255,150,40,.75);transition:transform .12s,filter .2s;white-space:nowrap;}
+  .cta:hover{filter:brightness(1.08);} .cta:active{transform:scale(.96);}
+  .cta.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none;}
+
+  /* ── HERO ── */
+  header{padding:56px 0 30px;}
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:12px;letter-spacing:2.4px;
+    color:var(--cy);border:1px solid rgba(0,212,255,.32);background:rgba(0,212,255,.08);
+    padding:6px 13px;border-radius:99px;margin-bottom:18px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--grn);box-shadow:0 0 10px var(--grn);animation:blip 1.6s infinite;}
+  @keyframes blip{0%,100%{opacity:1;}50%{opacity:.25;}}
+  h1{font-family:Bungee,sans-serif;font-size:clamp(38px,5.6vw,68px);line-height:.98;letter-spacing:.5px;}
+  h1 span{display:block;}
+  h1 .a{background:linear-gradient(180deg,#fff,#a99ad6);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  h1 .b{background:linear-gradient(180deg,var(--gold),#ff5a2a);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .lede{font-size:17.5px;color:#cfc6ec;max-width:44ch;margin:18px 0 26px;}
+  .btns{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .stats{display:flex;gap:26px;margin-top:32px;flex-wrap:wrap;}
+  .stat b{display:block;font-family:Bungee,sans-serif;font-size:25px;
+    background:linear-gradient(180deg,#fff,var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .stat span{font-size:11px;letter-spacing:2px;color:var(--mut);font-weight:700;}
+
+  /* ── PHONE ── */
+  .stage{display:flex;justify-content:center;position:relative;}
+  .glowring{position:absolute;width:min(430px,86vw);aspect-ratio:1;border-radius:50%;filter:blur(46px);opacity:.5;
+    background:conic-gradient(from 0deg,var(--vi),var(--cy),var(--pink),var(--gold),var(--vi));animation:spin 16s linear infinite;}
+  @keyframes spin{to{transform:rotate(1turn);}}
+  .phone{position:relative;width:392px;max-width:88vw;aspect-ratio:390/844;border-radius:44px;padding:9px;
+    background:linear-gradient(160deg,#2b2244,#0b0716);border:1px solid rgba(200,170,255,.22);
+    box-shadow:0 40px 90px -30px #000,0 0 70px -30px var(--vi);}
+  .phone iframe{width:100%;height:100%;border:0;border-radius:36px;display:block;background:#05030c;}
+  .tag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);z-index:3;
+    font-family:Syne,sans-serif;font-weight:800;font-size:11px;letter-spacing:1.6px;color:#0a0614;
+    background:linear-gradient(180deg,var(--grn),#1fae7a);padding:6px 15px;border-radius:99px;
+    box-shadow:0 8px 22px -8px var(--grn);white-space:nowrap;}
+
+  /* ── SECTIONS ── */
+  section{padding:66px 0;}
+  .kicker{text-align:center;font-weight:800;letter-spacing:3px;font-size:12px;color:var(--vi);margin-bottom:10px;}
+  h2{font-family:Bungee,sans-serif;font-size:clamp(25px,3.4vw,38px);text-align:center;margin-bottom:38px;letter-spacing:.5px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:16px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:19px;padding:22px;
+    transition:transform .18s,border-color .18s;}
+  .card:hover{transform:translateY(-4px);border-color:rgba(190,160,255,.4);}
+  .card .ic{font-size:27px;margin-bottom:11px;}
+  .card h3{font-family:Syne,sans-serif;font-size:17.5px;margin-bottom:6px;}
+  .card p{color:var(--mut);font-size:14.5px;}
+
+  /* realm rail */
+  .rail{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+  .realm{position:relative;border-radius:17px;overflow:hidden;border:1px solid var(--line);
+    aspect-ratio:3/4.4;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;
+    background-size:cover;background-position:center;}
+  .realm::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(5,3,12,.93));}
+  .realm>*{position:relative;z-index:1;}
+  .realm .lv{font-family:Bungee,sans-serif;font-size:12px;color:var(--rc);text-shadow:0 0 12px var(--rc);}
+  .realm .nm{font-family:Syne,sans-serif;font-weight:800;font-size:14px;margin-top:3px;line-height:1.15;}
+  .realm .op{font-size:12px;color:var(--mut);margin-top:4px;}
+
+  /* ── PAYWALL ── */
+  #wall{position:fixed;inset:0;z-index:200;display:none;place-items:center;padding:22px;
+    background:rgba(3,2,8,.86);backdrop-filter:blur(9px);}
+  #wall.on{display:grid;animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .wall-box{width:min(430px,94vw);text-align:center;border-radius:26px;padding:34px 26px 28px;position:relative;overflow:hidden;
+    background:linear-gradient(170deg,#1b1330,#0a0616);border:1px solid rgba(255,201,74,.42);
+    box-shadow:0 40px 90px -30px #000,0 0 60px -26px var(--gold);animation:pop .45s cubic-bezier(.2,1.5,.4,1);}
+  @keyframes pop{from{transform:scale(.86);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .wall-box .em{font-size:52px;}
+  .wall-box h3{font-family:Bungee,sans-serif;font-size:26px;margin:8px 0 6px;
+    background:linear-gradient(180deg,var(--gold),#ff5a2a);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .wall-box p{color:#cdc4ea;font-size:15px;margin-bottom:18px;}
+  .wall-list{text-align:left;display:grid;gap:9px;margin:0 auto 22px;max-width:295px;}
+  .wall-list div{font-size:14.5px;color:#ded6f6;}
+  .wall-list b{color:var(--gold);}
+  .wall-box .cta{width:100%;justify-content:center;font-size:16px;padding:14px;}
+  .again{display:block;margin-top:13px;background:none;border:0;color:var(--mut);cursor:pointer;
+    font-family:Rajdhani,sans-serif;font-weight:700;font-size:13.5px;text-decoration:underline;}
+
+  footer{border-top:1px solid var(--line);padding:30px 0 44px;text-align:center;color:var(--mut);font-size:13.5px;}
+  footer a{color:var(--cy);text-decoration:none;} footer a:hover{text-decoration:underline;}
+  .rv{opacity:0;transform:translateY(22px);transition:opacity .7s,transform .7s;}
+  .rv.in{opacity:1;transform:none;}
+
+  @media(max-width:900px){
+    .hero{grid-template-columns:1fr;gap:34px;text-align:center;}
+    .lede{margin-inline:auto;} .btns,.stats{justify-content:center;}
+    .rail{grid-template-columns:repeat(2,1fr);}
+    header{padding:34px 0 10px;} section{padding:46px 0;}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div class="wrap">
+<nav><div class="shell nav-in">
+  <div class="brand"><img src="icon-180.png" alt=""><i>NUMA</i>&nbsp;<b>BLAST</b></div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <a class="cta ghost" href="#play">Play free</a>
+    <a class="cta" id="nav-cta" href="#get">Get the full game</a>
+  </div>
+</div></nav>
+
+<header><div class="shell hero">
+  <div>
+    <div class="eyebrow"><span class="dot"></span> PLAYABLE IN YOUR BROWSER</div>
+    <h1><span class="a">THINK FAST.</span><span class="b">BLAST NUMBERS.</span></h1>
+    <p class="lede">Equations fall. Solve, tap the right answer, blast the tile — before it crosses the red line.
+      Ten levels free right here. The full journey lives on the App Store.</p>
+    <div class="btns">
+      <a class="cta" href="#play">▶ Play 10 levels free</a>
+      <a class="cta ghost" href="#get">See the full game</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>5</b><span>REALMS</span></div>
+      <div class="stat"><b>5</b><span>BOSSES</span></div>
+      <div class="stat"><b>50</b><span>LEVELS</span></div>
+      <div class="stat"><b>660+</b><span>WORDS</span></div>
+    </div>
+  </div>
+  <div class="stage" id="play">
+    <div class="glowring"></div>
+    <div class="phone">
+      <div class="tag">LIVE DEMO · 10 LEVELS</div>
+      <iframe id="game" title="NUMA BLAST playable demo"
+        src="index.html?demo=1"
+        allow="autoplay"
+        sandbox="allow-scripts allow-popups"></iframe>
+      <!-- NO allow-same-origin, deliberately: it gives the frame an opaque origin, so the demo gets
+           its own blocked storage instead of sharing localStorage with the full web game. Without it
+           a returning player's real save (level 23, their gold) loads inside the "demo" and the
+           10-level cap means nothing. The game wraps every storage call in try/catch, so it simply
+           starts fresh every time — exactly what a demo should do. -->
+    </div>
+  </div>
+</div></header>
+
+<section class="rv"><div class="shell">
+  <div class="kicker">HOW IT PLAYS</div>
+  <h2>Two modes in the demo</h2>
+  <div class="grid">
+    <div class="card"><div class="ic">🔢</div><h3>Math Blast</h3>
+      <p>Six answers fall in lanes. Only one is right, and the decoys sit ±1 away — you have to actually compute, not spot the odd number.</p></div>
+    <div class="card"><div class="ic">🎡</div><h3>Pulse</h3>
+      <p>Watch the colour sequence, then repeat it. The wheel grows from three slices to six as you climb.</p></div>
+    <div class="card"><div class="ic">❄️</div><h3>Power-ups</h3>
+      <p>Freeze the board, slow the fall, or raise a shield that eats one mistake. Earned with coins you win by playing.</p></div>
+    <div class="card"><div class="ic">❤️</div><h3>Three hearts</h3>
+      <p>A wrong tap only breaks your combo. Let the correct answer cross the red line and it costs a heart.</p></div>
+  </div>
+</div></section>
+
+<section class="rv"><div class="shell">
+  <div class="kicker">IN THE FULL GAME</div>
+  <h2>Five realms. Five bosses.</h2>
+  <div class="rail" id="rail"></div>
+  <p style="text-align:center;color:var(--mut);margin-top:22px;font-size:15px;">
+    Each realm owns its own maths — and every boss changes the question itself.</p>
+</div></section>
+
+<section class="rv" id="get"><div class="shell" style="text-align:center;">
+  <div class="kicker">READY?</div>
+  <h2>The other 40 levels are waiting</h2>
+  <div class="grid" style="max-width:880px;margin:0 auto 30px;">
+    <div class="card"><div class="ic">🔤</div><h3>Word Hunt</h3><p>660+ words with picture clues, repeat-free from level 1 to 50.</p></div>
+    <div class="card"><div class="ic">🏆</div><h3>Ranked ladder</h3><p>Climb seven divisions from Bronze to Grandmaster across three-month seasons.</p></div>
+    <div class="card"><div class="ic">🐾</div><h3>Boss pets</h3><p>Tame the realm bosses into companions with passive perks.</p></div>
+  </div>
+  <a class="cta" id="store-cta" href="#" style="font-size:17px;padding:15px 30px;">Get NUMA BLAST on the App Store</a>
+  <p style="color:var(--mut);font-size:13.5px;margin-top:12px;">Free to play · optional in-app purchases</p>
+</div></section>
+
+<footer><div class="shell">
+  NUMA BLAST · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> ·
+  <a href="index.html">Open the full web version</a>
+</div></footer>
+</div>
+
+<div id="wall" role="dialog" aria-modal="true" aria-labelledby="wall-title">
+  <div class="wall-box">
+    <div class="em">🏆</div>
+    <h3 id="wall-title">DEMO COMPLETE</h3>
+    <p>You cleared all ten demo levels. The realms start here.</p>
+    <div class="wall-list">
+      <div>⚔️ <b>40 more levels</b> across 5 painted realms</div>
+      <div>👹 <b>5 bosses</b> that change the question itself</div>
+      <div>🔤 <b>Word Hunt</b> and Time Attack modes</div>
+      <div>🏅 <b>Ranked seasons</b> — Bronze to Grandmaster</div>
+    </div>
+    <a class="cta store" href="#">Get it on the App Store</a>
+    <button class="again" id="again">Replay the demo</button>
+  </div>
+</div>
+
+<script>
+const APP_STORE_URL='https://apps.apple.com/app/id6790150362';
+document.querySelectorAll('.cta.store, #store-cta').forEach(a=>{ a.href=APP_STORE_URL; a.target='_blank'; a.rel='noopener'; });
+
+/* realms — art reused from the game's own world backdrops */
+const REALMS=[
+  {n:'VOID REALM',b:'Void Calculator',lv:'LV 10',op:'Addition & subtraction',c:'#c084fc',bg:'world1.jpg'},
+  {n:'WRAITH REALM',b:'Word Wraith',lv:'LV 20',op:'Multiplication',c:'#5af08a',bg:'world2.jpg'},
+  {n:'CHRONO REALM',b:'Chrono Devourer',lv:'LV 30',op:'Division',c:'#ffc94a',bg:'world3.jpg'},
+  {n:'AMALGAM REALM',b:'The Amalgam',lv:'LV 40',op:'Mixed + hidden operands',c:'#ff6a6a',bg:'world4.jpg'},
+  {n:'NULL REALM',b:'Null King',lv:'LV 50',op:'Two-stage equations',c:'#e9c46a',bg:'world5.jpg'}
+];
+document.getElementById('rail').innerHTML=REALMS.map(r=>
+  `<div class="realm" style="--rc:${r.c};background-image:linear-gradient(180deg,rgba(5,3,12,.3),rgba(5,3,12,.2)),url('${r.bg}')">
+     <div class="lv">${r.lv}</div><div class="nm">${r.b}</div><div class="op">${r.op}</div></div>`).join('');
+
+/* the game iframe tells us when the demo is over */
+addEventListener('message',e=>{
+  const d=e.data;
+  if(d && d.numaDemo==='wall') document.getElementById('wall').classList.add('on');
+});
+document.getElementById('again').onclick=()=>{
+  document.getElementById('wall').classList.remove('on');
+  const f=document.getElementById('game'); f.src=f.src;   // reload the demo from level 1
+};
+
+/* scroll reveal */
+const io=new IntersectionObserver(es=>es.forEach(x=>{ if(x.isIntersecting){ x.target.classList.add('in'); io.unobserve(x.target); } }),{threshold:.12});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+setTimeout(()=>document.querySelectorAll('.rv').forEach(el=>el.classList.add('in')),2600);  // safety net
+
+/* ── WebGL backdrop: drifting nebula + electric grid. Raw shader (~2KB) instead of a 600KB
+   3D library — same "wow", a fraction of the payload, and it degrades to a flat colour if
+   the context is refused. ── */
+(function(){
+  const c=document.getElementById('gl');
+  const gl=c.getContext('webgl',{antialias:false,alpha:false,powerPreference:'low-power'});
+  if(!gl){ c.style.background='radial-gradient(circle at 50% 0%,#1a0f33,#05030c 70%)'; return; }
+  const vs=`attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
+  const fs=`precision highp float;uniform vec2 r;uniform float t;
+  float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+    return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+  float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p*=2.03;a*=.5;}return v;}
+  void main(){
+    vec2 uv=(gl_FragCoord.xy-.5*r)/r.y;
+    vec2 q=uv*1.5; q.y-=t*.014;
+    float f=fbm(q+fbm(q*1.7+t*.02));
+    vec3 col=mix(vec3(.02,.012,.05),vec3(.29,.10,.62),smoothstep(.32,1.02,f));
+    col=mix(col,vec3(.0,.55,.85),smoothstep(.55,1.05,f)*.55);
+    /* electric grid, fading with distance */
+    vec2 g=abs(fract(uv*7.5+vec2(0.,t*.05))-.5);
+    float line=smoothstep(.47,.5,max(g.x,g.y));
+    col+=vec3(.16,.34,.62)*line*.16*(1.-smoothstep(.1,1.15,length(uv)));
+    /* slow pulse + vignette */
+    col*=.92+.08*sin(t*.55);
+    col*=1.-.55*smoothstep(.45,1.35,length(uv));
+    gl_FragColor=vec4(col,1.);
+  }`;
+  const sh=(ty,src)=>{const s=gl.createShader(ty);gl.shaderSource(s,src);gl.compileShader(s);return s;};
+  const pr=gl.createProgram();
+  gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){ c.style.background='radial-gradient(circle at 50% 0%,#1a0f33,#05030c 70%)'; return; }
+  gl.useProgram(pr);
+  const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(pr,'p'); gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const uR=gl.getUniformLocation(pr,'r'), uT=gl.getUniformLocation(pr,'t');
+  /* cap the pixel ratio: a full-screen fbm shader at 3x on a phone is a battery fire */
+  function size(){ const d=Math.min(devicePixelRatio||1,1.5);
+    c.width=innerWidth*d; c.height=innerHeight*d;
+    c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px';
+    gl.viewport(0,0,c.width,c.height); gl.uniform2f(uR,c.width,c.height); }
+  addEventListener('resize',size); size();
+  let run=true;
+  document.addEventListener('visibilitychange',()=>{ run=document.visibilityState==='visible'; if(run) requestAnimationFrame(loop); });
+  const t0=performance.now();
+  function loop(){ if(!run) return;
+    gl.uniform1f(uT,(performance.now()-t0)/1000);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+    requestAnimationFrame(loop); }
+  loop();
+})();
+</script>
+</body>
+</html>

@@ -3259,7 +3259,28 @@ function levelStarKey(lvl){ return 'numa_lvlstar_'+((gMode&&gMode!=='math')?(gMo
 function getLevelStars(lvl){ return parseInt(localStorage_get(levelStarKey(lvl))||'0'); }
 function recordLevelStars(lvl,n){ if(n>getLevelStars(lvl)) localStorage_set(levelStarKey(lvl),String(n)); }
 function worldStarTotal(w){ let t=0; for(let l=w*10+1;l<=w*10+10;l++) t+=getLevelStars(l); return t; }
+/* ═══ WEB DEMO MODE (?demo=1) ═══
+   The marketing page (demo.html) embeds THIS file rather than shipping a second copy of the game —
+   one codebase, so a fix never has to be made twice. Demo = math + pulse only, 10 levels, a touch
+   faster, and a paywall that tells the parent page to show the App Store call to action. */
+const DEMO = /[?&]demo=1/.test(location.search);
+const DEMO_MAX_LEVEL = 10;
+function demoInit(){
+  if(!DEMO) return;
+  document.documentElement.classList.add('is-demo');
+  // only the two modes the demo advertises
+  ['word','combo','time'].forEach(function(m){
+    var c=document.querySelector('.mode-card[data-mode="'+m+'"]'); if(c) c.style.display='none';
+  });
+}
+function demoWall(reason){
+  if(!DEMO) return false;
+  try{ gActive=false; }catch(e){}
+  try{ parent.postMessage({numaDemo:'wall', reason:reason||'level', level:(typeof pLevel!=='undefined'?pLevel:0)}, '*'); }catch(e){}
+  return true;
+}
 function selectMode(mode,el){
+  if(DEMO && mode!=='math' && mode!=='pulse'){ demoWall('mode'); return; }
   selectedMode=mode;
   document.querySelectorAll('#home-screen .mode-card').forEach(c=>c.classList.remove('sel'));
   if(el) el.classList.add('sel');
@@ -4562,6 +4583,7 @@ function waveFallSpeed(){
   const softMod=1+(difficultyMod-1)*0.5;
   // HARD CEILING applied last, after every multiplier. It used to sit on the raw curve, so the
   // final-stretch ×1.16 rode straight through it (cap 155 → real 180 px/s) — the "cap" was a lie.
+  if(typeof DEMO!=='undefined' && DEMO) v*=1.12;   // demo plays a touch punchier than the full game
   return Math.min(v*softMod,190);   // 190 px/s ≈ 2.0s per tile = the fastest the game ever gets
 }
 function spawnWaveMath(){
@@ -6260,6 +6282,10 @@ function handleSuccess(){
     endFinalWave();
     gActive=false; pLevel++; solvedCount=0;
     _lastBuildAt=-9; _lastChainAt=-9;   // reset build/chain cadence each level (else solvedCount-_last<2 blocks them after L1)
+    // WEB DEMO: 10 levels, then the parent page takes over with the App Store call to action
+    if(DEMO && pLevel>DEMO_MAX_LEVEL){ pLevel=DEMO_MAX_LEVEL; updateHUD();
+      stopBossZaps&&stopBossZaps(); isBoss=false; hideBoss&&hideBoss();
+      demoWall('level'); return; }
     // GUEST CAP: free play ends after Level 10 — gate further progress behind sign-up
     if(isGuest && pLevel>GUEST_CAP){
       pLevel=GUEST_CAP; updateHUD();
@@ -10130,6 +10156,7 @@ let splashDismissed=false;
 function dismissSplash(){
   if(splashDismissed) return;
   splashDismissed=true; splashDone=true; // stop splash rAF loops
+  if(typeof demoInit==='function') demoInit();
   initAudio();   // 🌩 entry lightning — WAIT for iOS AudioContext.resume() to actually finish, else the first sound is silent
   if(typeof thunderSound==='function'){
     var _fire=function(){ thunderSound(1.4); };
