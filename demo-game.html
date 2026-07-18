@@ -3272,6 +3272,16 @@ const DEMO_MAX_LEVEL = 10;
 function demoInit(){
   if(!DEMO) return;
   document.documentElement.classList.add('is-demo');
+  /* ONE onboarding, not two. The full game runs a long "trainer" (badges, PLAY NOW, progress dots)
+     AND a short finger tutorial; on the demo they landed on top of each other — the trainer's
+     graduation screen was drawing straight through the tutorial's "TAP THE ANSWER" tiles.
+     A landing page needs the player IN the game fast, so the demo keeps only the finger tutorial
+     and marks the trainer as already done. */
+  try{ localStorage_set('numa_trained','1'); }catch(e){}
+  /* if this file is opened directly (not through the sandboxed iframe) an old real save could
+     put the player past the demo cap — start them at 1 so the 10-level wall still means something */
+  try{ if(typeof pLevel!=='undefined' && pLevel>DEMO_MAX_LEVEL){ pLevel=1; localStorage_set('numa_level','1');
+        if(typeof updateHUD==='function') updateHUD(); } }catch(e){}
   // only the two modes the demo advertises
   ['word','combo','time'].forEach(function(m){
     var c=document.querySelector('.mode-card[data-mode="'+m+'"]'); if(c) c.style.display='none';
