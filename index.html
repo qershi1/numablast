@@ -229,10 +229,14 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .wm-back{width:40px;height:40px;border-radius:13px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.05);color:#cbb8e8;font-size:22px;line-height:1;cursor:pointer;flex-shrink:0;}
 .wm-back:active{transform:scale(.92);}
 .wm-title{text-align:center;}
+/* realm title: same Bungee gradient type, but the gradient + glow now BREATHE in the realm's own
+   colour (--rc / --rc2, set per realm in renderWorldMap) so each realm announces itself. */
 .wm-title .wm-name{font-family:'Bungee',sans-serif;font-size:17px;letter-spacing:1.5px;
-  background:linear-gradient(180deg,#ffc94a,#ff5a2a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 12px rgba(255,130,40,.35));}
-.wm-title .wm-sub{font-size:9.5px;letter-spacing:4px;color:#8a6db3;font-weight:700;margin-top:2px;}
+  background:linear-gradient(180deg,var(--rc,#ffc94a),var(--rc2,#ff5a2a));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  animation:wmGlow 2.4s ease-in-out infinite;}
+@keyframes wmGlow{0%,100%{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--rc,#ff8228) 45%,transparent)) brightness(.9);}
+  50%{filter:drop-shadow(0 0 20px var(--rc,#ff8228)) brightness(1.3);}}
+.wm-title .wm-sub{font-size:9.5px;letter-spacing:4px;color:var(--rc,#8a6db3);font-weight:700;margin-top:2px;opacity:.8;}
 .wm-arrow{width:30px;height:30px;border-radius:10px;border:1px solid rgba(190,150,255,.35);flex-shrink:0;
   background:rgba(40,25,70,.6);color:#c9b3f5;font-size:13px;cursor:pointer;}
 .wm-arrow:active{transform:scale(.9);background:rgba(90,60,150,.6);}
@@ -266,7 +270,10 @@ body{background:#030507;display:flex;justify-content:center;align-items:center;m
 .wm-node.mini .wn-tag{background:#b06ad0;color:#fff;}
 .wm-node.boss .wn-tag{background:linear-gradient(180deg,#ff6a2a,#c42a10);color:#fff;font-family:'Bungee',sans-serif;font-size:8px;}
 .wm-node.boss .wn-req{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);z-index:3;font-size:9px;font-weight:700;color:#ffd97a;background:rgba(20,12,8,.9);padding:3px 9px;border-radius:9px;border:1px solid rgba(255,200,70,.4);white-space:nowrap;}
-#wm-fog{position:absolute;top:0;left:0;right:0;height:74px;z-index:12;pointer-events:none;border-radius:18px 18px 0 0;
+/* the "??? NEXT REALM — LOCKED" teaser is obsolete now that the ◀ ▶ arrows browse every realm —
+   it was left painting over the header ("altta yazılar kalmış"). Kept in the DOM, never shown. */
+#wm-fog{display:none!important;}
+#wm-fog-unused{position:absolute;top:0;left:0;right:0;height:74px;z-index:12;pointer-events:none;border-radius:18px 18px 0 0;
   background:linear-gradient(180deg,rgba(10,6,16,.95) 35%,rgba(12,7,18,.6) 70%,transparent);display:flex;align-items:flex-start;justify-content:center;padding-top:8px;}
 #wm-fog .wm-next{text-align:center;opacity:.6;}
 #wm-fog .wm-nw{font-family:'Bungee',sans-serif;font-size:13px;color:#5a8a8e;letter-spacing:2px;filter:blur(.6px);}
@@ -3342,6 +3349,11 @@ function renderWorldMap(){
   if(bg) bg.src=worldBg(w);   // per-world map backdrop
   document.getElementById('wm-name').textContent=WORLDS[w].name;
   document.getElementById('wm-sub').textContent='WORLD '+(w+1);
+  // realm identity colours — the title pulses in them (VOID violet, WRAITH green, CHRONO amber,
+  // AMALGAM crimson, NULL gold), matching the boss art the player just saw on the poster.
+  const RC=[['#c084fc','#7c3aed'],['#5af08a','#16a34a'],['#ffc94a','#f97316'],['#ff6a6a','#b91c1c'],['#e9c46a','#a855f7']];
+  const t=document.querySelector('.wm-title');
+  if(t){ t.style.setProperty('--rc',RC[w][0]); t.style.setProperty('--rc2',RC[w][1]); }
   document.getElementById('wm-starct').textContent=worldStarTotal(w)+'/30';
   const nextW=WORLDS[Math.min(w+1,WORLDS.length-1)];
   document.getElementById('wm-nextname').textContent=(w+1<WORLDS.length)?('??? '+nextW.name):'∞ ENDLESS';
