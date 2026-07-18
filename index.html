@@ -8516,7 +8516,10 @@ const DAILY_DEALS=[
   {icon:'🪙',title:'Gold Rush',desc:'+400 gold instantly',old:'💎18',price:'💎10',cur:'gems',cost:10,grant:()=>{pGold+=400;}},
   {icon:'💖',title:'Full Refill Deal',desc:'All hearts back',old:'💎5',price:'💎3',cur:'gems',cost:3,grant:()=>{pLives=MAX_LIVES;}},
   {icon:'❤️',title:'Heart Bundle ×2',desc:'+2 hearts (max 5)',old:'🪙160',price:'🪙70',cur:'gold',cost:70,grant:()=>{pLives=Math.min(MAX_LIVES,pLives+2);}},
-  {icon:'💎',title:'Gem Splash -45%',desc:'150 gems for $0.99',old:'$1.99',price:'$0.99',cur:'iap'}
+  // APP STORE 2.1: the old '$0.99 Gem Splash' deal routed to iapStub (a toast) even in the native
+  // build — buyDailyDeal never calls nativeBuy — so a reviewer tapping a price tag would get nothing.
+  // Replaced with a soft-currency deal; real money lives in the Market cards, which DO reach StoreKit.
+  {icon:'💎',title:'Gem Trade',desc:'Turn gold into 5 gems',old:'🪙900',price:'🪙450',cur:'gold',cost:450,grant:()=>{pGems+=5;}}
 ];
 let _curDeal=null, dealTimerInt=null;
 function dealIndex(){ const d=new Date(); const day=Math.floor((d-new Date(d.getFullYear(),0,0))/86400000); return ((day%DAILY_DEALS.length)+DAILY_DEALS.length)%DAILY_DEALS.length; }
@@ -8582,10 +8585,16 @@ function renderMarket(){
   injectStoreCSS();
   const mg=document.getElementById('mkt-gold'); if(mg) mg.textContent=pGold;
   const mge=document.getElementById('mkt-gems'); if(mge) mge.textContent=pGems;
-  // APP STORE 2.1: a reviewer who taps a "$1.99" card that goes through iapStub (toast, no purchase)
-  // is a guideline rejection. Until StoreKit is wired, the native build simply doesn't show IAP cards.
-  if(typeof _nativeHost==='function' && _nativeHost()==='flutter' && !window.NumaIAPReady){
-    ['value-pack','founder-pack'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display='none'; });
+  // APP STORE 2.1 — a price tag that can't complete a purchase is a rejection. StoreKit IS wired
+  // (in_app_purchase + iap_service.dart + game_webview's case 'buy'), but the products only exist
+  // once they're created in App Store Connect. IapService reports what the store actually returned
+  // via window.NumaIAPReady and re-renders; until then the native build hides its paid cards.
+  // Web keeps showing them (iapStub is a harmless demo there, and the web build isn't reviewed).
+  // must be two-way: IapService flips NumaIAPReady to true AFTER the first render, and a one-way
+  // hide would leave the cards dead forever once the products finally exist.
+  if(typeof _nativeHost==='function' && _nativeHost()==='flutter'){
+    const paidVisible=(window.NumaIAPReady===true)?'':'none';
+    ['value-pack','founder-pack'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display=paidVisible; });
   }
   // Value Pack is a REPEATABLE gold+gem pack — always buyable at a flat $1.99 (no "/mo", never disabled)
   const vp=document.getElementById('value-pack');
